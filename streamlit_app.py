@@ -3,11 +3,12 @@ import pandas as pd
 import re
 import html
 
-# --- 1. UI 视觉配置 ---
+# --- 1. UI 视觉配置 (精准修改 Tab 样式) ---
 st.set_page_config(page_title="GianTakeshi | Matrix Hub", page_icon="💎", layout="wide")
 
 st.markdown(f"""
     <style>
+    /* 背景保持：聚光灯渐变 */
     .stApp {{ 
         background: radial-gradient(circle at center, #001d3d 0%, #000814 70%, #000000 100%) !important;
         color: #ffffff; 
@@ -23,50 +24,42 @@ st.markdown(f"""
     }}
     @keyframes flow {{ from {{ transform: translateX(15%); opacity: 0.4; }} to {{ transform: translateX(-5%); opacity: 0.8; }} }}
     
-    /* 胶囊上传框样式 */
-    [data-testid="stFileUploader"] {{
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(56, 189, 248, 0.3) !important;
-        border-radius: 50px !important; /* 胶囊形状 */
-        padding: 10px 30px;
-        backdrop-filter: blur(20px);
-        max-width: 600px;
-        margin: 100px auto !important;
-    }}
-    [data-testid="stFileUploader"] section {{ border-radius: 40px !important; }}
-
-    /* 药丸 Tab 切换器：居中、平分、毛玻璃 */
+    /* 【核心修改】药丸形 Tab 切换器：居中、平分、毛玻璃 */
     .stTabs {{
-        max-width: 600px;
-        margin: 0 auto !important;
+        max-width: 500px; /* 限制胶囊宽度 */
+        margin: 0 auto 30px auto !important; /* 居中并与下方保持间距 */
     }}
     .stTabs [data-baseweb="tab-list"] {{
         display: flex;
         justify-content: center;
         background: rgba(255, 255, 255, 0.05);
-        border-radius: 50px;
-        padding: 5px;
+        border-radius: 50px; /* 胶囊圆角 */
+        padding: 4px;
         border: 1px solid rgba(255, 255, 255, 0.1);
         gap: 0px;
     }}
     .stTabs [data-baseweb="tab"] {{
-        flex: 1; /* 平分宽度 */
+        flex: 1; /* 各占一半宽度 */
         text-align: center;
         border-radius: 40px;
-        height: 45px;
-        transition: all 0.3s;
-        color: rgba(255, 255, 255, 0.6);
+        height: 42px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        color: rgba(255, 255, 255, 0.5);
+        border: none !important;
     }}
-    .stTabs [data-baseweb="tab-highlight"] {{ display: none; }} /* 隐藏原有的下划线 */
+    .stTabs [data-baseweb="tab-highlight"] {{ display: none; }} /* 彻底隐藏原有的底部横线 */
+    
     .stTabs [aria-selected="true"] {{
-        background: rgba(56, 189, 248, 0.2) !important;
+        background: rgba(56, 189, 248, 0.2) !important; /* 选中的色块效果 */
         color: #38bdf8 !important;
+        font-weight: 700;
         box-shadow: 0 0 15px rgba(56, 189, 248, 0.1);
     }}
 
-    /* 属性框毛玻璃效果 */
+    /* 属性框毛玻璃效果 (保持原样) */
     div[data-testid="stVerticalBlockBorderWrapper"] {{
         height: 380px !important; 
+        overflow-y: auto !important;
         background: rgba(255, 255, 255, 0.05) !important; 
         border-radius: 24px !important;
         border: 1px solid rgba(255, 255, 255, 0.15) !important;
@@ -84,6 +77,7 @@ st.markdown(f"""
         border: 1px solid rgba(56, 189, 248, 0.3); backdrop-filter: blur(15px);
     }}
     </style>
+
     <div class="mist-light"></div>
     <div class="user-profile">
         <img src="https://avatars.githubusercontent.com/GianTakeshi" style="width:35px;height:35px;border-radius:50%;">
@@ -91,7 +85,7 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-# --- 2. 逻辑层 ---
+# --- 2. 逻辑层 (原封不动) ---
 def process_data(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -124,6 +118,7 @@ def process_data(uploaded_file):
         except: continue
     return pd.DataFrame(valid), pd.DataFrame(error)
 
+# --- 3. 渲染组件 (保持不变) ---
 def render_matrix(data_df, is_error=False):
     if data_df.empty:
         st.info("暂无数据")
@@ -147,27 +142,13 @@ def render_matrix(data_df, is_error=False):
                         size_html = "".join([f'<span style="background:rgba(56,189,248,0.1); padding:2px 6px; border-radius:6px; margin-left:4px; color:#fff;">{"×"+str(q) if s=="FREE" else s+"<b style=\'color:#38bdf8; margin-left:2px;\'>×"+str(q)+"</b>"}</span>' for s, q in size_stats.items()])
                         st.markdown(f'<div style="display:flex; align-items:center; background:rgba(255,255,255,0.05); margin-bottom:6px; padding:6px 10px; border-radius:10px; font-size:11px; border:1px solid rgba(255,255,255,0.05); flex-wrap:wrap;"><span style="color:#38bdf8; font-weight:bold; border-right:1px solid rgba(255,255,255,0.1); padding-right:8px; min-width:45px;">{html.escape(str(clr))}</span><div style="display:flex; flex-wrap:wrap; gap:4px;">{size_html}</div></div>', unsafe_allow_html=True)
 
-# --- 3. 动态界面渲染 ---
-placeholder = st.empty()
+# --- 4. 主程序 ---
+st.markdown("<h2 style='text-align:center; padding-top:50px; letter-spacing:4px;'>📊 智能属性全矩阵</h2>", unsafe_allow_html=True)
+file = st.file_uploader("", type=["xlsx"])
 
-if 'parsed' not in st.session_state:
-    st.session_state.parsed = False
-
-if not st.session_state.parsed:
-    with placeholder.container():
-        st.markdown("<h2 style='text-align:center; padding-top:80px; letter-spacing:4px;'>GIAN MATRIX SYSTEM</h2>", unsafe_allow_html=True)
-        file = st.file_uploader("", type=["xlsx"])
-        if file:
-            st.session_state.v_df, st.session_state.e_df = process_data(file)
-            st.session_state.parsed = True
-            st.rerun() # 触发重绘以隐藏上传框
-else:
-    # 解析完成后，这里不包含 file_uploader，因此它会消失
-    st.markdown("<div style='height:40px;'></div>", unsafe_allow_html=True) # 留白
-    t1, t2 = st.tabs(["✅ NORMAL SUMMARY", "❌ ANOMALY DATA"])
-    with t1: render_matrix(st.session_state.v_df, is_error=False)
-    with t2: render_matrix(st.session_state.e_df, is_error=True)
-    
-    if st.button("RELOAD SYSTEM", use_container_width=False):
-        st.session_state.parsed = False
-        st.rerun()
+if file:
+    v_df, e_df = process_data(file)
+    # 此处的 Tab 已经应用了上方的药丸 CSS 样式
+    t1, t2 = st.tabs(["✅ 正常数据", "❌ 异常汇总"])
+    with t1: render_matrix(v_df, is_error=False)
+    with t2: render_matrix(e_df, is_error=True)
