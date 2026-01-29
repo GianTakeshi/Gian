@@ -3,7 +3,7 @@ import pandas as pd
 import re
 
 # --- 1. UI 配置与全局样式 ---
-st.set_page_config(page_title="GianTakeshi | Hub", page_icon="🚀", layout="wide")
+st.set_page_config(page_title="GianTakeshi | SKU Hub", page_icon="🚀", layout="wide")
 
 GITHUB_USERNAME = "GianTakeshi" 
 BASE_URL = "https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id="
@@ -11,14 +11,14 @@ BASE_URL = "https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id="
 # 注入 CSS
 st.markdown(f"""
     <style>
-    /* 🎭 深邃舞台光背景：调暗蓝色，拉高四周全黑的范围 */
+    /* 🎭 深邃舞台背景 */
     .stApp {{ 
         background: radial-gradient(circle at 50% 50%, #0c1e3d 0%, #020617 60%, #000000 100%) !important; 
         color: #ffffff; 
     }}
     header {{visibility: hidden;}}
 
-    /* 🛡️ 用户面板 */
+    /* 🛡️ 用户面板 - 灵动交互 */
     .user-profile {{
         position: fixed; top: 25px; left: 25px; display: flex; align-items: center; gap: 12px; z-index: 1000000; 
         background: rgba(255, 255, 255, 0.05); padding: 8px 18px 8px 8px; border-radius: 50px;
@@ -36,75 +36,70 @@ st.markdown(f"""
         filter: drop-shadow(0 0 15px rgba(56, 189, 248, 0.3));
     }}
 
-    /* 🧊 毛玻璃卡片系统 */
+    /* 🧊 毛玻璃卡片系统与霓虹蔓延 */
     .wide-card {{
-        background: rgba(255, 255, 255, 0.03); 
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 20px; padding: 25px 30px; margin-bottom: 25px;
         display: flex; flex-direction: row; align-items: center; justify-content: space-between;
-        backdrop-filter: blur(15px);
-        -webkit-backdrop-filter: blur(15px);
-        transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-        position: relative;
+        backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+        transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1); position: relative;
     }}
-
-    /* ✨ 霓虹光蔓延效果 */
     .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.5); }}
     .normal-card:hover {{
-        background: rgba(56, 189, 248, 0.06);
-        transform: translateY(-10px) scale(1.005);
-        border-color: #38bdf8;
-        box-shadow: 
-            0 25px 50px rgba(0, 0, 0, 0.6),
-            0 0 45px rgba(56, 189, 248, 0.35),
-            0 -5px 25px rgba(56, 189, 248, 0.15);
+        background: rgba(56, 189, 248, 0.06); transform: translateY(-10px) scale(1.005); border-color: #38bdf8;
+        box-shadow: 0 25px 50px rgba(0,0,0,0.6), 0 0 45px rgba(56, 189, 248, 0.35), 0 -5px 25px rgba(56, 189, 248, 0.15);
         z-index: 10;
     }}
-
     .error-card {{ border-left: 5px solid rgba(245, 158, 11, 0.5); }}
     .error-card:hover {{
-        background: rgba(245, 158, 11, 0.06);
-        transform: translateY(-10px) scale(1.005);
-        border-color: #f59e0b;
-        box-shadow: 
-            0 25px 50px rgba(0, 0, 0, 0.6),
-            0 0 45px rgba(245, 158, 11, 0.35),
-            0 -5px 25px rgba(245, 158, 11, 0.15);
+        background: rgba(245, 158, 11, 0.06); transform: translateY(-10px) scale(1.005); border-color: #f59e0b;
+        box-shadow: 0 25px 50px rgba(0,0,0,0.6), 0 0 45px rgba(245, 158, 11, 0.35), 0 -5px 25px rgba(245, 158, 11, 0.15);
         z-index: 10;
     }}
 
-    /* ✨ SN 码显示：去除下划线 ✨ */
+    /* ✨ SN 码样式 (无下划线) */
     .sn-pill {{
         padding: 5px 15px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; 
-        transition: all 0.3s ease;
-        text-decoration: none !important; /* 彻底去除下划线 */
-        display: inline-block;
+        transition: all 0.3s ease; text-decoration: none !important; display: inline-block;
     }}
     .normal-sn {{ background: rgba(56, 189, 248, 0.1); color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.2); }}
     .normal-sn:hover {{ background: #38bdf8 !important; color: #000 !important; box-shadow: 0 0 15px #38bdf8; }}
     .error-sn {{ background: rgba(245, 158, 11, 0.1); color: #f59e0b !important; border: 1px solid rgba(245, 158, 11, 0.3); }}
     .error-sn:hover {{ background: #f59e0b !important; color: #000 !important; box-shadow: 0 0 15px #f59e0b; }}
 
-    /* 重制按钮 */
+    /* --- ✨ 灵动双色 Tabs --- */
+    .stTabs [data-baseweb="tab-list"] {{ gap: 20px; background-color: transparent !important; margin-bottom: 20px; }}
+    .stTabs [data-baseweb="tab"] {{
+        height: 45px !important; background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important; border-radius: 12px 12px 0 0 !important;
+        padding: 0 25px !important; color: rgba(255, 255, 255, 0.4) !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }}
+    /* 蓝色 Tab 激活 */
+    .stTabs [data-baseweb="tab"]:nth-child(1)[aria-selected="true"] {{
+        color: #38bdf8 !important; background: rgba(56, 189, 248, 0.1) !important;
+        border-color: rgba(56, 189, 248, 0.5) !important; border-bottom: 3px solid #38bdf8 !important;
+    }}
+    /* 橙色 Tab 激活 */
+    .stTabs [data-baseweb="tab"]:nth-child(2)[aria-selected="true"] {{
+        color: #f59e0b !important; background: rgba(245, 158, 11, 0.1) !important;
+        border-color: rgba(245, 158, 11, 0.5) !important; border-bottom: 3px solid #f59e0b !important;
+    }}
+
+    /* 重制按钮与上传框 */
     div.stButton > button {{
-        background: rgba(255, 255, 255, 0.03) !important;
-        color: #38bdf8 !important;
-        border: 1px solid rgba(56, 189, 248, 0.3) !important;
-        border-radius: 50px !important;
-        padding: 12px 60px !important; font-weight: 800 !important;
-        backdrop-filter: blur(10px) !important;
-        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        background: rgba(255, 255, 255, 0.03) !important; color: #38bdf8 !important;
+        border: 1px solid rgba(56, 189, 248, 0.3) !important; border-radius: 50px !important;
+        padding: 12px 60px !important; font-weight: 800 !important; backdrop-filter: blur(10px) !important;
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important; margin: 30px auto !important; display: block !important;
     }}
     div.stButton > button:hover {{ background: #38bdf8 !important; color: #000 !important; box-shadow: 0 0 30px rgba(56, 189, 248, 0.5); transform: translateY(-5px); }}
-
-    /* 底部上传框 */
+    
     [data-testid="stFileUploader"] {{
         position: fixed; bottom: 35px; left: 50%; transform: translateX(-50%); width: 450px; z-index: 9999;
-        background: rgba(255, 255, 255, 0.08) !important; 
-        border: 1px solid rgba(56, 189, 248, 0.3) !important;
-        border-radius: 50px !important; padding: 15px 35px !important; 
-        backdrop-filter: blur(25px) !important;
-        box-shadow: 0 0 40px rgba(0, 0, 0, 0.7);
+        background: rgba(255, 255, 255, 0.08) !important; border: 1px solid rgba(56, 189, 248, 0.3) !important;
+        border-radius: 50px !important; padding: 15px 35px !important; backdrop-filter: blur(25px) !important;
+        box-shadow: 0 0 40px rgba(0,0,0,0.7);
     }}
     [data-testid="stFileUploader"] label, [data-testid="stFileUploader"] small {{ display: none !important; }}
     </style>
@@ -113,13 +108,13 @@ st.markdown(f"""
         <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
         <div class="user-info">
             <div style="font-size: 0.9rem; font-weight: 900; color: #fff;">{GITHUB_USERNAME}</div>
-            <div style="font-size: 0.6rem; color: #38bdf8; font-weight: bold;">● MIDNIGHT STAGE ACTIVE</div>
+            <div style="font-size: 0.6rem; color: #38bdf8; font-weight: bold;">● SYSTEM CORE V6.0</div>
         </div>
     </div>
-    <div class="hero-container"><h1 class="grand-title">属性看板中枢</h1></div>
+    <div class="hero-container"><h1 class="grand-title">SKU 属性解析中枢</h1></div>
 """, unsafe_allow_html=True)
 
-# --- 2. 逻辑层 ---
+# --- 2. 逻辑处理核心 ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -151,13 +146,13 @@ def process_sku_logic(uploaded_file):
             all_error_rows.append({'SN': sn, 'Line': index+2, 'Reason': f"数量异常({len(data_pairs)}/{i_qty})", 'Content': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 3. 渲染层 ---
+# --- 3. 页面渲染 ---
 upload_zone = st.empty()
-uploaded_file = upload_zone.file_uploader("Upload", type=["xlsx"], key="deep_v1")
+uploaded_file = upload_zone.file_uploader("Upload", type=["xlsx"])
 
 if uploaded_file:
     v_df, e_df = process_sku_logic(uploaded_file)
-    upload_zone.empty()
+    upload_zone.empty() # 解析后隐藏
     
     t1, t2 = st.tabs(["💎 汇总数据流", "📡 异常拦截"])
     
@@ -186,14 +181,13 @@ if uploaded_file:
     with t2:
         if not e_df.empty:
             for _, err in e_df.iterrows():
+                sn_html = f'<a href="{BASE_URL}{err["SN"]}" target="_blank" class="sn-pill error-sn">{err["SN"]}</a>'
                 st.markdown(f'''
                     <div class="wide-card error-card">
                         <div style="flex:1;">
                             <div style="color:#f59e0b; font-weight:900; font-size:1.1rem;">LINE {err["Line"]} | {err["Reason"]}</div>
                             <div style="font-size:0.85rem; color:#cbd5e1; margin-top:8px; line-height:1.5;">{err["Content"]}</div>
                         </div>
-                        <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;">
-                            <a href="{BASE_URL}{err["SN"]}" target="_blank" class="sn-pill error-sn">{err["SN"]}</a>
-                        </div>
+                        <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;">{sn_html}</div>
                     </div>
                 ''', unsafe_allow_html=True)
