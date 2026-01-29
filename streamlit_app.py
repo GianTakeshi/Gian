@@ -3,12 +3,11 @@ import pandas as pd
 import re
 import html
 
-# --- 1. UI 视觉配置 (核心：强效毛玻璃 + 圆角 + 悬浮) ---
+# --- 1. UI 视觉配置 ---
 st.set_page_config(page_title="GianTakeshi | Matrix Hub", page_icon="💎", layout="wide")
 
 st.markdown(f"""
     <style>
-    /* 背景：聚光灯渐变 */
     .stApp {{ 
         background: radial-gradient(circle at center, #001d3d 0%, #000814 70%, #000000 100%) !important;
         color: #ffffff; 
@@ -24,33 +23,59 @@ st.markdown(f"""
     }}
     @keyframes flow {{ from {{ transform: translateX(15%); opacity: 0.4; }} to {{ transform: translateX(-5%); opacity: 0.8; }} }}
     
-    /* 【核心修改】大的属性框：极强毛玻璃效果 */
+    /* 胶囊上传框样式 */
+    [data-testid="stFileUploader"] {{
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(56, 189, 248, 0.3) !important;
+        border-radius: 50px !important; /* 胶囊形状 */
+        padding: 10px 30px;
+        backdrop-filter: blur(20px);
+        max-width: 600px;
+        margin: 100px auto !important;
+    }}
+    [data-testid="stFileUploader"] section {{ border-radius: 40px !important; }}
+
+    /* 药丸 Tab 切换器：居中、平分、毛玻璃 */
+    .stTabs {{
+        max-width: 600px;
+        margin: 0 auto !important;
+    }}
+    .stTabs [data-baseweb="tab-list"] {{
+        display: flex;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50px;
+        padding: 5px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        gap: 0px;
+    }}
+    .stTabs [data-baseweb="tab"] {{
+        flex: 1; /* 平分宽度 */
+        text-align: center;
+        border-radius: 40px;
+        height: 45px;
+        transition: all 0.3s;
+        color: rgba(255, 255, 255, 0.6);
+    }}
+    .stTabs [data-baseweb="tab-highlight"] {{ display: none; }} /* 隐藏原有的下划线 */
+    .stTabs [aria-selected="true"] {{
+        background: rgba(56, 189, 248, 0.2) !important;
+        color: #38bdf8 !important;
+        box-shadow: 0 0 15px rgba(56, 189, 248, 0.1);
+    }}
+
+    /* 属性框毛玻璃效果 */
     div[data-testid="stVerticalBlockBorderWrapper"] {{
         height: 380px !important; 
-        overflow-y: auto !important;
-        /* 背景色透明度降低，以便透出底色 */
         background: rgba(255, 255, 255, 0.05) !important; 
         border-radius: 24px !important;
         border: 1px solid rgba(255, 255, 255, 0.15) !important;
-        /* 毛玻璃核心代码 */
         backdrop-filter: blur(35px) saturate(200%) !important; 
-        -webkit-backdrop-filter: blur(35px) saturate(200%) !important;
         transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     }}
-    
-    /* 鼠标悬停：毛玻璃质感增强 */
     div[data-testid="stVerticalBlockBorderWrapper"]:hover {{
-        transform: translateY(-10px);
-        background: rgba(255, 255, 255, 0.08) !important;
+        transform: translateY(-8px);
         border: 1px solid rgba(56, 189, 248, 0.5) !important;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.2);
-    }}
-    
-    /* 滚动条美化 */
-    div[data-testid="stVerticalBlockBorderWrapper"]::-webkit-scrollbar {{ width: 4px; }}
-    div[data-testid="stVerticalBlockBorderWrapper"]::-webkit-scrollbar-thumb {{
-        background: rgba(56, 189, 248, 0.4); border-radius: 10px;
     }}
 
     .user-profile {{
@@ -58,9 +83,7 @@ st.markdown(f"""
         background: rgba(255, 255, 255, 0.05); padding: 5px 15px 5px 5px; border-radius: 50px;
         border: 1px solid rgba(56, 189, 248, 0.3); backdrop-filter: blur(15px);
     }}
-    .sn-link {{ color: #38bdf8 !important; text-decoration: none; font-weight: bold; border-bottom: 1px dashed #38bdf8; }}
     </style>
-
     <div class="mist-light"></div>
     <div class="user-profile">
         <img src="https://avatars.githubusercontent.com/GianTakeshi" style="width:35px;height:35px;border-radius:50%;">
@@ -68,7 +91,7 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-# --- 2. 逻辑层 (原封不动) ---
+# --- 2. 逻辑层 ---
 def process_data(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -98,21 +121,17 @@ def process_data(uploaded_file):
                 error.append({'Category': cat, 'SN': sn, 'Reason': '无法解析颜色属性'})
             else:
                 valid.extend(parsed)
-        except Exception as e:
-            error.append({'Category': 'ERROR', 'SN': 'N/A', 'Reason': str(e)})
+        except: continue
     return pd.DataFrame(valid), pd.DataFrame(error)
 
-# --- 3. 渲染组件 (保持圆角风格) ---
 def render_matrix(data_df, is_error=False):
     if data_df.empty:
         st.info("暂无数据")
         return
-    data_df = data_df.sort_values(['Category'])
-    cat_groups = list(data_df.groupby('Category'))
+    cat_groups = list(data_df.sort_values(['Category']).groupby('Category'))
     cols_per_row = 6
     for i in range(0, len(cat_groups), cols_per_row):
-        batch = cat_groups[i : i + cols_per_row]
-        cols = st.columns(cols_per_row)
+        batch, cols = cat_groups[i : i + cols_per_row], st.columns(cols_per_row)
         for idx, (cat, group) in enumerate(batch):
             with cols[idx].container(border=True):
                 head_bg = "rgba(239, 68, 68, 0.2)" if is_error else "rgba(56, 189, 248, 0.2)"
@@ -121,19 +140,34 @@ def render_matrix(data_df, is_error=False):
                 if is_error:
                     for _, row in group.iterrows():
                         url = f"https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id={row['SN']}" 
-                        st.markdown(f'<div style="background:rgba(239,68,68,0.05); margin-bottom:6px; padding:8px; border-radius:12px; font-size:11px; border:1px solid rgba(239,68,68,0.1);"><div style="margin-bottom:4px;">SN: <a class="sn-link" href="{url}" target="_blank">{row["SN"]}</a></div><div style="color:#94a3b8;">{row["Reason"]}</div></div>', unsafe_allow_html=True)
+                        st.markdown(f'<div style="background:rgba(239,68,68,0.05); margin-bottom:6px; padding:8px; border-radius:12px; font-size:11px; border:1px solid rgba(239,68,68,0.1);"><div style="margin-bottom:4px;">SN: <a style="color:#38bdf8;text-decoration:none;" href="{url}" target="_blank">{row["SN"]}</a></div><div style="color:#94a3b8;">{row["Reason"]}</div></div>', unsafe_allow_html=True)
                 else:
-                    color_groups = group.groupby('Color')
-                    for clr, clr_data in color_groups:
+                    for clr, clr_data in group.groupby('Color'):
                         size_stats = clr_data['Size'].value_counts().sort_index()
                         size_html = "".join([f'<span style="background:rgba(56,189,248,0.1); padding:2px 6px; border-radius:6px; margin-left:4px; color:#fff;">{"×"+str(q) if s=="FREE" else s+"<b style=\'color:#38bdf8; margin-left:2px;\'>×"+str(q)+"</b>"}</span>' for s, q in size_stats.items()])
                         st.markdown(f'<div style="display:flex; align-items:center; background:rgba(255,255,255,0.05); margin-bottom:6px; padding:6px 10px; border-radius:10px; font-size:11px; border:1px solid rgba(255,255,255,0.05); flex-wrap:wrap;"><span style="color:#38bdf8; font-weight:bold; border-right:1px solid rgba(255,255,255,0.1); padding-right:8px; min-width:45px;">{html.escape(str(clr))}</span><div style="display:flex; flex-wrap:wrap; gap:4px;">{size_html}</div></div>', unsafe_allow_html=True)
 
-# --- 4. 主程序 ---
-st.markdown("<h2 style='text-align:center; padding-top:50px;'>📊 智能属性全矩阵</h2>", unsafe_allow_html=True)
-file = st.file_uploader("", type=["xlsx"])
-if file:
-    v_df, e_df = process_data(file)
-    t1, t2 = st.tabs(["✅ 正常汇总", "❌ 异常拦截"])
-    with t1: render_matrix(v_df, is_error=False)
-    with t2: render_matrix(e_df, is_error=True)
+# --- 3. 动态界面渲染 ---
+placeholder = st.empty()
+
+if 'parsed' not in st.session_state:
+    st.session_state.parsed = False
+
+if not st.session_state.parsed:
+    with placeholder.container():
+        st.markdown("<h2 style='text-align:center; padding-top:80px; letter-spacing:4px;'>GIAN MATRIX SYSTEM</h2>", unsafe_allow_html=True)
+        file = st.file_uploader("", type=["xlsx"])
+        if file:
+            st.session_state.v_df, st.session_state.e_df = process_data(file)
+            st.session_state.parsed = True
+            st.rerun() # 触发重绘以隐藏上传框
+else:
+    # 解析完成后，这里不包含 file_uploader，因此它会消失
+    st.markdown("<div style='height:40px;'></div>", unsafe_allow_html=True) # 留白
+    t1, t2 = st.tabs(["✅ NORMAL SUMMARY", "❌ ANOMALY DATA"])
+    with t1: render_matrix(st.session_state.v_df, is_error=False)
+    with t2: render_matrix(st.session_state.e_df, is_error=True)
+    
+    if st.button("RELOAD SYSTEM", use_container_width=False):
+        st.session_state.parsed = False
+        st.rerun()
