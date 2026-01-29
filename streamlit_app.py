@@ -5,7 +5,7 @@ import io
 from openpyxl.styles import PatternFill, Alignment, Border, Side
 
 # --- 1. 页面配置与极简深色 CSS ---
-st.set_page_config(page_title="王哥专属工具", page_icon="🚀", layout="centered")
+st.set_page_config(page_title="SKU汇总工具", page_icon="🚀", layout="centered")
 
 st.markdown("""
     <style>
@@ -14,22 +14,15 @@ st.markdown("""
         background: radial-gradient(circle at 50% 50%, #1e293b, #020617);
         color: #ffffff;
     }
+    /* 隐藏 Streamlit 默认的所有头部组件 */
     header {visibility: hidden;}
+    .stDeployButton {display:none;}
+    #MainMenu {visibility: hidden;}
     
-    /* 顶部导航标题 */
-    .top-nav {
-        text-align: center; 
-        padding: 20px; 
-        color: #38bdf8; 
-        font-weight: 800;
-        font-size: 1.2rem;
-        letter-spacing: 2px;
-    }
-
     /* 标题居中设计 */
     .hero-section {
         text-align: center;
-        padding-top: 60px;
+        padding-top: 100px; /* 增加顶部留白，替代文字位置 */
         margin-bottom: 40px;
     }
     .hero-title {
@@ -61,12 +54,13 @@ st.markdown("""
         background: rgba(255, 255, 255, 0.08) !important;
     }
 
-    /* 底部版权信息 */
+    /* 底部版权信息 - 极淡处理 */
     .footer {
         text-align: center;
-        margin-top: 100px;
-        color: #475569;
-        font-size: 0.8rem;
+        margin-top: 120px;
+        color: rgba(71, 85, 105, 0.5);
+        font-size: 0.75rem;
+        letter-spacing: 1px;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -105,14 +99,12 @@ def process_sku_data(uploaded_file):
     return pd.DataFrame(all_normal_data)
 
 # --- 3. 页面布局 ---
-# 顶部导航 - 已修改为王哥专属
-st.markdown("<div class='top-nav'>✨ 王哥专属工具</div>", unsafe_allow_html=True)
 
-# 主体内容
+# 主体内容 - 顶部已清空，直接进入主题
 st.markdown("<div class='hero-section'>", unsafe_allow_html=True)
 st.markdown("<h1 class='hero-title'>智能商品</h1>", unsafe_allow_html=True)
 st.markdown("<h1 class='hero-subtitle'>属性汇总大师 🚀</h1>", unsafe_allow_html=True)
-st.markdown("<p style='color: #64748b; font-size: 1.1rem;'>快速解析 SKU 属性，生成专业汇总报表</p>", unsafe_allow_html=True)
+st.markdown("<p style='color: #64748b; font-size: 1.1rem;'>Professional SKU Data Processor</p>", unsafe_allow_html=True)
 st.markdown("</div>", unsafe_allow_html=True)
 
 # 上传组件
@@ -128,7 +120,6 @@ if uploaded_file:
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
                 final_df.to_excel(writer, index=False, sheet_name='SKU汇总')
             
-            # 下载按钮居中处理
             st.markdown("<br>", unsafe_allow_html=True)
             col_bt1, col_bt2, col_bt3 = st.columns([1, 2, 1])
             with col_bt2:
@@ -142,5 +133,5 @@ if uploaded_file:
         else:
             st.error("无法识别有效 SKU 数据，请检查 G 列格式。")
 
-# 底部版权 - 替换了原来的四个指标
-st.markdown("<div class='footer'>© 2024 王哥专属版本 | 高效办公工具</div>", unsafe_allow_html=True)
+# 底部极淡版权
+st.markdown("<div class='footer'>EFFICIENT WORKFLOW | POWERED BY STREAMLIT</div>", unsafe_allow_html=True)
