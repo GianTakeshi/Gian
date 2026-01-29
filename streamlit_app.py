@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import re
-import html
 
 # --- 1. UI 配置与全局样式 ---
 st.set_page_config(page_title="GianTakeshi | Hub", page_icon="🚀", layout="wide")
@@ -14,79 +13,82 @@ st.markdown(f"""
     .stApp {{ background: radial-gradient(circle at 50% 50%, #1e293b, #010409); color: #ffffff; }}
     header {{visibility: hidden;}}
 
-    /* 头像面板 */
+    /* 标题与头像样式（同前，保持一致性） */
     .user-profile {{
-        position: fixed; top: 25px; left: 25px; display: flex; align-items: center; gap: 12px; z-index: 1000000 !important; 
+        position: fixed; top: 25px; left: 25px; display: flex; align-items: center; gap: 12px; z-index: 1000000; 
         background: rgba(255, 255, 255, 0.05); padding: 6px 16px 6px 6px; border-radius: 50px;
         border: 1px solid rgba(56, 189, 248, 0.3); backdrop-filter: blur(10px);
     }}
     .avatar {{ width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; }}
-
-    /* 标题居中 */
     .hero-container {{ text-align: center; width: 100%; padding: 60px 0 20px 0; }}
     .grand-title {{
         display: block; font-family: 'Inter', sans-serif; font-size: 3.2rem !important; font-weight: 900; letter-spacing: 8px;
         background: linear-gradient(to bottom, #ffffff 30%, #38bdf8 100%);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        margin: 0 auto; filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.2));
+        filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.2));
     }}
 
-    /* 宽条卡片通用动画 */
+    /* 核心卡片光效动画 */
     .wide-card {{
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 14px; padding: 16px 25px; margin-bottom: 12px;
         display: flex; align-items: center; justify-content: space-between; gap: 20px;
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* 弹性动画 */
-        cursor: default;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }}
-
-    /* 正常汇总：蓝色光效 */
     .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.6); }}
     .normal-card:hover {{
-        background: rgba(56, 189, 248, 0.06);
-        border-color: rgba(56, 189, 248, 0.8);
-        transform: translateY(-5px) scale(1.002);
-        box-shadow: 0 10px 30px rgba(56, 189, 248, 0.15), 0 0 15px rgba(56, 189, 248, 0.1);
+        background: rgba(56, 189, 248, 0.06); border-color: rgba(56, 189, 248, 0.8);
+        transform: translateY(-5px); box-shadow: 0 10px 30px rgba(56, 189, 248, 0.2);
     }}
-
-    /* 异常拦截：橙色光效 */
-    .error-card {{ border-left: 5px solid rgba(245, 158, 11, 0.6); background: rgba(245, 158, 11, 0.01); }}
+    .error-card {{ border-left: 5px solid rgba(245, 158, 11, 0.6); }}
     .error-card:hover {{
-        background: rgba(245, 158, 11, 0.04);
-        border-color: rgba(245, 158, 11, 0.8);
-        transform: translateY(-5px) scale(1.002);
-        box-shadow: 0 10px 30px rgba(245, 158, 11, 0.15), 0 0 15px rgba(245, 158, 11, 0.1);
+        background: rgba(245, 158, 11, 0.04); border-color: rgba(245, 158, 11, 0.8);
+        transform: translateY(-5px); box-shadow: 0 10px 30px rgba(245, 158, 11, 0.2);
     }}
 
-    /* 内部文本样式 */
-    .attr-cluster {{ display: flex; align-items: center; min-width: 400px; flex-shrink: 0; }}
-    .cat-label {{ color: #38bdf8; font-weight: 900; font-size: 1.05rem; width: 90px; text-shadow: 0 0 8px rgba(56,189,248,0.3); }}
-    .clr-label {{ color: #ffffff; font-weight: 700; font-size: 0.95rem; min-width: 60px; margin-right: 15px; border-right: 1px solid rgba(255,255,255,0.15); padding-right: 15px; }}
-    .size-badge {{ background: rgba(56, 189, 248, 0.1); padding: 3px 10px; border-radius: 8px; color: #eee; font-size: 0.85rem; border: 1px solid rgba(56, 189, 248, 0.2); margin-right: 6px; transition: 0.3s; }}
-    .size-badge:hover {{ background: rgba(56, 189, 248, 0.2); border-color: #38bdf8; }}
-    .size-badge b {{ color: #38bdf8; }}
-
-    /* SN 按钮极右排版与光效 */
-    .sn-grid {{ margin-left: auto; display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; max-width: 600px; }}
+    /* SN 按钮样式 */
     .sn-pill {{
         display: inline-block; padding: 3px 14px; background: rgba(255, 255, 255, 0.03);
         color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 20px; 
-        text-decoration: none !important; font-size: 0.75rem; font-weight: 600; transition: all 0.3s;
+        text-decoration: none !important; font-size: 0.75rem; font-weight: 600; transition: 0.3s;
     }}
-    .sn-pill:hover {{
+    .sn-pill:hover {{ background: rgba(56, 189, 248, 0.2); transform: scale(1.1); box-shadow: 0 0 12px rgba(56, 189, 248, 0.4); }}
+
+    /* 自定义重新部署按钮 (模拟 st.button) */
+    .deploy-btn-container {{
+        display: flex; justify-content: center; padding: 40px 0 100px 0;
+    }}
+    .custom-deploy-btn {{
+        background: rgba(56, 189, 248, 0.05);
+        color: #38bdf8;
+        border: 2px solid rgba(56, 189, 248, 0.4);
+        padding: 12px 40px;
+        border-radius: 50px;
+        font-weight: 900;
+        letter-spacing: 2px;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        text-transform: uppercase;
+        box-shadow: 0 0 15px rgba(56, 189, 248, 0.1);
+        animation: breath 3s infinite ease-in-out;
+    }}
+    .custom-deploy-btn:hover {{
         background: rgba(56, 189, 248, 0.2);
+        transform: translateY(-5px) scale(1.05);
         border-color: #38bdf8;
-        box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
-        transform: scale(1.1);
+        box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
+        color: #ffffff;
+    }}
+    @keyframes breath {{
+        0%, 100% {{ opacity: 0.8; box-shadow: 0 0 10px rgba(56, 189, 248, 0.1); }}
+        50% {{ opacity: 1; box-shadow: 0 0 25px rgba(56, 189, 248, 0.3); }}
     }}
 
-    /* 上传框浮动卡片 */
+    /* 隐藏上传组件自带的标签 */
     [data-testid="stFileUploader"] {{
-        position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); width: 480px; z-index: 9999;
+        position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 400px; z-index: 9999;
         background: rgba(255, 255, 255, 0.12) !important; border: 1px solid rgba(255, 255, 255, 0.2) !important;
         border-radius: 50px !important; padding: 10px 30px !important; backdrop-filter: blur(25px);
-        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
     }}
     [data-testid="stFileUploader"] label, [data-testid="stFileUploader"] small {{ display: none !important; }}
     </style>
@@ -95,7 +97,7 @@ st.markdown(f"""
         <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
         <div class="user-info">
             <div class="user-name">{GITHUB_USERNAME}</div>
-            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● LIGHT-SPEED UI</div>
+            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● FULL INTERACTIVE</div>
         </div>
     </div>
 
@@ -104,7 +106,7 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-# --- 2. 逻辑层 ---
+# --- 2. 逻辑层 (略，保持原有逻辑) ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -154,7 +156,6 @@ if uploaded_file:
         if not v_df.empty:
             for (cat, clr), group in v_df.groupby(['Category', 'Color']):
                 size_counts = group['Size'].value_counts().sort_index()
-                # 尺码渲染：FREE不显示文字只显示数量
                 size_html = "".join([f'<span class="size-badge">{" " if s=="FREE" else s}<b>×{q}</b></span>' for s, q in size_counts.items()])
                 sns = sorted(list(set(group['SN'].tolist())))
                 sn_pills = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill">{sn}</a>' for sn in sns])
@@ -169,8 +170,36 @@ if uploaded_file:
                         <div class="sn-grid">{sn_pills}</div>
                     </div>
                 ''', unsafe_allow_html=True)
-            if st.button("↺ 重置部署"): st.rerun()
-        else: st.info("空数据")
+            
+            # --- 【核心修改】自定义按钮触发 ---
+            st.markdown('<div class="deploy-btn-container">', unsafe_allow_html=True)
+            if st.button("↺ 重新部署系统", key="redeploy_final", use_container_width=False):
+                st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
+            
+            # 这里的 st.button 会被上面的 CSS .stButton>button 强制覆盖样式（如果需要极致效果建议用 html 注入，但为了功能稳健，我通过 CSS 注入到原生按钮）
+            st.markdown("""
+                <style>
+                div.stButton > button {
+                    background: rgba(56, 189, 248, 0.05) !important;
+                    color: #38bdf8 !important;
+                    border: 2px solid rgba(56, 189, 248, 0.4) !important;
+                    border-radius: 50px !important;
+                    padding: 10px 40px !important;
+                    font-weight: 900 !important;
+                    transition: all 0.4s !important;
+                    display: block; margin: 0 auto;
+                }
+                div.stButton > button:hover {
+                    background: rgba(56, 189, 248, 0.2) !important;
+                    transform: translateY(-5px) !important;
+                    box-shadow: 0 0 20px rgba(56, 189, 248, 0.4) !important;
+                    border-color: #38bdf8 !important;
+                }
+                </style>
+            """, unsafe_allow_html=True)
+        else:
+            st.info("数据解析中...")
 
     with t2:
         if not e_df.empty:
@@ -179,12 +208,9 @@ if uploaded_file:
                     <div class="wide-card error-card">
                         <div style="flex: 1;">
                             <span style="color:#f59e0b; font-weight:bold; font-size:0.85rem;">LINE: {err['行号']}</span>
-                            <span style="color:#ffffff; margin-left:15px; font-weight:600; text-shadow: 0 0 5px rgba(245,158,11,0.4);">{err['原因']}</span>
+                            <span style="color:#ffffff; margin-left:15px; font-weight:600;">{err['原因']}</span>
                             <div style="margin-top:6px; font-size:0.8rem; color:#94a3b8;">{err['内容']}</div>
                         </div>
-                        <div class="sn-grid">
-                            <a href="{BASE_URL}{err['SN']}" target="_blank" class="sn-pill" style="border-color:#f59e0b; color:#f59e0b !important;">{err['SN']}</a>
-                        </div>
+                        <div class="sn-grid"><a href="{BASE_URL}{err['SN']}" target="_blank" class="sn-pill" style="border-color:#f59e0b; color:#f59e0b !important;">{err['SN']}</a></div>
                     </div>
                 ''', unsafe_allow_html=True)
-        else: st.success("全线通过")
