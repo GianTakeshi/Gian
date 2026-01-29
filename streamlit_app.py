@@ -62,7 +62,7 @@ st.markdown(f"""
         <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
         <div class="user-info">
             <div class="user-name">{GITHUB_USERNAME}</div>
-            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● HYBRID LAYOUT ACTIVE</div>
+            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● V0.03</div>
         </div>
     </div>
 
@@ -132,7 +132,7 @@ if uploaded_file:
     with st.spinner('ANALYZING...'):
         v_df, e_df = process_sku_logic(uploaded_file)
     
-    t1, t2 = st.tabs(["💎 结构化看板", "📡 实时异常捕获"])
+    t1, t2 = st.tabs(["正常汇总", "异常数据"])
 
     with t1:
         if not v_df.empty:
