@@ -13,13 +13,14 @@ st.markdown(f"""
     .stApp {{ background: radial-gradient(circle at 50% 50%, #1e293b, #010409); color: #ffffff; }}
     header {{visibility: hidden;}}
 
-    /* 头像与标题 */
+    /* 修复：头像面板重新上线 */
     .user-profile {{
         position: fixed; top: 25px; left: 25px; display: flex; align-items: center; gap: 12px; z-index: 1000000; 
         background: rgba(255, 255, 255, 0.05); padding: 6px 16px 6px 6px; border-radius: 50px;
         border: 1px solid rgba(56, 189, 248, 0.3); backdrop-filter: blur(10px);
     }}
     .avatar {{ width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; }}
+    
     .hero-container {{ text-align: center; width: 100%; padding: 60px 0 20px 0; }}
     .grand-title {{
         display: block; font-family: 'Inter', sans-serif; font-size: 3.2rem !important; font-weight: 900; letter-spacing: 8px;
@@ -27,27 +28,36 @@ st.markdown(f"""
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }}
 
-    /* 宽条卡片：悬浮与光效 */
+    /* 通用卡片样式 */
     .wide-card {{
         background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 14px; padding: 16px 25px; margin-bottom: 12px;
         display: flex; align-items: center; justify-content: space-between; gap: 20px;
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }}
+
+    /* 汇总卡片：蓝色光效 */
     .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.6); }}
     .normal-card:hover {{
         background: rgba(56, 189, 248, 0.06); border-color: rgba(56, 189, 248, 0.8);
         transform: translateY(-5px); box-shadow: 0 10px 30px rgba(56, 189, 248, 0.2);
     }}
 
-    /* 属性显示布局恢复 */
+    /* 异常卡片：橙色光效 */
+    .error-card {{ border-left: 5px solid rgba(245, 158, 11, 0.6); background: rgba(245, 158, 11, 0.01); }}
+    .error-card:hover {{
+        background: rgba(245, 158, 11, 0.04); border-color: rgba(245, 158, 11, 0.8);
+        transform: translateY(-5px); box-shadow: 0 10px 30px rgba(245, 158, 11, 0.2);
+    }}
+
+    /* 属性显示布局 */
     .attr-cluster {{ display: flex; align-items: center; gap: 15px; min-width: 420px; flex-shrink: 0; }}
     .cat-label {{ color: #38bdf8; font-weight: 900; font-size: 1.05rem; width: 90px; }}
     .color-text {{ color: #ffffff; font-weight: 700; font-size: 0.95rem; }}
     .size-text {{ color: #38bdf8; font-weight: 600; font-size: 0.9rem; margin-left: 5px; }}
     .qty-text {{ color: #10b981; font-weight: 800; font-size: 0.85rem; margin-left: 2px; }}
 
-    /* SN 按钮极右排版 */
+    /* SN 按钮对齐 */
     .sn-grid {{ margin-left: auto; display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; max-width: 600px; }}
     .sn-pill {{
         display: inline-block; padding: 3px 14px; background: rgba(255, 255, 255, 0.03);
@@ -56,20 +66,16 @@ st.markdown(f"""
     }}
     .sn-pill:hover {{ background: rgba(56, 189, 248, 0.2); transform: scale(1.1); box-shadow: 0 0 12px rgba(56, 189, 248, 0.4); }}
 
-    /* 重新部署按钮特效 */
+    /* 部署按钮动效 */
     div.stButton > button {{
-        background: rgba(56, 189, 248, 0.05) !important;
-        color: #38bdf8 !important;
-        border: 2px solid rgba(56, 189, 248, 0.4) !important;
-        border-radius: 50px !important;
-        padding: 12px 45px !important;
-        font-weight: 900 !important;
+        background: rgba(56, 189, 248, 0.05) !important; color: #38bdf8 !important;
+        border: 2px solid rgba(56, 189, 248, 0.4) !important; border-radius: 50px !important;
+        padding: 12px 45px !important; font-weight: 900 !important;
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
         display: block !important; margin: 40px auto !important;
     }}
     div.stButton > button:hover {{
-        background: rgba(56, 189, 248, 0.2) !important;
-        transform: translateY(-8px) scale(1.05) !important;
+        background: rgba(56, 189, 248, 0.2) !important; transform: translateY(-8px) !important;
         box-shadow: 0 15px 35px rgba(56, 189, 248, 0.3) !important;
     }}
 
@@ -80,6 +86,18 @@ st.markdown(f"""
     }}
     [data-testid="stFileUploader"] label, [data-testid="stFileUploader"] small {{ display: none !important; }}
     </style>
+    
+    <div class="user-profile">
+        <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
+        <div class="user-info">
+            <div class="user-name">{GITHUB_USERNAME}</div>
+            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● SYSTEM RESTORED</div>
+        </div>
+    </div>
+
+    <div class="hero-container">
+        <h1 class="grand-title">属性看板中枢</h1>
+    </div>
 """, unsafe_allow_html=True)
 
 # --- 2. 逻辑层 ---
@@ -88,7 +106,7 @@ def process_sku_logic(uploaded_file):
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
     df = pd.read_excel(uploaded_file, engine='openpyxl')
     col_a, col_c, col_g, col_i = df.columns[0], df.columns[2], df.columns[6], df.columns[8]
-    all_normal_data = []
+    all_normal_data, all_error_rows = [], []
     
     for index, row in df.iterrows():
         c_raw = str(row[col_c]).strip()
@@ -100,6 +118,10 @@ def process_sku_logic(uploaded_file):
         i_qty = int(re.findall(r'\d+', i_val)[0]) if re.findall(r'\d+', i_val) else 0
         chunks = re.split(r'[;；]', g_text)
         
+        if ';' in c_raw or '；' in c_raw:
+            all_error_rows.append({'SN': sn, '行号': index + 2, '原因': "复合品类阻断", '内容': g_text})
+            continue
+
         data_pairs = []
         for chunk in chunks:
             chunk = chunk.strip()
@@ -114,39 +136,55 @@ def process_sku_logic(uploaded_file):
         if len(data_pairs) == i_qty and i_qty > 0:
             for c_val, s_val in data_pairs:
                 all_normal_data.append({'Category': cat, 'Color': c_val, 'Size': s_val, 'SN': sn})
-    return pd.DataFrame(all_normal_data)
+        else:
+            all_error_rows.append({'SN': sn, '行号': index + 2, '原因': f"数量不符({len(data_pairs)}/{i_qty})", '内容': g_text})
+    return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
 # --- 3. 渲染层 ---
 upload_placeholder = st.empty()
 uploaded_file = upload_placeholder.file_uploader("Upload", type=["xlsx"])
 
 if uploaded_file:
-    v_df = process_sku_logic(uploaded_file)
+    v_df, e_df = process_sku_logic(uploaded_file)
     upload_placeholder.empty()
     
-    if not v_df.empty:
-        # 按 品类 + 颜色 聚合显示
-        for (cat, clr), group in v_df.groupby(['Category', 'Color']):
-            # 格式化尺码部分：L ×2 这种以前的格式
-            size_counts = group['Size'].value_counts().sort_index()
-            attr_display = ""
-            for s, q in size_counts.items():
-                s_label = "" if s == "FREE" else s
-                attr_display += f'<span class="size-text">{s_label}</span><span class="qty-text">×{q}</span> '
-            
-            sns = sorted(list(set(group['SN'].tolist())))
-            sn_pills = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill">{sn}</a>' for sn in sns])
-            
-            st.markdown(f'''
-                <div class="wide-card normal-card">
-                    <div class="attr-cluster">
-                        <div class="cat-label">{cat}</div>
-                        <div class="color-text">{clr}</div>
-                        <div style="display:flex; align-items:baseline;">{attr_display}</div>
+    t1, t2 = st.tabs(["💎 汇总数据流", "📡 异常拦截"])
+    
+    with t1:
+        if not v_df.empty:
+            for (cat, clr), group in v_df.groupby(['Category', 'Color']):
+                size_counts = group['Size'].value_counts().sort_index()
+                attr_display = ""
+                for s, q in size_counts.items():
+                    s_label = "" if s == "FREE" else s
+                    attr_display += f'<span class="size-text">{s_label}</span><span class="qty-text">×{q}</span> '
+                
+                sns = sorted(list(set(group['SN'].tolist())))
+                sn_pills = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill">{sn}</a>' for sn in sns])
+                
+                st.markdown(f'''
+                    <div class="wide-card normal-card">
+                        <div class="attr-cluster">
+                            <div class="cat-label">{cat}</div>
+                            <div class="color-text">{clr}</div>
+                            <div style="display:flex; align-items:baseline;">{attr_display}</div>
+                        </div>
+                        <div class="sn-grid">{sn_pills}</div>
                     </div>
-                    <div class="sn-grid">{sn_pills}</div>
-                </div>
-            ''', unsafe_allow_html=True)
-        
-        if st.button("↺ 重新部署系统"):
-            st.rerun()
+                ''', unsafe_allow_html=True)
+            if st.button("↺ 重新部署系统"): st.rerun()
+        else: st.info("空数据")
+
+    with t2:
+        if not e_df.empty:
+            for _, err in e_df.iterrows():
+                st.markdown(f'''
+                    <div class="wide-card error-card">
+                        <div style="flex: 1;">
+                            <span style="color:#f59e0b; font-weight:bold; font-size:0.85rem;">LINE: {err['行号']}</span>
+                            <span style="color:#ffffff; margin-left:15px; font-weight:600;">{err['原因']}</span>
+                            <div style="margin-top:6px; font-size:0.8rem; color:#94a3b8;">{err['内容']}</div>
+                        </div>
+                        <div class="sn-grid"><a href="{BASE_URL}{err['SN']}" target="_blank" class="sn-pill" style="border-color:#f59e0b; color:#f59e0b !important;">{err['SN']}</a></div>
+                    </div>
+                ''', unsafe_allow_html=True)
