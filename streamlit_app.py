@@ -3,7 +3,7 @@ import pandas as pd
 import re
 import html
 
-# --- 1. UI 视觉配置 (仅修改背景层，保留原逻辑) ---
+# --- 1. UI 视觉配置 (精准移除底部 Gian，保留光雾与渐变) ---
 st.set_page_config(page_title="GianTakeshi | Matrix Hub", page_icon="💎", layout="wide")
 
 st.markdown(f"""
@@ -15,22 +15,6 @@ st.markdown(f"""
     }}
     header {{ visibility: hidden; }}
     
-    /* 注入底部 Gian 标识 */
-    .background-gian {{
-        position: fixed;
-        bottom: -2%;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: clamp(10rem, 30vw, 40rem);
-        font-weight: 900;
-        color: rgba(255, 255, 255, 0.06);
-        letter-spacing: -15px;
-        z-index: -2;
-        user-select: none;
-        white-space: nowrap;
-        pointer-events: none;
-    }}
-
     /* 注入右侧流动雾气 */
     .mist-light {{
         position: fixed;
@@ -48,14 +32,14 @@ st.markdown(f"""
         to {{ transform: translateX(-5%); opacity: 0.7; }}
     }}
     
-    /* 保留你原有的容器样式 */
+    /* 保留原有的容器样式 */
     div[data-testid="stVerticalBlockBorderWrapper"] {{
         height: 380px !important; 
         overflow-y: auto !important;
         background: rgba(255, 255, 255, 0.02);
         border-radius: 12px;
         border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        backdrop-filter: blur(20px); /* 增加毛玻璃度以适配新背景 */
+        backdrop-filter: blur(20px);
     }}
     
     .user-profile {{
@@ -66,7 +50,6 @@ st.markdown(f"""
     .sn-link {{ color: #38bdf8 !important; text-decoration: none; font-weight: bold; border-bottom: 1px dashed #38bdf8; }}
     </style>
 
-    <div class="background-gian">Gian</div>
     <div class="mist-light"></div>
 
     <div class="user-profile">
@@ -75,7 +58,7 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-# --- 2. 逻辑层 (完全保留你的原始逻辑) ---
+# --- 2. 逻辑层 (完全保留) ---
 def process_data(uploaded_file):
     COLOR_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)'
     SIZE_REG = r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
@@ -114,7 +97,7 @@ def process_data(uploaded_file):
             error.append({'Category': 'ERROR', 'SN': 'N/A', 'Reason': str(e)})
     return pd.DataFrame(valid), pd.DataFrame(error)
 
-# --- 3. 渲染组件 (完全保留你的原始渲染逻辑) ---
+# --- 3. 渲染组件 (完全保留) ---
 def render_matrix(data_df, is_error=False):
     if data_df.empty:
         st.info("暂无数据")
