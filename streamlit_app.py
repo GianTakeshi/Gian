@@ -14,16 +14,12 @@ st.markdown(f"""
     .stApp {{ background: radial-gradient(circle at 50% 50%, #1e293b, #010409); color: #ffffff; }}
     header {{visibility: hidden;}}
 
-    /* 🛡️ 头像面板 */
     .user-profile {{
         position: fixed; top: 25px; left: 25px; display: flex; align-items: center; gap: 12px; z-index: 1000000; 
         background: rgba(255, 255, 255, 0.05); padding: 6px 16px 6px 6px; border-radius: 50px;
         border: 1px solid rgba(56, 189, 248, 0.3); backdrop-filter: blur(10px);
     }}
     .avatar {{ width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; }}
-    .user-info {{ line-height: 1.1; }}
-    
-    /* ✨ 名字粗细改为 600 ✨ */
     .user-name {{ font-size: 0.95rem; font-weight: 600; color: #fff; letter-spacing: 1.2px; }}
     
     .hero-container {{ text-align: center; width: 100%; padding: 60px 0 20px 0; }}
@@ -39,9 +35,13 @@ st.markdown(f"""
         border-radius: 14px; padding: 18px 25px; margin-bottom: 12px;
         display: flex; align-items: center; justify-content: space-between; gap: 20px;
         min-height: 85px; box-sizing: border-box;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }}
     .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.6); }}
+    .normal-card:hover {{ background: rgba(56, 189, 248, 0.06); border-color: rgba(56, 189, 248, 0.8); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(56, 189, 248, 0.2); }}
+    
     .error-card {{ border-left: 5px solid rgba(245, 158, 11, 0.6); background: rgba(245, 158, 11, 0.02); }}
+    .error-card:hover {{ background: rgba(245, 158, 11, 0.05); border-color: rgba(245, 158, 11, 0.8); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(245, 158, 11, 0.2); }}
 
     .cat-label {{ color: #38bdf8; font-weight: 900; font-size: 1.05rem; width: 85px; }}
     .color-text {{ color: #38bdf8; font-weight: 700; font-size: 0.95rem; min-width: 60px; }}
@@ -54,21 +54,21 @@ st.markdown(f"""
     .size-text {{ color: #ffffff; font-weight: 600; font-size: 0.85rem; }}
     .qty-text {{ color: #38bdf8; font-weight: 800; font-size: 0.85rem; margin-left: 5px; }}
 
+    .sn-grid {{ margin-left: auto; display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; max-width: 550px; }}
     .sn-pill {{
         display: inline-block; padding: 3px 14px; background: rgba(255, 255, 255, 0.03);
         color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 20px; 
-        text-decoration: none !important; font-size: 0.75rem; font-weight: 600;
+        text-decoration: none !important; font-size: 0.75rem; font-weight: 600; transition: 0.3s;
     }}
+    .sn-pill:hover {{ background: rgba(56, 189, 248, 0.2); transform: scale(1.1); box-shadow: 0 0 12px rgba(56, 189, 248, 0.4); }}
 
-    /* 重新部署按钮样式保持 */
     div.stButton > button {{
-        background: rgba(56, 189, 248, 0.1) !important; color: #38bdf8 !important;
+        background: rgba(56, 189, 248, 0.05) !important; color: #38bdf8 !important;
         border: 2px solid rgba(56, 189, 248, 0.4) !important; border-radius: 50px !important;
         padding: 12px 45px !important; font-weight: 900 !important;
-        display: block !important; margin: 40px auto !important;
+        transition: all 0.4s !important; display: block !important; margin: 40px auto !important;
     }}
 
-    /* ✨ 上传框：固定底部 60px + 蓝色光效 ✨ */
     [data-testid="stFileUploader"] {{
         position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%); width: 400px; z-index: 9999;
         background: rgba(255, 255, 255, 0.12) !important; border: 1px solid rgba(56, 189, 248, 0.3) !important;
@@ -91,13 +91,14 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-# --- 2. 逻辑层（完全没动） ---
+# --- 2. 逻辑层 ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
     df = pd.read_excel(uploaded_file, engine='openpyxl')
     col_a, col_c, col_g, col_i = df.columns[0], df.columns[2], df.columns[6], df.columns[8]
     all_normal_data, all_error_rows = [], []
+    
     for index, row in df.iterrows():
         c_raw = str(row[col_c]).strip()
         if not c_raw or c_raw == 'nan': continue
@@ -126,29 +127,55 @@ def process_sku_logic(uploaded_file):
             all_error_rows.append({'SN': sn, '行号': index + 2, '原因': f"数量不符({len(data_pairs)}/{i_qty})", '内容': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 3. 渲染层（微调按钮位置以生效） ---
-# 使用 st.empty() 容器来包裹上传框，方便重置
+# --- 3. 渲染层 ---
 upload_placeholder = st.empty()
 uploaded_file = upload_placeholder.file_uploader("Upload", type=["xlsx"], key="main_uploader")
 
 if uploaded_file:
     v_df, e_df = process_sku_logic(uploaded_file)
+    upload_placeholder.empty() # ✨ 这里负责隐藏上传框
+    
     t1, t2 = st.tabs(["💎 汇总数据流", "📡 异常拦截"])
     
     with t1:
         if not v_df.empty:
+            # ✨ 核心：恢复合并逻辑 ✨
             for (cat, clr), group in v_df.groupby(['Category', 'Color']):
                 size_counts = group['Size'].value_counts().sort_index()
                 attr_display = "".join([f'<div class="size-box"><span class="size-text">{("" if s=="FREE" else s)}</span><span class="qty-text">×{q}</span></div>' for s, q in size_counts.items()])
                 sns = sorted(list(set(group['SN'].tolist())))
                 sn_pills = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill">{sn}</a>' for sn in sns])
-                st.markdown(f'''<div class="wide-card normal-card"><div style="display:flex;align-items:center;gap:15px;"><div class="cat-label">{cat}</div><div class="color-text" style="width:60px;">{clr}</div>{attr_display}</div><div style="margin-left:auto;display:flex;gap:8px;">{sn_pills}</div></div>''', unsafe_allow_html=True)
-
-            # ✨ 核心修复：按钮点击后强制清除 query_params 或刷新 ✨
-            if st.button("↺ 重新部署系统"):
+                
+                st.markdown(f'''
+                    <div class="wide-card normal-card">
+                        <div class="attr-cluster">
+                            <div class="cat-label">{cat}</div>
+                            <div class="color-text">{clr}</div>
+                            <div style="display:flex; flex-wrap:wrap; gap:2px;">{attr_display}</div>
+                        </div>
+                        <div class="sn-grid">{sn_pills}</div>
+                    </div>
+                ''', unsafe_allow_html=True)
+            
+            # ✨ 使用特殊的 key 解决点击无效问题 ✨
+            if st.button("↺ 重新部署系统", key="refresh_system_btn"):
                 st.rerun()
+        else: st.info("暂无汇总数据")
 
     with t2:
         if not e_df.empty:
             for _, err in e_df.iterrows():
-                st.markdown(f'''<div class="wide-card error-card"><div><span style="color:#f59e0b;font-weight:bold;">LINE: {err['行号']}</span><span style="color:#ffffff;margin-left:15px;">{err['原因']}</span><div style="font-size:0.8rem;color:#94a3b8;">{err['内容']}</div></div><div style="margin-left:auto;"><a href="{BASE_URL}{err['SN']}" target="_blank" class="sn-pill" style="border-color:#f59e0b;color:#f59e0b !important;">{err['SN']}</a></div></div>''', unsafe_allow_html=True)
+                st.markdown(f'''
+                    <div class="wide-card error-card">
+                        <div style="flex: 1; display:flex; flex-direction:column; justify-content:center;">
+                            <div>
+                                <span style="color:#f59e0b; font-weight:bold; font-size:0.85rem;">LINE: {err['行号']}</span>
+                                <span style="color:#ffffff; margin-left:15px; font-weight:600;">{err['原因']}</span>
+                            </div>
+                            <div style="margin-top:6px; font-size:0.8rem; color:#94a3b8; line-height:1.2;">{err['内容']}</div>
+                        </div>
+                        <div class="sn-grid">
+                            <a href="{BASE_URL}{err['SN']}" target="_blank" class="sn-pill" style="border-color:#f59e0b; color:#f59e0b !important;">{err['SN']}</a>
+                        </div>
+                    </div>
+                ''', unsafe_allow_html=True)
