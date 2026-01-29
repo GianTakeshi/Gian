@@ -31,12 +31,11 @@ st.markdown(f"""
         margin: 0 auto; filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.2));
     }}
 
-    /* 白色磨砂药丸上传框 */
+    /* 上传框样式 */
     [data-testid="stFileUploader"] {{
         position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); width: 480px; z-index: 9999;
         background: rgba(255, 255, 255, 0.12) !important; border: 1px solid rgba(255, 255, 255, 0.3) !important;
         border-radius: 50px !important; padding: 8px 25px !important; backdrop-filter: blur(25px) saturate(180%);
-        box-shadow: 0 15px 35px rgba(0,0,0,0.3);
     }}
 
     /* 宽条卡片 */
@@ -45,9 +44,7 @@ st.markdown(f"""
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 12px; padding: 15px 25px; margin-bottom: 12px;
         display: flex; align-items: center; justify-content: space-between; gap: 20px;
-        transition: all 0.3s ease;
     }}
-    .wide-card:hover {{ background: rgba(255, 255, 255, 0.08); }}
     .normal-card {{ border-left: 5px solid #38bdf8; }}
     .error-card {{ border-left: 5px solid #f59e0b; background: rgba(245, 158, 11, 0.02); }}
 
@@ -56,18 +53,17 @@ st.markdown(f"""
     .cat-label {{ color: #38bdf8; font-weight: 900; font-size: 1rem; width: 85px; }}
     .clr-label {{ color: #ffffff; font-weight: 700; font-size: 0.95rem; min-width: 60px; margin-right: 15px; border-right: 1px solid rgba(255,255,255,0.1); padding-right: 15px; }}
     
-    /* 尺码徽章样式 */
-    .size-badge {{ background: rgba(56, 189, 248, 0.1); padding: 2px 8px; border-radius: 6px; color: #eee; font-size: 0.8rem; border: 1px solid rgba(56, 189, 248, 0.2); margin-right: 5px; }}
-    .size-badge b {{ color: #38bdf8; margin-left: 3px; }}
+    /* 尺码徽章（针对 FREE 优化） */
+    .size-badge {{ background: rgba(56, 189, 248, 0.1); padding: 2px 8px; border-radius: 6px; color: #eee; font-size: 0.85rem; border: 1px solid rgba(56, 189, 248, 0.2); margin-right: 5px; }}
+    .size-badge b {{ color: #38bdf8; }}
 
-    /* SN 按钮网格 */
+    /* SN 网格 */
     .sn-grid {{ flex: 1; display: flex; flex-wrap: wrap; gap: 6px; border-left: 1px solid rgba(255,255,255,0.05); padding-left: 20px; }}
     .sn-pill {{
         display: inline-block; padding: 2px 10px; background: rgba(255, 255, 255, 0.05);
         color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 12px; 
-        text-decoration: none !important; font-size: 0.7rem; font-weight: 600; transition: all 0.2s;
+        text-decoration: none !important; font-size: 0.7rem; font-weight: 600;
     }}
-    .sn-pill:hover {{ background: rgba(56, 189, 248, 0.3); transform: translateY(-1px); }}
 
     [data-testid="stFileUploader"] label, [data-testid="stFileUploader"] small {{ display: none !important; }}
     </style>
@@ -76,7 +72,7 @@ st.markdown(f"""
         <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
         <div class="user-info">
             <div class="user-name">{GITHUB_USERNAME}</div>
-            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● FREE SIZE FIXED</div>
+            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● MINIMAL SIZE MODE</div>
         </div>
     </div>
 
@@ -85,7 +81,7 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-# --- 2. 逻辑层 (修复 Size 取值) ---
+# --- 2. 逻辑层 ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -110,7 +106,6 @@ def process_sku_logic(uploaded_file):
             c_m, s_m = re.search(COLOR_REG, chunk), re.search(SIZE_REG, chunk)
             if c_m:
                 clr_v = c_m.group(1).strip().upper()
-                # 【修复核心】如果尺码正则没匹配到，或者匹配到的是空的，设为 FREE
                 raw_s = s_m.group(1).strip().upper() if s_m else "FREE"
                 if not raw_s: raw_s = "FREE"
                 data_pairs.append((clr_v, SIZE_MAP.get(raw_s, raw_s)))
@@ -122,23 +117,28 @@ def process_sku_logic(uploaded_file):
             all_error_rows.append({'SN': sn, '行号': index + 2, '原因': f"数量不符({len(data_pairs)}/{i_qty})", '内容': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 3. 主程序流程 ---
+# --- 3. 渲染层 ---
 upload_placeholder = st.empty()
 uploaded_file = upload_placeholder.file_uploader("Upload", type=["xlsx"])
 
 if uploaded_file:
-    with st.spinner('FIXING FREE SIZE...'):
+    with st.spinner('SYNCING...'):
         v_df, e_df = process_sku_logic(uploaded_file)
     upload_placeholder.empty()
     
-    t1, t2 = st.tabs(["💎 汇总数据流", "📡 异常拦截流"])
+    t1, t2 = st.tabs(["💎 汇总汇总", "📡 异常拦截"])
     
     with t1:
         if not v_df.empty:
             for (cat, clr), group in v_df.groupby(['Category', 'Color']):
                 size_counts = group['Size'].value_counts().sort_index()
-                # 再次确保渲染时如果尺码是空或NaN，显示为 FREE
-                size_html = "".join([f'<span class="size-badge">{s if (pd.notna(s) and s != "") else "FREE"}<b>×{q}</b></span>' for s, q in size_counts.items()])
+                
+                # 【修改核心】如果是 FREE 则不显示文本，只显示数量 ×Qty
+                size_html = ""
+                for s, q in size_counts.items():
+                    display_size = "" if s == "FREE" else s
+                    size_html += f'<span class="size-badge">{display_size}<b>×{q}</b></span>'
+                
                 sns = sorted(list(set(group['SN'].tolist())))
                 sn_pills = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill">{sn}</a>' for sn in sns])
                 
@@ -172,4 +172,4 @@ if uploaded_file:
                         </div>
                     </div>
                 ''', unsafe_allow_html=True)
-        else: st.success("校验全通过")
+        else: st.success("全线通过")
