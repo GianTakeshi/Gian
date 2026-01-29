@@ -1,4 +1,4 @@
-import streamlit as st
+duogeshabimport streamlit as st
 import pandas as pd
 import re
 
@@ -124,7 +124,7 @@ def process_sku_logic(uploaded_file):
         chunks = re.split(r'[;；]', g_text)
         
         if ';' in c_raw or '；' in c_raw:
-            all_error_rows.append({'SN': sn, '行号': index + 2, '原因': "复合品类阻断", '内容': g_text})
+            all_error_rows.append({'SN': sn, '行号': index + 2, '原因': "多个商品", '内容': g_text})
             continue
 
         data_pairs = []
@@ -153,7 +153,7 @@ if uploaded_file:
     v_df, e_df = process_sku_logic(uploaded_file)
     upload_placeholder.empty()
     
-    t1, t2 = st.tabs(["💎 汇总数据流", "📡 异常拦截"])
+    t1, t2 = st.tabs(["汇总数据流", "异常拦截"])
     
     with t1:
         if not v_df.empty:
