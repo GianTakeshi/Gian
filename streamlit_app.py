@@ -9,7 +9,7 @@ st.set_page_config(page_title="SKU汇总工具", page_icon="🚀", layout="cente
 
 ## ----------------- 请确认这里的用户名 ----------------- ##
 # 比如你的主页是 https://github.com/gian-code，那这里就填 gian-code
-GITHUB_USERNAME = "gian-code" 
+GITHUB_USERNAME = "GianTakeshi" 
 ## --------------------------------------------------- ##
 
 st.markdown(f"""
