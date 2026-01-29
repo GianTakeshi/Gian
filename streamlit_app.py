@@ -13,24 +13,26 @@ st.markdown(f"""
     
     /* 统一大格子容器 */
     div[data-testid="stVerticalBlockBorderWrapper"] {{
-        height: 400px !important; 
+        height: 380px !important; 
         overflow-y: auto !important;
         background: rgba(255, 255, 255, 0.02);
         border-radius: 12px;
         border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(56, 189, 248, 0.3) transparent;
     }}
     
-    /* 链接样式优化 */
-    .sn-link {{
+    /* 异常链接样式 */
+    .err-link {{
         color: #38bdf8 !important;
         text-decoration: none;
         font-weight: bold;
-        transition: all 0.2s;
-        font-size: 10px;
+        border-bottom: 1px dashed rgba(56, 189, 248, 0.4);
     }}
-    .sn-link:hover {{
+    .err-link:hover {{
         color: #7dd3fc !important;
-        text-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
+        border-bottom: 1px solid #7dd3fc;
+        background: rgba(56, 189, 248, 0.1);
     }}
 
     .user-profile {{
@@ -47,20 +49,14 @@ st.markdown(f"""
 
 # --- 2. 逻辑层 ---
 def process_data(uploaded_file):
-    COLOR_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)'
-    SIZE_REG = r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
+    COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
-    
     df = pd.read_excel(uploaded_file, engine='openpyxl')
     valid, error = [], []
     
     for idx, row in df.iterrows():
         try:
-            sn = str(row.iloc[1]).strip() # 订单编号
-            name = str(row.iloc[2]).strip() # 品类
-            attr = str(row.iloc[6]).strip() # 属性
-            qty_raw = str(row.iloc[8]).strip() # 数量
-            
+            sn, name, attr, qty_raw = str(row.iloc[1]).strip(), str(row.iloc[2]).strip(), str(row.iloc[6]).strip(), str(row.iloc[8]).strip()
             cat = name.split(' ')[0].upper()
             if cat.startswith('WZ'): cat = 'WZ'
 
@@ -76,13 +72,12 @@ def process_data(uploaded_file):
                 if c_m:
                     clr = c_m.group(1).strip().upper()
                     sze = s_m.group(1).strip().upper() if s_m else "FREE"
-                    # 关键：正常数据也带上 SN
-                    parsed.append({'Category': cat, 'SN': sn, 'Color': clr, 'Size': SIZE_MAP.get(sze, sze)})
+                    parsed.append({'Category': cat, 'Color': clr, 'Size': SIZE_MAP.get(sze, sze)})
             
             if len(parsed) == target_qty and parsed:
                 valid.extend(parsed)
             else:
-                error.append({'Category': cat, 'SN': sn, 'Reason': f'解析/数量异常({len(parsed)}/{target_qty})'})
+                error.append({'Category': cat, 'SN': sn, 'Reason': f'解析失败/数量不符({len(parsed)}/{target_qty})'})
         except: continue
     return pd.DataFrame(valid), pd.DataFrame(error)
 
@@ -97,43 +92,39 @@ def render_matrix(data_df, is_error=False):
     cols_per_row = 6
     
     for i in range(0, len(cat_groups), cols_per_row):
-        batch = cat_groups[i : i + cols_per_row]
         cols = st.columns(cols_per_row)
+        batch = cat_groups[i : i + cols_per_row]
         for idx, (cat, group) in enumerate(batch):
             with cols[idx].container(border=True):
                 head_bg = "rgba(239, 68, 68, 0.2)" if is_error else "rgba(56, 189, 248, 0.2)"
                 head_clr = "#f87171" if is_error else "#38bdf8"
-                
                 st.markdown(f'<div style="background:{head_bg}; margin:-1rem -1rem 10px -1rem; padding:10px; text-align:center; color:{head_clr}; font-weight:900; font-size:1.1rem; border-bottom:1px solid rgba(255,255,255,0.1); position:sticky; top:-1rem; z-index:10;">{cat}</div>', unsafe_allow_html=True)
 
                 if is_error:
-                    for _, row in group.iterrows():
-                        url = f"https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id={row['SN']}"
-                        st.markdown(f'<div style="background:rgba(239,68,68,0.05); margin-bottom:6px; padding:8px; border-radius:6px; font-size:11px; border:1px solid rgba(239,68,68,0.1);">SN: <a class="sn-link" href="{url}" target="_blank">{row["SN"]}</a><br><span style="color:#94a3b8;">{row["Reason"]}</span></div>', unsafe_allow_html=True)
+                    # 异常数据渲染：显示 SN 链接和原因
+                    for _, r in group.iterrows():
+                        url = f"https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id={r['SN']}"
+                        st.markdown(f"""
+                            <div style="background:rgba(239,68,68,0.05); margin-bottom:6px; padding:8px; border-radius:6px; font-size:11px; border:1px solid rgba(239,68,68,0.1);">
+                                SN: <a class="err-link" href="{url}" target="_blank">{r['SN']}</a><br>
+                                <span style="color:#94a3b8;">{r['Reason']}</span>
+                            </div>
+                        """, unsafe_allow_html=True)
                 else:
-                    # 正常汇总渲染：按 Color 聚合，但内部要能展示 SN
+                    # 正常汇总渲染：维持最清爽的颜色聚合模式
                     color_groups = group.groupby('Color')
                     for clr, clr_data in color_groups:
-                        # 统计尺码
                         size_stats = clr_data['Size'].value_counts().sort_index()
                         size_html = "".join([f'<span style="background:rgba(56,189,248,0.1); padding:2px 6px; border-radius:4px; margin-left:4px; color:#fff;">{"×"+str(q) if s=="FREE" else s+"<b style=\'color:#38bdf8; margin-left:2px;\'>×"+str(q)+"</b>"}</span>' for s, q in size_stats.items()])
-                        
-                        # 获取该颜色涉及的所有订单 SN (去重并生成链接)
-                        sns = clr_data['SN'].unique()
-                        sn_links = " ".join([f'<a class="sn-link" href="https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id={s}" target="_blank">#{s[-4:]}</a>' for s in sns]) # 显示后四位省空间
-
                         st.markdown(f"""
-                            <div style="background:rgba(255,255,255,0.05); margin-bottom:8px; padding:8px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);">
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:4px;">
-                                    <span style="color:#38bdf8; font-weight:bold; font-size:12px;">{html.escape(str(clr))}</span>
-                                    <div style="display:flex; gap:5px;">{sn_links}</div>
-                                </div>
-                                <div style="display:flex; flex-wrap:wrap; gap:4px; padding-top:2px;">{size_html}</div>
+                            <div style="display:flex; align-items:center; background:rgba(255,255,255,0.05); margin-bottom:4px; padding:6px 10px; border-radius:6px; font-size:11px; border:1px solid rgba(255,255,255,0.05); flex-wrap:wrap;">
+                                <span style="color:#38bdf8; font-weight:bold; border-right:1px solid rgba(255,255,255,0.1); padding-right:8px; min-width:45px;">{html.escape(str(clr))}</span>
+                                <div style="display:flex; flex-wrap:wrap; gap:4px;">{size_html}</div>
                             </div>
                         """, unsafe_allow_html=True)
 
 # --- 4. 主程序 ---
-st.markdown("<h2 style='text-align:center; padding-top:50px;'>📊 订单全链路矩阵</h2>", unsafe_allow_html=True)
+st.markdown("<h2 style='text-align:center; padding-top:50px;'>📊 订单矩阵看板</h2>", unsafe_allow_html=True)
 file = st.file_uploader("", type=["xlsx"])
 if file:
     v_df, e_df = process_data(file)
