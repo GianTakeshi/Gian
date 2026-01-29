@@ -30,7 +30,7 @@ st.markdown(f"""
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }}
 
-    /* 深色药丸上传框：位置调高至 120px，解析后会被 Python 逻辑隐藏 */
+    /* 【核心修改】白色磨砂玻璃药丸上传框 */
     [data-testid="stFileUploader"] {{
         position: fixed;
         bottom: 120px;
@@ -38,17 +38,29 @@ st.markdown(f"""
         transform: translateX(-50%);
         width: 480px;
         z-index: 9999;
-        background: rgba(15, 23, 42, 0.9) !important;
-        border: 2px solid rgba(56, 189, 248, 0.5) !important;
+        /* 白色磨砂核心参数 */
+        background: rgba(255, 255, 255, 0.12) !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
         border-radius: 50px !important;
         padding: 8px 25px !important;
-        backdrop-filter: blur(20px);
-        box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+        backdrop-filter: blur(25px) saturate(180%);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.3), inset 0 0 10px rgba(255,255,255,0.1);
+        transition: all 0.3s ease;
     }}
+    
+    /* 悬浮微光效果 */
+    [data-testid="stFileUploader"]:hover {{
+        background: rgba(255, 255, 255, 0.18) !important;
+        border: 1px solid rgba(255, 255, 255, 0.5) !important;
+        box-shadow: 0 20px 45px rgba(56, 189, 248, 0.2);
+    }}
+
     [data-testid="stFileUploader"] section {{ padding: 0 !important; min-height: 60px !important; }}
     [data-testid="stFileUploader"] label, [data-testid="stFileUploader"] small {{ display: none !important; }}
+    /* 修改上传框内的“Browse files”文字颜色以适应亮色背景 */
+    [data-testid="stFileUploader"] button {{ color: #ffffff !important; background-color: rgba(56, 189, 248, 0.4) !important; border-radius: 20px !important; border: none !important; }}
     
-    /* 正常汇总格子样式 */
+    /* 看板格子样式 */
     .cat-card-inner {{
         height: 280px; background: rgba(255, 255, 255, 0.04) !important;
         border: 1px solid rgba(255, 255, 255, 0.1) !important; border-radius: 16px !important;
@@ -69,7 +81,7 @@ st.markdown(f"""
         <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
         <div class="user-info">
             <div class="user-name">{GITHUB_USERNAME}</div>
-            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● CONSOLE READY</div>
+            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● WHITE GLASS MODE</div>
         </div>
     </div>
 
@@ -108,7 +120,7 @@ def process_sku_logic(uploaded_file):
         if len(data_pairs) == i_qty and i_qty > 0:
             for c_val, s_val in data_pairs: all_normal_data.append({'Category': cat, 'Color': c_val, 'Size': s_val})
         else:
-            all_error_rows.append({'行号': index + 2, '订单编号': row[col_a], '原因': f"校验不匹配({len(data_pairs)}/{i_qty})", '原始属性': g_text})
+            all_error_rows.append({'行号': index + 2, '订单编号': row[col_a], '原因': f"数量不符({len(data_pairs)}/{i_qty})", '原始属性': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
 # --- 3. 正常数据渲染函数 ---
@@ -129,18 +141,15 @@ def render_normal_card(cat, group):
         </div>
     ''', unsafe_allow_html=True)
 
-# --- 4. 主程序流程控制 ---
-# 使用 empty 容器实现解析后隐藏上传框
+# --- 4. 主程序流程 ---
 upload_box = st.empty()
-uploaded_file = upload_box.file_uploader("Upload XLSX", type=["xlsx"])
+uploaded_file = upload_box.file_uploader("Upload", type=["xlsx"])
 
 if uploaded_file:
-    # 核心步骤：解析文件
-    with st.spinner('ANALYZING DATA FLOW...'):
+    with st.spinner('SYSTEM ANALYZING...'):
         v_df, e_df = process_sku_logic(uploaded_file)
     
-    # 解析完成后，清空占位符，上传框消失
-    upload_box.empty()
+    upload_box.empty() # 解析完立即隐藏
     
     t1, t2 = st.tabs(["💎 结构化看板", "📡 实时异常捕获"])
 
@@ -171,6 +180,6 @@ if uploaded_file:
                     <a href="{BASE_URL}{sn_v}" target="_blank" class="sn-button">SN: {sn_v}</a>
                 </div>
                 """, unsafe_allow_html=True)
-        else: st.success("校验全通过。")
+        else: st.success("校验全通过")
 
 st.markdown("<div style='height:50px;'></div>", unsafe_allow_html=True)
