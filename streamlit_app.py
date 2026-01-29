@@ -4,7 +4,7 @@ import re
 import io
 from openpyxl.styles import PatternFill, Alignment, Border, Side
 
-# --- 1. 页面配置与高亮 CSS ---
+# --- 1. 页面配置与深度自定义 CSS ---
 st.set_page_config(page_title="SKU汇总工具", page_icon="🚀", layout="centered")
 
 st.markdown("""
@@ -15,11 +15,11 @@ st.markdown("""
         color: #ffffff;
     }
     header {visibility: hidden;}
-    
+
     /* 标题部分 */
     .hero-section {
         text-align: center;
-        padding-top: 100px;
+        padding-top: 80px;
         margin-bottom: 40px;
     }
     .hero-title {
@@ -36,36 +36,58 @@ st.markdown("""
         margin-top: -10px;
     }
 
-    /* --- 核心修复：上传区域文字全高亮 --- */
+    /* --- 核心修复：强制汉化并高亮上传区域 --- */
     
-    /* 1. 针对 "Drag and drop file here" */
+    /* 隐藏原本的英文文字 */
     [data-testid="stFileUploadDropzone"] div div {
-        color: #ffffff !important;
-        font-size: 1.1rem !important;
+        font-size: 0 !important;
     }
-
-    /* 2. 针对 "Limit 200MB per file • XLSX" */
     [data-testid="stFileUploadDropzone"] div small {
-        color: #94a3b8 !important; /* 浅灰蓝色，更清晰 */
-        font-size: 0.9rem !important;
+        font-size: 0 !important;
     }
 
-    /* 3. 针对上传框内部的按钮（Browse files） */
+    /* 注入中文提示 - 主文字 */
+    [data-testid="stFileUploadDropzone"] div div::before {
+        content: "请将 Excel 文件拖拽至此处";
+        font-size: 1.2rem !important;
+        color: #ffffff !important;
+        visibility: visible !important;
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    /* 注入中文提示 - 副文字 */
+    [data-testid="stFileUploadDropzone"] div div::after {
+        content: "支持 XLSX 格式 | 最大 200MB";
+        font-size: 0.9rem !important;
+        color: #94a3b8 !important;
+        visibility: visible !important;
+        display: block;
+    }
+
+    /* 修改按钮文字（通过覆盖内部按钮样式） */
     [data-testid="stFileUploadDropzone"] button {
         border: 1px solid #38bdf8 !important;
-        background-color: rgba(56, 189, 248, 0.1) !important;
-        color: #38bdf8 !important;
+        background-color: rgba(56, 189, 248, 0.2) !important;
+        color: #ffffff !important;
+    }
+    [data-testid="stFileUploadDropzone"] button span::before {
+        content: "选择文件";
+        font-size: 1rem;
+    }
+    [data-testid="stFileUploadDropzone"] button span {
+        font-size: 0 !important;
     }
 
-    /* 4. 上传框整体美化 */
+    /* 上传框整体效果 */
     .stFileUploader section {
         background: rgba(255, 255, 255, 0.05) !important;
-        border: 2px dashed rgba(56, 189, 248, 0.5) !important;
+        border: 2px dashed #38bdf8 !important;
         border-radius: 24px !important;
         padding: 50px 20px !important;
     }
-    
-    /* 5. 已上传文件名的颜色 */
+
+    /* 已上传文件名 */
     [data-testid="stFileUploadFileName"] {
         color: #38bdf8 !important;
     }
@@ -73,8 +95,9 @@ st.markdown("""
     .footer {
         text-align: center;
         margin-top: 120px;
-        color: rgba(71, 85, 105, 0.5);
-        font-size: 0.75rem;
+        color: rgba(71, 85, 105, 0.6);
+        font-size: 0.8rem;
+        letter-spacing: 2px;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -116,10 +139,10 @@ def process_sku_data(uploaded_file):
 st.markdown("<div class='hero-section'>", unsafe_allow_html=True)
 st.markdown("<h1 class='hero-title'>智能商品</h1>", unsafe_allow_html=True)
 st.markdown("<h1 class='hero-subtitle'>属性汇总大师 🚀</h1>", unsafe_allow_html=True)
-st.markdown("<p style='color: #94a3b8; font-size: 1.1rem;'>Professional SKU Data Processor</p>", unsafe_allow_html=True)
+st.markdown("<p style='color: #94a3b8; font-size: 1.1rem;'>专业的 SKU 数据自动化处理工具</p>", unsafe_allow_html=True)
 st.markdown("</div>", unsafe_allow_html=True)
 
-# 上传组件 - 标签设为空，CSS 会处理内部文字
+# 上传组件
 uploaded_file = st.file_uploader("", type=["xlsx"])
 
 if uploaded_file:
@@ -143,6 +166,6 @@ if uploaded_file:
                     use_container_width=True
                 )
         else:
-            st.error("无法识别有效 SKU 数据，请检查 G 列格式。")
+            st.error("未识别到有效 SKU 数据，请检查 G 列内容。")
 
-st.markdown("<div class='footer'>EFFICIENT WORKFLOW | POWERED BY STREAMLIT</div>", unsafe_allow_html=True)
+st.markdown("<div class='footer'>高效工作流 | 由科技驱动办公</div>", unsafe_allow_html=True)
