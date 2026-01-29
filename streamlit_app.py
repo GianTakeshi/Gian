@@ -31,48 +31,71 @@ st.markdown(f"""
         margin: 0 auto; filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.2));
     }}
 
-    /* 上传框样式 */
-    [data-testid="stFileUploader"] {{
-        position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); width: 480px; z-index: 9999;
-        background: rgba(255, 255, 255, 0.12) !important; border: 1px solid rgba(255, 255, 255, 0.3) !important;
-        border-radius: 50px !important; padding: 8px 25px !important; backdrop-filter: blur(25px) saturate(180%);
-    }}
-
-    /* 宽条卡片 */
+    /* 宽条卡片通用动画 */
     .wide-card {{
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px; padding: 15px 25px; margin-bottom: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 14px; padding: 16px 25px; margin-bottom: 12px;
         display: flex; align-items: center; justify-content: space-between; gap: 20px;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* 弹性动画 */
+        cursor: default;
     }}
-    .normal-card {{ border-left: 5px solid #38bdf8; }}
-    .error-card {{ border-left: 5px solid #f59e0b; background: rgba(245, 158, 11, 0.02); }}
 
-    /* 属性显示区域 */
-    .attr-cluster {{ display: flex; align-items: center; min-width: 380px; flex-shrink: 0; }}
-    .cat-label {{ color: #38bdf8; font-weight: 900; font-size: 1rem; width: 85px; }}
-    .clr-label {{ color: #ffffff; font-weight: 700; font-size: 0.95rem; min-width: 60px; margin-right: 15px; border-right: 1px solid rgba(255,255,255,0.1); padding-right: 15px; }}
-    
-    /* 尺码徽章（针对 FREE 优化） */
-    .size-badge {{ background: rgba(56, 189, 248, 0.1); padding: 2px 8px; border-radius: 6px; color: #eee; font-size: 0.85rem; border: 1px solid rgba(56, 189, 248, 0.2); margin-right: 5px; }}
+    /* 正常汇总：蓝色光效 */
+    .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.6); }}
+    .normal-card:hover {{
+        background: rgba(56, 189, 248, 0.06);
+        border-color: rgba(56, 189, 248, 0.8);
+        transform: translateY(-5px) scale(1.002);
+        box-shadow: 0 10px 30px rgba(56, 189, 248, 0.15), 0 0 15px rgba(56, 189, 248, 0.1);
+    }}
+
+    /* 异常拦截：橙色光效 */
+    .error-card {{ border-left: 5px solid rgba(245, 158, 11, 0.6); background: rgba(245, 158, 11, 0.01); }}
+    .error-card:hover {{
+        background: rgba(245, 158, 11, 0.04);
+        border-color: rgba(245, 158, 11, 0.8);
+        transform: translateY(-5px) scale(1.002);
+        box-shadow: 0 10px 30px rgba(245, 158, 11, 0.15), 0 0 15px rgba(245, 158, 11, 0.1);
+    }}
+
+    /* 内部文本样式 */
+    .attr-cluster {{ display: flex; align-items: center; min-width: 400px; flex-shrink: 0; }}
+    .cat-label {{ color: #38bdf8; font-weight: 900; font-size: 1.05rem; width: 90px; text-shadow: 0 0 8px rgba(56,189,248,0.3); }}
+    .clr-label {{ color: #ffffff; font-weight: 700; font-size: 0.95rem; min-width: 60px; margin-right: 15px; border-right: 1px solid rgba(255,255,255,0.15); padding-right: 15px; }}
+    .size-badge {{ background: rgba(56, 189, 248, 0.1); padding: 3px 10px; border-radius: 8px; color: #eee; font-size: 0.85rem; border: 1px solid rgba(56, 189, 248, 0.2); margin-right: 6px; transition: 0.3s; }}
+    .size-badge:hover {{ background: rgba(56, 189, 248, 0.2); border-color: #38bdf8; }}
     .size-badge b {{ color: #38bdf8; }}
 
-    /* SN 网格 */
-    .sn-grid {{ flex: 1; display: flex; flex-wrap: wrap; gap: 6px; border-left: 1px solid rgba(255,255,255,0.05); padding-left: 20px; }}
+    /* SN 按钮极右排版与光效 */
+    .sn-grid {{ margin-left: auto; display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; max-width: 600px; }}
     .sn-pill {{
-        display: inline-block; padding: 2px 10px; background: rgba(255, 255, 255, 0.05);
-        color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 12px; 
-        text-decoration: none !important; font-size: 0.7rem; font-weight: 600;
+        display: inline-block; padding: 3px 14px; background: rgba(255, 255, 255, 0.03);
+        color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 20px; 
+        text-decoration: none !important; font-size: 0.75rem; font-weight: 600; transition: all 0.3s;
+    }}
+    .sn-pill:hover {{
+        background: rgba(56, 189, 248, 0.2);
+        border-color: #38bdf8;
+        box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+        transform: scale(1.1);
     }}
 
+    /* 上传框浮动卡片 */
+    [data-testid="stFileUploader"] {{
+        position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); width: 480px; z-index: 9999;
+        background: rgba(255, 255, 255, 0.12) !important; border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border-radius: 50px !important; padding: 10px 30px !important; backdrop-filter: blur(25px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }}
     [data-testid="stFileUploader"] label, [data-testid="stFileUploader"] small {{ display: none !important; }}
     </style>
-    
+
     <div class="user-profile">
         <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
         <div class="user-info">
             <div class="user-name">{GITHUB_USERNAME}</div>
-            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● MINIMAL SIZE MODE</div>
+            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● LIGHT-SPEED UI</div>
         </div>
     </div>
 
@@ -109,7 +132,6 @@ def process_sku_logic(uploaded_file):
                 raw_s = s_m.group(1).strip().upper() if s_m else "FREE"
                 if not raw_s: raw_s = "FREE"
                 data_pairs.append((clr_v, SIZE_MAP.get(raw_s, raw_s)))
-        
         if len(data_pairs) == i_qty and i_qty > 0:
             for c_val, s_val in data_pairs:
                 all_normal_data.append({'Category': cat, 'Color': c_val, 'Size': s_val, 'SN': sn})
@@ -122,23 +144,18 @@ upload_placeholder = st.empty()
 uploaded_file = upload_placeholder.file_uploader("Upload", type=["xlsx"])
 
 if uploaded_file:
-    with st.spinner('SYNCING...'):
+    with st.spinner('ENERGIZING...'):
         v_df, e_df = process_sku_logic(uploaded_file)
     upload_placeholder.empty()
     
-    t1, t2 = st.tabs(["💎 汇总汇总", "📡 异常拦截"])
+    t1, t2 = st.tabs(["💎 汇总数据流", "📡 异常拦截"])
     
     with t1:
         if not v_df.empty:
             for (cat, clr), group in v_df.groupby(['Category', 'Color']):
                 size_counts = group['Size'].value_counts().sort_index()
-                
-                # 【修改核心】如果是 FREE 则不显示文本，只显示数量 ×Qty
-                size_html = ""
-                for s, q in size_counts.items():
-                    display_size = "" if s == "FREE" else s
-                    size_html += f'<span class="size-badge">{display_size}<b>×{q}</b></span>'
-                
+                # 尺码渲染：FREE不显示文字只显示数量
+                size_html = "".join([f'<span class="size-badge">{" " if s=="FREE" else s}<b>×{q}</b></span>' for s, q in size_counts.items()])
                 sns = sorted(list(set(group['SN'].tolist())))
                 sn_pills = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill">{sn}</a>' for sn in sns])
                 
@@ -147,14 +164,12 @@ if uploaded_file:
                         <div class="attr-cluster">
                             <div class="cat-label">{cat}</div>
                             <div class="clr-label">{clr}</div>
-                            <div style="display:flex; flex-wrap:wrap; gap:2px;">{size_html}</div>
+                            <div style="display:flex; flex-wrap:wrap; gap:4px;">{size_html}</div>
                         </div>
-                        <div class="sn-grid">
-                            {sn_pills}
-                        </div>
+                        <div class="sn-grid">{sn_pills}</div>
                     </div>
                 ''', unsafe_allow_html=True)
-            if st.button("↺ 重置"): st.rerun()
+            if st.button("↺ 重置部署"): st.rerun()
         else: st.info("空数据")
 
     with t2:
@@ -164,10 +179,10 @@ if uploaded_file:
                     <div class="wide-card error-card">
                         <div style="flex: 1;">
                             <span style="color:#f59e0b; font-weight:bold; font-size:0.85rem;">LINE: {err['行号']}</span>
-                            <span style="color:#ffffff; margin-left:15px; font-weight:600;">{err['原因']}</span>
-                            <div style="margin-top:4px; font-size:0.8rem; color:#64748b;">{err['内容']}</div>
+                            <span style="color:#ffffff; margin-left:15px; font-weight:600; text-shadow: 0 0 5px rgba(245,158,11,0.4);">{err['原因']}</span>
+                            <div style="margin-top:6px; font-size:0.8rem; color:#94a3b8;">{err['内容']}</div>
                         </div>
-                        <div class="sn-grid" style="flex:0; border:none;">
+                        <div class="sn-grid">
                             <a href="{BASE_URL}{err['SN']}" target="_blank" class="sn-pill" style="border-color:#f59e0b; color:#f59e0b !important;">{err['SN']}</a>
                         </div>
                     </div>
