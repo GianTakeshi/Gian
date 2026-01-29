@@ -1,13 +1,10 @@
 import streamlit as st
 import pandas as pd
 import re
-import io
 import time
-from openpyxl import load_workbook
-from openpyxl.styles import PatternFill, Alignment, Border, Side
 
-# --- 1. 页面配置与玻璃拟态 UI ---
-st.set_page_config(page_title="SKU汇总工具", page_icon="🚀", layout="centered")
+# --- 1. 页面配置与 UI (增强玻璃感) ---
+st.set_page_config(page_title="SKU预览工具", page_icon="🚀", layout="wide") # 宽屏显示效果更好
 
 GITHUB_USERNAME = "GianTakeshi" 
 
@@ -16,16 +13,40 @@ st.markdown(f"""
     .stApp {{ background: radial-gradient(circle at 50% 50%, #1e293b, #010409); color: #ffffff; }}
     header {{visibility: hidden;}}
 
-    /* 玻璃拟态卡片 */
-    .glass-card {{
-        border-radius: 20px; padding: 20px; text-align: center;
-        backdrop-filter: blur(15px); animation: fadeIn 0.6s ease-out; margin-bottom: 20px;
-        background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+    /* 结果显示面板 */
+    .result-container {{
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        border-radius: 20px;
+        padding: 25px;
+        margin-top: 20px;
     }}
-    .success-card {{ border-left: 5px solid #10b981; }}
-    .error-card {{ border-left: 5px solid #f59e0b; }}
-
-    @keyframes fadeIn {{ from {{ opacity: 0; transform: translateY(10px); }} to {{ opacity: 1; transform: translateY(0); }} }}
+    .category-header {{
+        color: #38bdf8;
+        font-size: 1.8rem;
+        font-weight: 800;
+        border-bottom: 2px solid rgba(56, 189, 248, 0.3);
+        margin-bottom: 15px;
+        padding-bottom: 5px;
+    }}
+    .data-row {{
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        transition: background 0.3s;
+    }}
+    .data-row:hover {{ background: rgba(56, 189, 248, 0.1); }}
+    .color-label {{ font-weight: 600; color: #e2e8f0; }}
+    .size-tag {{
+        background: rgba(56, 189, 248, 0.2);
+        color: #38bdf8;
+        padding: 2px 10px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        margin-left: 10px;
+    }}
 
     /* 左上角头像面板 */
     .user-profile {{
@@ -34,40 +55,24 @@ st.markdown(f"""
         border: 1px solid rgba(56, 189, 248, 0.3); backdrop-filter: blur(10px);
     }}
     .avatar {{ width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; }}
-
-    /* 上传框样式 */
-    .stFileUploader section {{ 
-        background: rgba(255, 255, 255, 0.03) !important; 
-        backdrop-filter: blur(20px) !important; 
-        border: 2px dashed rgba(56, 189, 248, 0.4) !important; 
-        border-radius: 30px !important; 
-    }}
-    [data-testid="stFileUploadDropzone"] > div {{ color: transparent !important; }}
-    [data-testid="stFileUploadDropzone"]::before {{ content: "拖拽文件到这里"; position: absolute; top: 40%; color: #ffffff; font-size: 1.4rem; font-weight: bold; }}
-    [data-testid="stFileUploadDropzone"] button::after {{ content: "选择文件"; position: absolute; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 800; visibility: visible; }}
     </style>
     
     <div class="user-profile">
         <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
         <div style="display: flex; flex-direction: column;">
             <span style="font-weight:700; font-size:0.9rem;">{GITHUB_USERNAME}</span>
-            <span style="font-size:0.65rem; color:#10b981;">● 开发模式 v3.0</span>
+            <span style="font-size:0.65rem; color:#10b981;">● 实时预览模式</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-# --- 2. 完美复刻源代码的核心逻辑 ---
-COLOR_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)'
-SIZE_REG = r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
-SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
-BLUE_FILL = PatternFill(start_color='D9E1F2', end_color='D9E1F2', fill_type='solid')
-THIN_BORDER = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
-
+# --- 2. 核心逻辑 (保持你的源代码提取逻辑) ---
 def process_sku_logic(uploaded_file):
+    COLOR_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)'
+    SIZE_REG = r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
+    SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
+    
     df = pd.read_excel(uploaded_file, engine='openpyxl')
-    if len(df.columns) < 9:
-        return None, None, "错误: 表格格式不正确（列数不足）"
-
     col_a, col_c, col_g, col_i = df.columns[0], df.columns[2], df.columns[6], df.columns[8]
     all_normal_data, all_error_rows = [], []
 
@@ -75,19 +80,12 @@ def process_sku_logic(uploaded_file):
         c_raw = str(row[col_c]).strip()
         if not c_raw or c_raw == 'nan': continue
         
-        # 异常：多个商品
-        if ';' in c_raw or '；' in c_raw:
-            all_error_rows.append({'商品名称': c_raw, '订单编号': row[col_a], '原因': "多个商品", 'SKU属性': str(row[col_g])})
-            continue
-
         category_name = c_raw.split(' ')[0].upper()
         if category_name.startswith('WZ'): category_name = 'WZ'
 
         g_text = str(row[col_g])
-        i_val = str(row[col_i])
-        i_qty = int(re.findall(r'\d+', i_val)[0]) if re.findall(r'\d+', i_val) else 0
+        i_qty = int(re.findall(r'\d+', str(row[col_i]))[0]) if re.findall(r'\d+', str(row[col_i])) else 0
 
-        # 分号块切割提取
         chunks = re.split(r'[;；]', g_text)
         data_pairs = []
         for chunk in chunks:
@@ -98,91 +96,73 @@ def process_sku_logic(uploaded_file):
             if c_match:
                 color_val = c_match.group(1).strip().upper()
                 raw_size = s_match.group(1).strip().upper() if s_match else ""
-                size_val = SIZE_MAP.get(raw_size, raw_size) 
-                data_pairs.append((color_val, size_val))
+                data_pairs.append((color_val, SIZE_MAP.get(raw_size, raw_size)))
 
         if len(data_pairs) == i_qty and i_qty > 0:
             for c_val, s_val in data_pairs:
                 all_normal_data.append({'Category': category_name, 'Color': c_val, 'Size': s_val})
         else:
-            all_error_rows.append({
-                '商品名称': category_name, 
-                '订单编号': row[col_a], 
-                '原因': f"解析数({len(data_pairs)})与购买数量({i_qty})不符", 
-                'SKU属性': g_text
-            })
+            all_error_rows.append({'行号': index + 2, '品名': category_name, '原因': f"解析({len(data_pairs)})≠购买({i_qty})"})
 
-    return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows), None
+    return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 3. 页面渲染逻辑 ---
-st.markdown("<div style='text-align:center; padding-top:50px;'><h1 style='font-size:4.2rem; font-weight:800; background:linear-gradient(to bottom, #fff, #64748b); -webkit-background-clip:text; -webkit-text-fill-color:transparent;'>智能商品</h1><h1 style='color:#38bdf8; font-size:2.6rem; margin-top:-15px;'>属性汇总大师 🚀</h1></div>", unsafe_allow_html=True)
+# --- 3. 页面渲染 ---
+st.markdown("<div style='text-align:center; padding-top:30px;'><h1 style='color:#38bdf8; font-size:3rem; font-weight:800;'>数据实时看板 🚀</h1></div>", unsafe_allow_html=True)
 
 uploaded_file = st.file_uploader("", type=["xlsx"])
 
 if uploaded_file:
-    with st.status("正在进行量子扫描并穿透玻璃面板...", expanded=True) as status:
-        final_df, error_df, err_msg = process_sku_logic(uploaded_file)
-        time.sleep(0.5)
-        status.update(label="解析完成!", state="complete", expanded=False)
+    with st.spinner('正在透视数据...'):
+        final_df, error_df = process_sku_logic(uploaded_file)
+    
+    # --- 分栏显示：左边预览结果，右边显示异常 ---
+    col_left, col_right = st.columns([2, 1])
 
-    if err_msg:
-        st.error(err_msg)
-    else:
-        # --- 汇总表处理与美化导出 ---
+    with col_left:
+        st.markdown("### 📊 汇总结果")
         if not final_df.empty:
-            st.markdown("<div class='glass-card success-card'><h3 style='color:#10b981; margin:0;'>✨ 汇总就绪</h3><p style='color:#a7f3d0;'>已成功重构 {} 条 SKU 属性</p></div>".format(len(final_df)), unsafe_allow_html=True)
-            
-            # 这里复刻你源码中的复杂排序和多列格式
             categories = sorted(final_df['Category'].unique())
-            size_order = ['XXS', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', 'FREE', '']
-            def sort_sizes(s_list): return sorted(s_list, key=lambda x: size_order.index(x) if x in size_order else 99)
-            def extract_num(s): 
-                n = re.findall(r'\d+', str(s))
-                return int(n[0]) if n else 999999
-
-            output_rows, category_blocks = [], []
             for cat in categories:
-                start_row = len(output_rows) + 1
+                st.markdown(f"""<div class="result-container">
+                    <div class="category-header">{cat}</div>
+                """, unsafe_allow_html=True)
+                
                 cat_data = final_df[final_df['Category'] == cat]
-                distinct_sizes = sort_sizes(cat_data['Size'].unique())
-                output_rows.append({'A': cat})
-                sorted_colors = sorted(cat_data['Color'].unique(), key=extract_num)
-                for color in sorted_colors:
-                    color_data = cat_data[cat_data['Color'] == color]
-                    size_counts = color_data['Size'].value_counts()
-                    row_dict = {'A': f"Color {color}"}
-                    for idx, s_name in enumerate(distinct_sizes):
-                        col_key = chr(66 + idx) if idx < 25 else f"Z{idx}"
-                        if s_name in size_counts:
-                            qty = size_counts[s_name]
-                            row_dict[col_key] = f"*{qty}" if s_name == "" else f"{s_name}*{qty}"
-                    output_rows.append(row_dict)
-                category_blocks.append((start_row, len(output_rows), 1 + len(distinct_sizes)))
-                output_rows.append({})
+                # 按颜色分组
+                colors = sorted(cat_data['Color'].unique(), key=lambda x: int(re.findall(r'\d+', str(x))[0]) if re.findall(r'\d+', str(x)) else 999)
+                
+                for clr in colors:
+                    color_data = cat_data[cat_data['Color'] == clr]
+                    counts = color_data['Size'].value_counts()
+                    # 拼接 Size 标签
+                    size_tags = "".join([f'<span class="size-tag">{"无尺码" if s=="" else s} *{q}</span>' for s, q in counts.items()])
+                    
+                    st.markdown(f"""
+                        <div class="data-row">
+                            <span class="color-label">Color {clr}</span>
+                            <div class="tags-container">{size_tags}</div>
+                        </div>
+                    """, unsafe_allow_html=True)
+                
+                st.markdown("</div>", unsafe_allow_html=True)
+        else:
+            st.info("暂无有效汇总数据")
 
-            # 导出带格式的 Excel
-            out_ok = io.BytesIO()
-            pd.DataFrame(output_rows).to_excel(out_ok, index=False, header=False)
-            wb = load_workbook(out_ok)
-            ws = wb.active
-            for start, end, col_limit in category_blocks:
-                ws.cell(row=start, column=1).alignment = Alignment(horizontal='center')
-                for r in range(start + 1, end + 1):
-                    for c in range(1, col_limit + 1):
-                        cell = ws.cell(row=r, column=c)
-                        cell.fill, cell.border, cell.alignment = BLUE_FILL, THIN_BORDER, Alignment(horizontal='center')
-            for col in ws.columns: ws.column_dimensions[col[0].column_letter].width = 15
-            
-            final_out = io.BytesIO()
-            wb.save(final_out)
-            st.download_button("📥 下载汇总报表 (完美格式版)", final_out.getvalue(), f"汇总_{uploaded_file.name}", use_container_width=True)
-
-        # --- 异常表处理与导出 ---
+    with col_right:
+        st.markdown("### ⚠️ 异常监控")
         if not error_df.empty:
-            st.markdown(f"<div class='glass-card error-card'><h3 style='color:#f59e0b; margin:0;'>⚠️ 异常拦截</h3><p style='color:#fcd34d;'>拦截到 {len(error_df)} 条无法解析的原始订单</p></div>", unsafe_allow_html=True)
-            
-            out_err = io.BytesIO()
-            error_df.to_excel(out_err, index=False)
-            st.download_button("🚩 下载异常明细 (核对用)", out_err.getvalue(), f"异常_{uploaded_file.name}", use_container_width=True)
+            for _, err in error_df.iterrows():
+                st.markdown(f"""
+                    <div style="background:rgba(245, 158, 11, 0.1); border:1px solid #f59e0b; padding:15px; border-radius:15px; margin-bottom:10px;">
+                        <span style="color:#f59e0b; font-weight:bold;">行 {err['行号']}</span> | {err['品名']}<br>
+                        <small style="color:#94a3b8;">{err['原因']}</small>
+                    </div>
+                """, unsafe_allow_html=True)
+        else:
+            st.markdown("""
+                <div style="background:rgba(16, 185, 129, 0.1); border:1px solid #10b981; padding:15px; border-radius:15px; text-align:center;">
+                    <span style="color:#10b981;">✅ 暂无异常数据</span>
+                </div>
+            """, unsafe_allow_html=True)
 
-st.markdown("<div style='text-align:center; margin-top:80px; color:rgba(148,163,184,0.4); font-size:0.8rem;'>GianTakeshi CUSTOM SYSTEM v3.0 | 2026</div>", unsafe_allow_html=True)
+st.markdown("<div style='text-align:center; margin-top:50px; color:rgba(148,163,184,0.3);'>GianTakeshi LIVE VIEW v4.0</div>", unsafe_allow_html=True)
