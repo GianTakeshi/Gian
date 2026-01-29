@@ -13,7 +13,7 @@ st.markdown(f"""
     .stApp {{ background: radial-gradient(circle at 50% 50%, #1e293b, #010409); color: #ffffff; }}
     header {{visibility: hidden;}}
 
-    /* 修复：头像面板重新上线 */
+    /* 头像面板 */
     .user-profile {{
         position: fixed; top: 25px; left: 25px; display: flex; align-items: center; gap: 12px; z-index: 1000000; 
         background: rgba(255, 255, 255, 0.05); padding: 6px 16px 6px 6px; border-radius: 50px;
@@ -28,37 +28,47 @@ st.markdown(f"""
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }}
 
-    /* 通用卡片样式 */
+    /* 核心卡片样式：强制高度一致 */
     .wide-card {{
         background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 14px; padding: 16px 25px; margin-bottom: 12px;
+        border-radius: 14px; padding: 18px 25px; margin-bottom: 12px;
         display: flex; align-items: center; justify-content: space-between; gap: 20px;
+        min-height: 85px; /* 强制锁定最小高度 */
+        box-sizing: border-box;
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }}
 
-    /* 汇总卡片：蓝色光效 */
     .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.6); }}
     .normal-card:hover {{
         background: rgba(56, 189, 248, 0.06); border-color: rgba(56, 189, 248, 0.8);
         transform: translateY(-5px); box-shadow: 0 10px 30px rgba(56, 189, 248, 0.2);
     }}
 
-    /* 异常卡片：橙色光效 */
-    .error-card {{ border-left: 5px solid rgba(245, 158, 11, 0.6); background: rgba(245, 158, 11, 0.01); }}
+    .error-card {{ border-left: 5px solid rgba(245, 158, 11, 0.6); background: rgba(245, 158, 11, 0.02); }}
     .error-card:hover {{
-        background: rgba(245, 158, 11, 0.04); border-color: rgba(245, 158, 11, 0.8);
+        background: rgba(245, 158, 11, 0.05); border-color: rgba(245, 158, 11, 0.8);
         transform: translateY(-5px); box-shadow: 0 10px 30px rgba(245, 158, 11, 0.2);
     }}
 
     /* 属性显示布局 */
-    .attr-cluster {{ display: flex; align-items: center; gap: 15px; min-width: 420px; flex-shrink: 0; }}
-    .cat-label {{ color: #38bdf8; font-weight: 900; font-size: 1.05rem; width: 90px; }}
-    .color-text {{ color: #ffffff; font-weight: 700; font-size: 0.95rem; }}
-    .size-text {{ color: #38bdf8; font-weight: 600; font-size: 0.9rem; margin-left: 5px; }}
-    .qty-text {{ color: #10b981; font-weight: 800; font-size: 0.85rem; margin-left: 2px; }}
+    .attr-cluster {{ display: flex; align-items: center; gap: 15px; min-width: 450px; flex-shrink: 0; }}
+    .cat-label {{ color: #38bdf8; font-weight: 900; font-size: 1.05rem; width: 85px; }}
+    .color-text {{ color: #ffffff; font-weight: 700; font-size: 0.95rem; min-width: 60px; }}
+    
+    /* ✨ Size 框框化样式 ✨ */
+    .size-box {{
+        display: inline-flex; align-items: center;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 6px; padding: 2px 8px; margin-right: 6px;
+        transition: 0.3s;
+    }}
+    .size-box:hover {{ background: rgba(56, 189, 248, 0.1); border-color: rgba(56, 189, 248, 0.4); }}
+    .size-text {{ color: #38bdf8; font-weight: 600; font-size: 0.85rem; }}
+    .qty-text {{ color: #10b981; font-weight: 800; font-size: 0.8rem; margin-left: 4px; }}
 
-    /* SN 按钮对齐 */
-    .sn-grid {{ margin-left: auto; display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; max-width: 600px; }}
+    /* SN 按钮极右排版 */
+    .sn-grid {{ margin-left: auto; display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; max-width: 550px; }}
     .sn-pill {{
         display: inline-block; padding: 3px 14px; background: rgba(255, 255, 255, 0.03);
         color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 20px; 
@@ -66,7 +76,7 @@ st.markdown(f"""
     }}
     .sn-pill:hover {{ background: rgba(56, 189, 248, 0.2); transform: scale(1.1); box-shadow: 0 0 12px rgba(56, 189, 248, 0.4); }}
 
-    /* 部署按钮动效 */
+    /* 重新部署按钮 */
     div.stButton > button {{
         background: rgba(56, 189, 248, 0.05) !important; color: #38bdf8 !important;
         border: 2px solid rgba(56, 189, 248, 0.4) !important; border-radius: 50px !important;
@@ -91,7 +101,7 @@ st.markdown(f"""
         <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
         <div class="user-info">
             <div class="user-name">{GITHUB_USERNAME}</div>
-            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● SYSTEM RESTORED</div>
+            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● LAYOUT SYNCED</div>
         </div>
     </div>
 
@@ -157,7 +167,12 @@ if uploaded_file:
                 attr_display = ""
                 for s, q in size_counts.items():
                     s_label = "" if s == "FREE" else s
-                    attr_display += f'<span class="size-text">{s_label}</span><span class="qty-text">×{q}</span> '
+                    # 将 Size 用小框框起来
+                    attr_display += f'''
+                        <div class="size-box">
+                            <span class="size-text">{s_label}</span>
+                            <span class="qty-text">×{q}</span>
+                        </div>'''
                 
                 sns = sorted(list(set(group['SN'].tolist())))
                 sn_pills = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill">{sn}</a>' for sn in sns])
@@ -167,7 +182,7 @@ if uploaded_file:
                         <div class="attr-cluster">
                             <div class="cat-label">{cat}</div>
                             <div class="color-text">{clr}</div>
-                            <div style="display:flex; align-items:baseline;">{attr_display}</div>
+                            <div style="display:flex; flex-wrap:wrap; gap:2px;">{attr_display}</div>
                         </div>
                         <div class="sn-grid">{sn_pills}</div>
                     </div>
@@ -178,13 +193,18 @@ if uploaded_file:
     with t2:
         if not e_df.empty:
             for _, err in e_df.iterrows():
+                # 确保异常卡片的排版结构与汇总卡片高度一致
                 st.markdown(f'''
                     <div class="wide-card error-card">
-                        <div style="flex: 1;">
-                            <span style="color:#f59e0b; font-weight:bold; font-size:0.85rem;">LINE: {err['行号']}</span>
-                            <span style="color:#ffffff; margin-left:15px; font-weight:600;">{err['原因']}</span>
-                            <div style="margin-top:6px; font-size:0.8rem; color:#94a3b8;">{err['内容']}</div>
+                        <div style="flex: 1; display:flex; flex-direction:column; justify-content:center;">
+                            <div>
+                                <span style="color:#f59e0b; font-weight:bold; font-size:0.85rem;">LINE: {err['行号']}</span>
+                                <span style="color:#ffffff; margin-left:15px; font-weight:600;">{err['原因']}</span>
+                            </div>
+                            <div style="margin-top:6px; font-size:0.8rem; color:#94a3b8; line-height:1.2;">{err['内容']}</div>
                         </div>
-                        <div class="sn-grid"><a href="{BASE_URL}{err['SN']}" target="_blank" class="sn-pill" style="border-color:#f59e0b; color:#f59e0b !important;">{err['SN']}</a></div>
+                        <div class="sn-grid">
+                            <a href="{BASE_URL}{err['SN']}" target="_blank" class="sn-pill" style="border-color:#f59e0b; color:#f59e0b !important;">{err['SN']}</a>
+                        </div>
                     </div>
                 ''', unsafe_allow_html=True)
