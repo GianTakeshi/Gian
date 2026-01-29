@@ -23,16 +23,15 @@ st.markdown(f"""
     .avatar {{ width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; }}
     .user-info {{ line-height: 1.1; }}
     
-    /* ✨ 名字字体优化：已替换为纤细风格 ✨ */
+    /* ✨ 名字字体：调整为 600 ✨ */
     .user-name {{ 
         font-size: 0.95rem; 
-        font-weight: 400; 
+        font-weight: 600; 
         color: #fff; 
         letter-spacing: 1.2px;
         font-family: 'Inter', sans-serif;
     }}
     
-    /* 标题居中 */
     .hero-container {{ text-align: center; width: 100%; padding: 60px 0 20px 0; }}
     .grand-title {{
         display: block; font-family: 'Inter', sans-serif; font-size: 3.2rem !important; font-weight: 900; letter-spacing: 8px;
@@ -49,20 +48,18 @@ st.markdown(f"""
         min-height: 85px; box-sizing: border-box;
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }}
-
-    /* 汇总卡片（蓝）与 异常卡片（橙） */
     .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.6); }}
     .normal-card:hover {{ background: rgba(56, 189, 248, 0.06); border-color: rgba(56, 189, 248, 0.8); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(56, 189, 248, 0.2); }}
     
     .error-card {{ border-left: 5px solid rgba(245, 158, 11, 0.6); background: rgba(245, 158, 11, 0.02); }}
     .error-card:hover {{ background: rgba(245, 158, 11, 0.05); border-color: rgba(245, 158, 11, 0.8); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(245, 158, 11, 0.2); }}
 
-    /* 属性层级配色 */
+    /* 属性层级 */
     .attr-cluster {{ display: flex; align-items: center; gap: 15px; min-width: 450px; flex-shrink: 0; }}
     .cat-label {{ color: #38bdf8; font-weight: 900; font-size: 1.05rem; width: 85px; }}
     .color-text {{ color: #38bdf8; font-weight: 700; font-size: 0.95rem; min-width: 60px; }}
     
-    /* Size 框框与配色 */
+    /* Size 框 */
     .size-box {{
         display: inline-flex; align-items: center;
         background: rgba(255, 255, 255, 0.05);
@@ -72,7 +69,7 @@ st.markdown(f"""
     .size-text {{ color: #ffffff; font-weight: 600; font-size: 0.85rem; }}
     .qty-text {{ color: #38bdf8; font-weight: 800; font-size: 0.85rem; margin-left: 5px; }}
 
-    /* SN 极右对齐 */
+    /* SN 按钮 */
     .sn-grid {{ margin-left: auto; display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; max-width: 550px; }}
     .sn-pill {{
         display: inline-block; padding: 3px 14px; background: rgba(255, 255, 255, 0.03);
@@ -81,21 +78,29 @@ st.markdown(f"""
     }}
     .sn-pill:hover {{ background: rgba(56, 189, 248, 0.2); transform: scale(1.1); box-shadow: 0 0 12px rgba(56, 189, 248, 0.4); }}
 
-    /* 重新部署按钮 */
+    /* ✨ 重新部署按钮 - 增加点击响应稳定性 ✨ */
     div.stButton > button {{
         background: rgba(56, 189, 248, 0.05) !important; color: #38bdf8 !important;
         border: 2px solid rgba(56, 189, 248, 0.4) !important; border-radius: 50px !important;
         padding: 12px 45px !important; font-weight: 900 !important;
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-        display: block !important; margin: 40px auto !important;
+        transition: all 0.4s !important; display: block !important; margin: 40px auto !important;
+        z-index: 9999; position: relative;
     }}
-    div.stButton > button:hover {{ background: rgba(56, 189, 248, 0.2) !important; transform: translateY(-8px) !important; box-shadow: 0 15px 35px rgba(56, 189, 248, 0.3) !important; }}
+    div.stButton > button:hover {{ background: rgba(56, 189, 248, 0.2) !important; transform: translateY(-5px); box-shadow: 0 10px 20px rgba(56, 189, 248, 0.2); }}
 
-    /* 上传框固定 */
+    /* ✨ 上传框：上移 + 增加光效 ✨ */
     [data-testid="stFileUploader"] {{
-        position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 400px; z-index: 9999;
-        background: rgba(255, 255, 255, 0.12) !important; border: 1px solid rgba(255, 255, 255, 0.2) !important;
-        border-radius: 50px !important; padding: 10px 30px !important; backdrop-filter: blur(25px);
+        position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%); width: 400px; z-index: 100000;
+        background: rgba(255, 255, 255, 0.12) !important; 
+        border: 1px solid rgba(56, 189, 248, 0.2) !important;
+        border-radius: 50px !important; padding: 10px 30px !important; 
+        backdrop-filter: blur(25px);
+        box-shadow: 0 0 15px rgba(56, 189, 248, 0.15); /* 默认微光 */
+        transition: all 0.3s ease;
+    }}
+    [data-testid="stFileUploader"]:hover {{
+        border-color: rgba(56, 189, 248, 0.6) !important;
+        box-shadow: 0 0 25px rgba(56, 189, 248, 0.3); /* 悬浮强光 */
     }}
     [data-testid="stFileUploader"] label, [data-testid="stFileUploader"] small {{ display: none !important; }}
     </style>
@@ -104,7 +109,7 @@ st.markdown(f"""
         <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
         <div class="user-info">
             <div class="user-name">{GITHUB_USERNAME}</div>
-            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● FULL VERSION ACTIVE</div>
+            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● SYSTEM ONLINE</div>
         </div>
     </div>
 
@@ -155,7 +160,7 @@ def process_sku_logic(uploaded_file):
 
 # --- 3. 渲染层 ---
 upload_placeholder = st.empty()
-uploaded_file = upload_placeholder.file_uploader("Upload", type=["xlsx"])
+uploaded_file = upload_placeholder.file_uploader("Upload", type=["xlsx"], key="main_uploader")
 
 if uploaded_file:
     v_df, e_df = process_sku_logic(uploaded_file)
@@ -181,7 +186,10 @@ if uploaded_file:
                         <div class="sn-grid">{sn_pills}</div>
                     </div>
                 ''', unsafe_allow_html=True)
-            if st.button("↺ 重新部署系统"): st.rerun()
+            
+            # 按钮加固：赋予独特 Key 并放在容器末尾
+            if st.button("↺ 重新部署系统", key="reset_btn"):
+                st.rerun()
         else: st.info("暂无汇总数据")
 
     with t2:
@@ -201,4 +209,3 @@ if uploaded_file:
                         </div>
                     </div>
                 ''', unsafe_allow_html=True)
-        else: st.success("系统扫描完毕：未发现异常订单")
