@@ -11,14 +11,14 @@ BASE_URL = "https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id="
 # 注入 CSS
 st.markdown(f"""
     <style>
-    /* 🎭 舞台光背景：中心深蓝向四周全黑扩散 */
+    /* 🎭 深邃舞台光背景：调暗蓝色，拉高四周全黑的范围 */
     .stApp {{ 
-        background: radial-gradient(circle at 50% 50%, #1e3a8a 0%, #020617 70%, #000000 100%) !important; 
+        background: radial-gradient(circle at 50% 50%, #0c1e3d 0%, #020617 60%, #000000 100%) !important; 
         color: #ffffff; 
     }}
     header {{visibility: hidden;}}
 
-    /* 🛡️ 灵动头像面板 */
+    /* 🛡️ 用户面板 */
     .user-profile {{
         position: fixed; top: 25px; left: 25px; display: flex; align-items: center; gap: 12px; z-index: 1000000; 
         background: rgba(255, 255, 255, 0.05); padding: 8px 18px 8px 8px; border-radius: 50px;
@@ -39,92 +39,81 @@ st.markdown(f"""
     /* 🧊 毛玻璃卡片系统 */
     .wide-card {{
         background: rgba(255, 255, 255, 0.03); 
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 20px; padding: 25px 30px; margin-bottom: 25px;
         display: flex; flex-direction: row; align-items: center; justify-content: space-between;
-        
-        /* 核心：毛玻璃与平滑过渡 */
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
         transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
         position: relative;
-        z-index: 1;
     }}
 
-    /* ✨ 霓虹光蔓延效果：利用多层阴影营造扩散感 */
+    /* ✨ 霓虹光蔓延效果 */
     .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.5); }}
     .normal-card:hover {{
-        background: rgba(56, 189, 248, 0.05);
-        transform: translateY(-10px) scale(1.01);
+        background: rgba(56, 189, 248, 0.06);
+        transform: translateY(-10px) scale(1.005);
         border-color: #38bdf8;
-        /* 蓝色霓虹光向上下蔓延 */
         box-shadow: 
-            0 20px 50px rgba(0, 0, 0, 0.5),
-            0 0 40px rgba(56, 189, 248, 0.4),
-            0 -10px 30px rgba(56, 189, 248, 0.2);
+            0 25px 50px rgba(0, 0, 0, 0.6),
+            0 0 45px rgba(56, 189, 248, 0.35),
+            0 -5px 25px rgba(56, 189, 248, 0.15);
         z-index: 10;
     }}
 
     .error-card {{ border-left: 5px solid rgba(245, 158, 11, 0.5); }}
     .error-card:hover {{
-        background: rgba(245, 158, 11, 0.05);
-        transform: translateY(-10px) scale(1.01);
+        background: rgba(245, 158, 11, 0.06);
+        transform: translateY(-10px) scale(1.005);
         border-color: #f59e0b;
-        /* 橙色霓虹光向上下蔓延 */
         box-shadow: 
-            0 20px 50px rgba(0, 0, 0, 0.5),
-            0 0 40px rgba(245, 158, 11, 0.4),
-            0 -10px 30px rgba(245, 158, 11, 0.2);
+            0 25px 50px rgba(0, 0, 0, 0.6),
+            0 0 45px rgba(245, 158, 11, 0.35),
+            0 -5px 25px rgba(245, 158, 11, 0.15);
         z-index: 10;
     }}
 
-    /* 💎 灵动按钮 */
+    /* ✨ SN 码显示：去除下划线 ✨ */
+    .sn-pill {{
+        padding: 5px 15px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; 
+        transition: all 0.3s ease;
+        text-decoration: none !important; /* 彻底去除下划线 */
+        display: inline-block;
+    }}
+    .normal-sn {{ background: rgba(56, 189, 248, 0.1); color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.2); }}
+    .normal-sn:hover {{ background: #38bdf8 !important; color: #000 !important; box-shadow: 0 0 15px #38bdf8; }}
+    .error-sn {{ background: rgba(245, 158, 11, 0.1); color: #f59e0b !important; border: 1px solid rgba(245, 158, 11, 0.3); }}
+    .error-sn:hover {{ background: #f59e0b !important; color: #000 !important; box-shadow: 0 0 15px #f59e0b; }}
+
+    /* 重制按钮 */
     div.stButton > button {{
-        background: rgba(255, 255, 255, 0.05) !important;
+        background: rgba(255, 255, 255, 0.03) !important;
         color: #38bdf8 !important;
-        border: 1px solid rgba(56, 189, 248, 0.4) !important;
+        border: 1px solid rgba(56, 189, 248, 0.3) !important;
         border-radius: 50px !important;
-        padding: 12px 60px !important;
-        font-weight: 800 !important;
+        padding: 12px 60px !important; font-weight: 800 !important;
         backdrop-filter: blur(10px) !important;
         transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
     }}
-    div.stButton > button:hover {{
-        background: #38bdf8 !important;
-        color: #000 !important;
-        box-shadow: 0 0 30px rgba(56, 189, 248, 0.6);
-        transform: translateY(-5px);
-    }}
+    div.stButton > button:hover {{ background: #38bdf8 !important; color: #000 !important; box-shadow: 0 0 30px rgba(56, 189, 248, 0.5); transform: translateY(-5px); }}
 
-    /* 底部毛玻璃上传框 */
+    /* 底部上传框 */
     [data-testid="stFileUploader"] {{
         position: fixed; bottom: 35px; left: 50%; transform: translateX(-50%); width: 450px; z-index: 9999;
         background: rgba(255, 255, 255, 0.08) !important; 
         border: 1px solid rgba(56, 189, 248, 0.3) !important;
         border-radius: 50px !important; padding: 15px 35px !important; 
         backdrop-filter: blur(25px) !important;
-        box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
-        transition: 0.5s;
+        box-shadow: 0 0 40px rgba(0, 0, 0, 0.7);
     }}
-    [data-testid="stFileUploader"]:hover {{ 
-        border-color: #38bdf8 !important; 
-        box-shadow: 0 0 50px rgba(56, 189, 248, 0.4); 
-    }}
-
-    .sn-pill {{
-        padding: 5px 15px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; transition: 0.3s;
-    }}
-    .normal-sn {{ background: rgba(56, 189, 248, 0.1); color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.2); }}
-    .normal-sn:hover {{ background: #38bdf8 !important; color: #000 !important; box-shadow: 0 0 15px #38bdf8; }}
-    .error-sn {{ background: rgba(245, 158, 11, 0.1); color: #f59e0b !important; border: 1px solid rgba(245, 158, 11, 0.3); }}
-    .error-sn:hover {{ background: #f59e0b !important; color: #000 !important; box-shadow: 0 0 15px #f59e0b; }}
+    [data-testid="stFileUploader"] label, [data-testid="stFileUploader"] small {{ display: none !important; }}
     </style>
 
     <div class="user-profile">
         <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
         <div class="user-info">
             <div style="font-size: 0.9rem; font-weight: 900; color: #fff;">{GITHUB_USERNAME}</div>
-            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● GLASS ENGINE ACTIVE</div>
+            <div style="font-size: 0.6rem; color: #38bdf8; font-weight: bold;">● MIDNIGHT STAGE ACTIVE</div>
         </div>
     </div>
     <div class="hero-container"><h1 class="grand-title">属性看板中枢</h1></div>
@@ -164,7 +153,7 @@ def process_sku_logic(uploaded_file):
 
 # --- 3. 渲染层 ---
 upload_zone = st.empty()
-uploaded_file = upload_zone.file_uploader("Upload", type=["xlsx"], key="glass_v1")
+uploaded_file = upload_zone.file_uploader("Upload", type=["xlsx"], key="deep_v1")
 
 if uploaded_file:
     v_df, e_df = process_sku_logic(uploaded_file)
