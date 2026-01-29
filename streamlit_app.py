@@ -2,70 +2,41 @@ import streamlit as st
 import pandas as pd
 import re
 
-# --- 1. UI 重塑：GitHub 头像 + 真正悬浮面板 ---
+# --- 1. UI 配置与悬浮面板 ---
 st.set_page_config(page_title="GianTakeshi | Data System", page_icon="🚀", layout="wide")
 
 GITHUB_USERNAME = "GianTakeshi" 
 
 st.markdown(f"""
     <style>
-    /* 全局背景 */
     .stApp {{ background: radial-gradient(circle at 50% 50%, #1e293b, #010409); color: #ffffff; }}
     header {{visibility: hidden;}}
 
-    /* --- 核心：固定悬浮面板 --- */
+    /* 固定悬浮面板 */
     .user-profile {{
-        position: fixed; 
-        top: 25px; 
-        left: 25px; 
-        display: flex; 
-        align-items: center; 
-        gap: 12px; 
-        z-index: 1000000; 
-        background: rgba(255, 255, 255, 0.05); 
-        padding: 6px 16px 6px 6px; 
-        border-radius: 50px;
-        border: 1px solid rgba(56, 189, 248, 0.3); 
-        backdrop-filter: blur(10px);
-        box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        position: fixed; top: 25px; left: 25px; display: flex; align-items: center; gap: 12px; z-index: 1000000; 
+        background: rgba(255, 255, 255, 0.05); padding: 6px 16px 6px 6px; border-radius: 50px;
+        border: 1px solid rgba(56, 189, 248, 0.3); backdrop-filter: blur(10px);
     }}
-    
-    /* 你的 GitHub 头像样式 */
-    .avatar {{ 
-        width: 40px; 
-        height: 40px; 
-        border-radius: 50%; 
-        border: 2px solid #38bdf8; 
-        object-fit: cover;
-        box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
-    }}
-    
-    .user-name {{ font-weight: 700; font-size: 0.95rem; color: #ffffff; line-height: 1.2; }}
-    .user-status {{ font-size: 0.65rem; color: #10b981; font-weight: bold; display: flex; align-items: center; gap: 4px; }}
+    .avatar {{ width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; }}
+    .user-name {{ font-weight: 700; font-size: 0.95rem; color: #ffffff; }}
+    .user-status {{ font-size: 0.65rem; color: #10b981; font-weight: bold; }}
 
     /* 大气标题 */
     .hero-container {{ text-align: center; padding: 100px 0 40px 0; }}
     .grand-title {{
-        font-family: 'Inter', sans-serif;
-        font-size: 5.5rem !important;
-        font-weight: 900;
-        letter-spacing: 15px;
+        font-family: 'Inter', sans-serif; font-size: 5.5rem !important; font-weight: 900; letter-spacing: 15px;
         background: linear-gradient(to bottom, #ffffff 30%, #38bdf8 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        filter: drop-shadow(0 10px 20px rgba(56, 189, 248, 0.3));
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }}
     .grand-subtitle {{ font-size: 1.1rem; letter-spacing: 6px; color: rgba(148, 163, 184, 0.7); }}
-
-    /* 隐藏默认组件 */
-    .stFileUploader section {{ background: rgba(255, 255, 255, 0.03); border: 1px dashed rgba(56, 189, 248, 0.3); border-radius: 15px; }}
     </style>
     
     <div class="user-profile">
         <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
         <div class="user-info">
             <div class="user-name">{GITHUB_USERNAME}</div>
-            <div class="user-status"><span style="font-size:10px;">●</span> 测试版 V0.3</div>
+            <div class="user-status">● 测试版 V0.3</div>
         </div>
     </div>
 
@@ -75,7 +46,7 @@ st.markdown(f"""
     </div>
     """, unsafe_allow_html=True)
 
-# --- 2. 核心逻辑 (保持源代码解析逻辑) ---
+# --- 2. 核心逻辑 ---
 def process_sku_logic(uploaded_file):
     COLOR_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)'
     SIZE_REG = r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
@@ -109,38 +80,56 @@ def process_sku_logic(uploaded_file):
             all_error_rows.append({'行号': index + 2, '订单编号': row[col_a], '品名': cat, '原因': f"校验不匹配({len(data_pairs)}/{i_qty})", '原始属性': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 3. 渲染 ---
-uploaded_file = st.file_uploader("", type=["xlsx"])
+# --- 3. 动态上传与渲染区 ---
+# 使用 empty 容器来包装上传组件
+upload_container = st.empty()
+
+# 如果 session_state 里没有文件状态，就显示上传框
+if 'processed' not in st.session_state:
+    st.session_state.processed = False
+
+uploaded_file = upload_container.file_uploader("", type=["xlsx"])
 
 if uploaded_file:
-    with st.spinner('执行数据流解析...'):
+    # 1. 隐藏上传框：直接清空容器
+    upload_container.empty()
+    
+    # 2. 执行解析
+    with st.spinner('正在重构多维数据...'):
         final_df, error_df = process_sku_logic(uploaded_file)
     
+    # 3. 显示结果
     tab1, tab2 = st.tabs(["💎 结构化属性汇总", "📡 实时异常捕获"])
 
     with tab1:
         if not final_df.empty:
             categories = sorted(final_df['Category'].unique())
             for cat in categories:
-                st.markdown(f'<div style="color:#38bdf8; font-size:1.4rem; font-weight:800; margin:30px 0 15px 0;">◈ {cat} ◈</div>', unsafe_allow_html=True)
+                st.markdown(f'<div style="color:#38bdf8; font-size:1.4rem; font-weight:800; margin:20px 0 10px 0;">◈ {cat} ◈</div>', unsafe_allow_html=True)
                 cat_data = final_df[final_df['Category'] == cat]
                 color_groups = cat_data.groupby('Color')
                 for clr, group in color_groups:
                     size_counts = group['Size'].value_counts()
                     tags = " ".join([f'<span style="background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.2); color:#ffffff; padding:4px 12px; border-radius:4px; margin-right:8px;">{s if s!="" else "FREE"} <b style="color:#38bdf8;">× {q}</b></span>' for s, q in size_counts.items()])
                     st.markdown(f"<div style='margin-bottom:12px; background:rgba(255,255,255,0.02); padding:10px; border-radius:8px;'><span style='color:#94a3b8; margin-right:20px; font-family:monospace;'>COLOR_{clr}</span> {tags}</div>", unsafe_allow_html=True)
+        
+        # 增加一个“重新上传”的按钮，方便宝宝操作
+        if st.button("↺ 重新部署数据源"):
+            st.rerun()
 
     with tab2:
         if not error_df.empty:
             for _, err in error_df.iterrows():
                 st.markdown(f"""
                 <div style="background:rgba(245,158,11,0.03); border:1px solid rgba(245,158,11,0.2); border-radius:10px; padding:15px; margin-bottom:10px;">
-                    <span style="color:#f59e0b; font-weight:bold; font-size:0.8rem;">LINE: {err['行号']}</span>
+                    <span style="color:#f59e0b; font-weight:bold; font-size:0.8rem;">REF_LINE: {err['行号']}</span>
                     <span style="color:#ffffff; margin-left:15px; font-weight:600;">{err['原因']}</span>
                     <div style="margin-top:8px; font-size:0.85rem; color:#64748b;">
                         <b>SN:</b> {err['订单编号']} | <b>LOG:</b> {err['原始属性']}
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
+        else:
+            st.success("环境监测：所有数据单元均通过合规性校验。")
 
 st.markdown("<div style='height:100px;'></div>", unsafe_allow_html=True)
