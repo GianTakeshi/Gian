@@ -3,8 +3,8 @@ import pandas as pd
 import re
 import html
 
-# --- 1. UI 视觉配置 (样式升级) ---
-st.set_page_config(page_title="GianTakeshi | Matrix Hub", page_icon="💎", layout="wide")
+# --- 1. UI 配置与样式锁定 ---
+st.set_page_config(page_title="GianTakeshi | Matrix Hub", page_icon="📊", layout="wide")
 
 st.markdown(f"""
     <style>
@@ -18,72 +18,26 @@ st.markdown(f"""
         border: 1px solid rgba(56, 189, 248, 0.3); backdrop-filter: blur(10px);
     }}
 
-    /* 大格子：外框 */
-    .cat-box {{
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.12);
+    /* 模拟大格子的样式：移除 st.container 默认边距 */
+    div[data-testid="stVerticalBlockBorderWrapper"] {{
+        background: rgba(255, 255, 255, 0.02);
         border-radius: 12px;
-        margin-bottom: 20px;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
     }}
 
-    /* 品类名称 */
-    .cat-name {{
-        background: rgba(56, 189, 248, 0.15);
-        color: #38bdf8;
-        font-size: 1.1rem; 
-        font-weight: 900;
-        padding: 10px;
-        text-align: center;
-        border-bottom: 1px solid rgba(56, 189, 248, 0.1);
-    }}
-
-    /* 内部竖向列表区域 */
-    .list-area {{
-        padding: 8px;
-        display: flex;
-        flex-direction: column; /* 核心：强制竖向 */
-        gap: 4px;
-    }}
-
-    /* 竖向排列的小条 */
-    .inner-row {{
+    /* 内部竖向清单行样式 */
+    .row-item {{
         display: flex;
         justify-content: space-between;
         align-items: center;
         background: rgba(255, 255, 255, 0.04);
+        margin: 4px 0;
+        padding: 6px 12px;
         border-radius: 6px;
-        padding: 6px 10px;
         border: 1px solid rgba(255, 255, 255, 0.05);
-        transition: background 0.2s;
     }}
-    .inner-row:hover {{
-        background: rgba(56, 189, 248, 0.08);
-        border-color: rgba(56, 189, 248, 0.2);
-    }}
-
-    .row-clr {{
-        font-size: 0.85rem;
-        font-weight: 700;
-        color: #ffffff;
-        max-width: 60%;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }}
-
-    .row-sze {{
-        font-size: 0.8rem;
-        color: #94a3b8;
-        text-align: right;
-    }}
-    .row-sze b {{
-        color: #38bdf8;
-        margin-left: 4px;
-        font-family: monospace;
-    }}
+    .clr-text {{ font-size: 0.85rem; font-weight: 700; color: #ffffff; }}
+    .sze-text {{ font-size: 0.8rem; color: #94a3b8; }}
+    .sze-text b {{ color: #38bdf8; margin-left: 4px; font-family: monospace; }}
     </style>
     
     <div class="user-profile">
@@ -92,7 +46,7 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-# --- 2. 逻辑层 (保持严谨) ---
+# --- 2. 逻辑层 ---
 def process_data(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -120,48 +74,41 @@ def process_data(uploaded_file):
         except: continue
     return pd.DataFrame(valid), pd.DataFrame(error)
 
-# --- 3. 渲染层 (恢复一排六个 + 内部竖向) ---
-st.markdown("<h2 style='text-align:center; padding-top:50px;'>📊 属性清单矩阵</h2>", unsafe_allow_html=True)
+# --- 3. 渲染层 ---
+st.markdown("<h2 style='text-align:center; padding-top:50px;'>📊 极稳属性清单</h2>", unsafe_allow_html=True)
 file = st.file_uploader("", type=["xlsx"])
 
 if file:
     v_df, e_df = process_data(file)
-    t1, t2 = st.tabs(["✅ 汇总矩阵", "❌ 异常报告"])
+    t1, t2 = st.tabs(["✅ 矩阵汇总", "❌ 异常拦截"])
     
     with t1:
         if not v_df.empty:
             v_df = v_df.sort_values(['Category', 'Color'])
             cat_groups = list(v_df.groupby('Category'))
             
-            # 维持每行 6 个大格子的布局
+            # 维持每行 6 个大盒子的布局
             cols_per_row = 6
             for i in range(0, len(cat_groups), cols_per_row):
                 batch = cat_groups[i : i + cols_per_row]
                 cols = st.columns(cols_per_row)
                 
                 for idx, (cat, group) in enumerate(batch):
-                    # 聚合统计
-                    sub_stats = group.groupby(['Color', 'Size']).size().reset_index(name='count')
-                    
-                    # 构建竖向列表 HTML
-                    inner_list_html = ""
-                    for _, r in sub_stats.iterrows():
-                        safe_clr = html.escape(str(r['Color']))
-                        inner_list_html += f"""
-                        <div class="inner-row">
-                            <span class="row-clr">{safe_clr}</span>
-                            <span class="row-sze">{r['Size']}<b>×{r['count']}</b></span>
-                        </div>
-                        """
-                    
-                    cols[idx].markdown(f"""
-                    <div class="cat-box">
-                        <div class="cat-name">{cat}</div>
-                        <div class="list-area">
-                            {inner_list_html}
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
+                    # 使用原生 container(border=True) 替代 HTML 大盒子，物理解决乱码问题
+                    with cols[idx].container(border=True):
+                        # 盒子头部：品类名
+                        st.markdown(f"""<div style="text-align:center; color:#38bdf8; font-weight:900; font-size:1.1rem; border-bottom:1px solid rgba(56,189,248,0.2); padding-bottom:8px; margin-bottom:8px;">{cat}</div>""", unsafe_allow_html=True)
+                        
+                        # 盒子内容：竖向清单
+                        sub_stats = group.groupby(['Color', 'Size']).size().reset_index(name='count')
+                        for _, r in sub_stats.iterrows():
+                            # 每一行独立渲染，不进行大拼接
+                            st.markdown(f"""
+                            <div class="row-item">
+                                <span class="clr-text">{html.escape(str(r['Color']))}</span>
+                                <span class="sze-text">{r['Size']}<b>×{r['count']}</b></span>
+                            </div>
+                            """, unsafe_allow_html=True)
         else:
             st.info("数据解析后为空")
             
