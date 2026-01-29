@@ -14,7 +14,7 @@ st.markdown(f"""
     .stApp {{ background: radial-gradient(circle at 50% 50%, #1e293b, #010409); color: #ffffff; }}
     header {{visibility: hidden;}}
 
-    /* 🛡️ 头像面板 - 重新归位 */
+    /* 🛡️ 头像面板 */
     .user-profile {{
         position: fixed; top: 25px; left: 25px; display: flex; align-items: center; gap: 12px; z-index: 1000000; 
         background: rgba(255, 255, 255, 0.05); padding: 6px 16px 6px 6px; border-radius: 50px;
@@ -22,7 +22,15 @@ st.markdown(f"""
     }}
     .avatar {{ width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; }}
     .user-info {{ line-height: 1.1; }}
-    .user-name {{ font-size: 0.9rem; font-weight: 600; color: #fff; }}
+    
+    /* ✨ 名字字体优化：已替换为纤细风格 ✨ */
+    .user-name {{ 
+        font-size: 0.95rem; 
+        font-weight: 400; 
+        color: #fff; 
+        letter-spacing: 1.2px;
+        font-family: 'Inter', sans-serif;
+    }}
     
     /* 标题居中 */
     .hero-container {{ text-align: center; width: 100%; padding: 60px 0 20px 0; }}
@@ -52,7 +60,7 @@ st.markdown(f"""
     /* 属性层级配色 */
     .attr-cluster {{ display: flex; align-items: center; gap: 15px; min-width: 450px; flex-shrink: 0; }}
     .cat-label {{ color: #38bdf8; font-weight: 900; font-size: 1.05rem; width: 85px; }}
-    .color-text {{ color: #38bdf8; font-weight: 700; font-size: 0.95rem; min-width: 60px; }} /* Color 蓝色 */
+    .color-text {{ color: #38bdf8; font-weight: 700; font-size: 0.95rem; min-width: 60px; }}
     
     /* Size 框框与配色 */
     .size-box {{
@@ -61,8 +69,8 @@ st.markdown(f"""
         border: 1px solid rgba(255, 255, 255, 0.15);
         border-radius: 6px; padding: 2px 10px; margin-right: 6px;
     }}
-    .size-text {{ color: #ffffff; font-weight: 600; font-size: 0.85rem; }} /* Size 白色 */
-    .qty-text {{ color: #38bdf8; font-weight: 800; font-size: 0.85rem; margin-left: 5px; }} /* 数量蓝色 */
+    .size-text {{ color: #ffffff; font-weight: 600; font-size: 0.85rem; }}
+    .qty-text {{ color: #38bdf8; font-weight: 800; font-size: 0.85rem; margin-left: 5px; }}
 
     /* SN 极右对齐 */
     .sn-grid {{ margin-left: auto; display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; max-width: 550px; }}
@@ -83,22 +91,14 @@ st.markdown(f"""
     }}
     div.stButton > button:hover {{ background: rgba(56, 189, 248, 0.2) !important; transform: translateY(-8px) !important; box-shadow: 0 15px 35px rgba(56, 189, 248, 0.3) !important; }}
 
-       /* 建议：为上传框增加微弱的蓝色呼吸描边，使其更符合中枢主题 */
-    [data-testid="stFileUploader"] {
+    /* 上传框固定 */
+    [data-testid="stFileUploader"] {{
         position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 400px; z-index: 9999;
-        background: rgba(255, 255, 255, 0.08) !important; 
-        border: 1px solid rgba(56, 189, 248, 0.2) !important; /* 改为淡淡的蓝色边框 */
-        border-radius: 50px !important; padding: 10px 30px !important; 
-        backdrop-filter: blur(25px);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(56, 189, 248, 0.1); /* 增加深影和微光 */
-        transition: all 0.3s ease;
-    }
-    
-    [data-testid="stFileUploader"]:hover {
-        border-color: rgba(56, 189, 248, 0.5) !important;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.2);
-    }
-
+        background: rgba(255, 255, 255, 0.12) !important; border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border-radius: 50px !important; padding: 10px 30px !important; backdrop-filter: blur(25px);
+    }}
+    [data-testid="stFileUploader"] label, [data-testid="stFileUploader"] small {{ display: none !important; }}
+    </style>
 
     <div class="user-profile">
         <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
@@ -132,7 +132,7 @@ def process_sku_logic(uploaded_file):
         chunks = re.split(r'[;；]', g_text)
         
         if ';' in c_raw or '；' in c_raw:
-            all_error_rows.append({'SN': sn, '行号': index + 2, '原因': "多个商品", '内容': g_text})
+            all_error_rows.append({'SN': sn, '行号': index + 2, '原因': "复合品类阻断", '内容': g_text})
             continue
 
         data_pairs = []
@@ -161,7 +161,7 @@ if uploaded_file:
     v_df, e_df = process_sku_logic(uploaded_file)
     upload_placeholder.empty()
     
-    t1, t2 = st.tabs(["汇总数据流", "异常拦截"])
+    t1, t2 = st.tabs(["💎 汇总数据流", "📡 异常拦截"])
     
     with t1:
         if not v_df.empty:
