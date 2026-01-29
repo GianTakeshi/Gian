@@ -30,27 +30,56 @@ st.markdown(f"""
         background: linear-gradient(to bottom, #ffffff 30%, #38bdf8 100%);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }}
-    .grand-subtitle {{ font-size: 1.1rem; letter-spacing: 6px; color: rgba(148, 163, 184, 0.7); }}
+    
+    /* 网格布局样式 */
+    .grid-container {{
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 30px;
+    }}
+    .color-card {{
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 15px;
+        min-width: 200px;
+        flex: 1 1 calc(25% - 15px); /* 四列布局，自动收缩 */
+        transition: all 0.3s ease;
+    }}
+    .color-card:hover {{
+        border-color: #38bdf8;
+        background: rgba(56, 189, 248, 0.05);
+        transform: translateY(-2px);
+    }}
+    .color-label {{
+        color: #94a3b8;
+        font-family: monospace;
+        font-size: 0.85rem;
+        margin-bottom: 10px;
+        display: block;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+        padding-bottom: 5px;
+    }}
+    .tag-container {{
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }}
+    .size-tag {{
+        background: rgba(56, 189, 248, 0.1);
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        color: #ffffff;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+    }}
 
     /* 异常跳转按钮样式 */
     .sn-button {{
-        display: inline-block;
-        padding: 4px 14px;
-        background: rgba(56, 189, 248, 0.15);
-        color: #38bdf8 !important;
-        border: 1px solid rgba(56, 189, 248, 0.4);
-        border-radius: 20px;
-        text-decoration: none !important;
-        font-size: 0.8rem;
-        font-weight: 600;
-        transition: all 0.2s ease;
-        margin-left: 10px;
-    }}
-    .sn-button:hover {{
-        background: #38bdf8;
-        color: #000000 !important;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+        display: inline-block; padding: 4px 14px; background: rgba(56, 189, 248, 0.15);
+        color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.4);
+        border-radius: 20px; text-decoration: none !important; font-size: 0.8rem; font-weight: 600;
     }}
     </style>
     
@@ -64,11 +93,10 @@ st.markdown(f"""
 
     <div class="hero-container">
         <h1 class="grand-title">属性解析中枢</h1>
-        <p class="grand-subtitle">CORE PROPERTY PARSING HUB</p>
     </div>
     """, unsafe_allow_html=True)
 
-# --- 2. 核心逻辑 ---
+# --- 2. 核心逻辑 (保持不变) ---
 def process_sku_logic(uploaded_file):
     COLOR_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)'
     SIZE_REG = r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
@@ -102,14 +130,13 @@ def process_sku_logic(uploaded_file):
             all_error_rows.append({'行号': index + 2, '订单编号': row[col_a], '品名': cat, '原因': f"校验不匹配({len(data_pairs)}/{i_qty})", '原始属性': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 3. 动态上传与渲染 ---
+# --- 3. 动态渲染 ---
 upload_container = st.empty()
 uploaded_file = upload_container.file_uploader("", type=["xlsx"])
 
 if uploaded_file:
-    upload_container.empty() # 解析后隐藏上传框
-    
-    with st.spinner('执行数据流解析...'):
+    upload_container.empty()
+    with st.spinner('重构数据矩阵...'):
         final_df, error_df = process_sku_logic(uploaded_file)
     
     tab1, tab2 = st.tabs(["💎 结构化属性汇总", "📡 实时异常捕获"])
@@ -118,36 +145,39 @@ if uploaded_file:
         if not final_df.empty:
             categories = sorted(final_df['Category'].unique())
             for cat in categories:
-                st.markdown(f'<div style="color:#38bdf8; font-size:1.4rem; font-weight:800; margin:20px 0 10px 0;">◈ {cat} ◈</div>', unsafe_allow_html=True)
+                st.markdown(f'<div style="color:#38bdf8; font-size:1.4rem; font-weight:800; margin:30px 0 15px 0;">◈ {cat} ◈</div>', unsafe_allow_html=True)
+                
+                # 开始网格布局
+                st.markdown('<div class="grid-container">', unsafe_allow_html=True)
                 cat_data = final_df[final_df['Category'] == cat]
                 color_groups = cat_data.groupby('Color')
+                
                 for clr, group in color_groups:
                     size_counts = group['Size'].value_counts()
-                    tags = " ".join([f'<span style="background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.2); color:#ffffff; padding:4px 12px; border-radius:4px; margin-right:8px;">{s if s!="" else "FREE"} <b style="color:#38bdf8;">× {q}</b></span>' for s, q in size_counts.items()])
-                    st.markdown(f"<div style='margin-bottom:12px; background:rgba(255,255,255,0.02); padding:10px; border-radius:8px;'><span style='color:#94a3b8; margin-right:20px; font-family:monospace;'>COLOR_{clr}</span> {tags}</div>", unsafe_allow_html=True)
-        if st.button("↺ 重新部署数据源"):
-            st.rerun()
+                    tags_html = "".join([f'<div class="size-tag">{s if s!="" else "FREE"} <b style="color:#38bdf8;">× {q}</b></div>' for s, q in size_counts.items()])
+                    
+                    st.markdown(f"""
+                        <div class="color-card">
+                            <span class="color-label">{clr}</span>
+                            <div class="tag-container">{tags_html}</div>
+                        </div>
+                    """, unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True) # 结束网格
+        
+        st.button("↺ 重新部署数据源", on_click=lambda: st.rerun())
 
     with tab2:
         if not error_df.empty:
             for _, err in error_df.iterrows():
-                sn_val = str(err['订单编号'])
-                full_link = f"{BASE_URL}{sn_val}"
+                sn_val, full_link = str(err['订单编号']), f"{BASE_URL}{err['订单编号']}"
                 st.markdown(f"""
                 <div style="background:rgba(245,158,11,0.03); border:1px solid rgba(245,158,11,0.2); border-radius:10px; padding:15px; margin-bottom:10px;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <span style="color:#f59e0b; font-weight:bold; font-size:0.8rem;">LINE: {err['行号']}</span>
-                            <span style="color:#ffffff; margin-left:15px; font-weight:600;">{err['原因']}</span>
-                        </div>
-                        <a href="{full_link}" target="_blank" class="sn-button">查看详情 SN: {sn_val}</a>
+                        <div><span style="color:#f59e0b; font-weight:bold;">LINE: {err['行号']}</span> <span style="margin-left:15px;">{err['原因']}</span></div>
+                        <a href="{full_link}" target="_blank" class="sn-button">SN: {sn_val}</a>
                     </div>
-                    <div style="margin-top:8px; font-size:0.85rem; color:#64748b;">
-                        <b>原始属性:</b> {err['原始属性']}
-                    </div>
+                    <div style="margin-top:8px; font-size:0.85rem; color:#64748b;"><b>LOG:</b> {err['原始属性']}</div>
                 </div>
                 """, unsafe_allow_html=True)
-        else:
-            st.success("所有数据均通过校验。")
 
 st.markdown("<div style='height:100px;'></div>", unsafe_allow_html=True)
