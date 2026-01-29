@@ -8,7 +8,7 @@ st.set_page_config(page_title="GianTakeshi | Hub", page_icon="🚀", layout="wid
 GITHUB_USERNAME = "GianTakeshi" 
 BASE_URL = "https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id="
 
-# 注入 CSS
+# 注入 CSS 样式
 st.markdown(f"""
     <style>
     .stApp {{ background: radial-gradient(circle at 50% 50%, #1e293b, #010409); color: #ffffff; }}
@@ -21,7 +21,7 @@ st.markdown(f"""
         border: 1px solid rgba(56, 189, 248, 0.3); backdrop-filter: blur(10px);
     }}
     .avatar {{ width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; }}
-    .user-name {{ font-size: 0.95rem; font-weight: 600; color: #fff; letter-spacing: 1.2px; }}
+    .user-name {{ font-size: 0.9rem; font-weight: 900; color: #fff; }}
     
     .hero-container {{ text-align: center; width: 100%; padding: 60px 0 20px 0; }}
     .grand-title {{
@@ -30,142 +30,165 @@ st.markdown(f"""
         -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 30px;
     }}
 
-    /* 📦 卡片交互动效 */
+    /* 📦 聚合卡片布局 */
     .wide-card {{
         background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 14px; padding: 20px 25px; margin-bottom: 15px;
-        display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 30px;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        cursor: default;
+        border-radius: 14px; padding: 18px 25px; margin-bottom: 12px;
+        display: flex; align-items: center; justify-content: space-between; gap: 20px;
+        min-height: 85px; box-sizing: border-box;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }}
-    .normal-card {{ border-left: 6px solid #38bdf8; }}
-    .error-card {{ border-left: 6px solid #f59e0b; background: rgba(245, 158, 11, 0.05); }}
+    .normal-card {{ border-left: 6px solid rgba(56, 189, 248, 0.6); }}
+    
+    /* 悬浮与点击动效 */
+    .wide-card:hover {{ 
+        background: rgba(56, 189, 248, 0.06); 
+        border-color: rgba(56, 189, 248, 0.8); 
+        transform: translateY(-5px); 
+        box-shadow: 0 10px 30px rgba(56, 189, 248, 0.2); 
+    }}
+    .wide-card:active {{ transform: scale(0.99); filter: brightness(1.2); }}
 
-    /* ✨ 悬浮与点击动效 ✨ */
-    .wide-card:hover {{
-        background: rgba(56, 189, 248, 0.06);
-        transform: translateY(-4px) scale(1.005);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-        border-color: rgba(56, 189, 248, 0.4);
-    }}
-    .wide-card:active {{
-        transform: translateY(-1px) scale(0.995);
-        filter: brightness(1.2);
-    }}
+    .error-card {{ border-left: 6px solid rgba(245, 158, 11, 0.6); background: rgba(245, 158, 11, 0.02); }}
 
-    .main-info {{ flex: 1; }}
-    .cat-header {{ color: #38bdf8; font-weight: 900; font-size: 1.3rem; margin-bottom: 8px; }}
-    .attr-row {{ display: flex; align-items: center; gap: 15px; padding: 4px 0; }}
-    .color-label {{ color: #38bdf8; font-weight: 700; font-size: 0.9rem; min-width: 90px; }}
+    /* 属性集群 */
+    .attr-cluster {{ display: flex; align-items: center; gap: 15px; min-width: 450px; flex-shrink: 0; }}
+    .cat-label {{ color: #38bdf8; font-weight: 900; font-size: 1.1rem; width: 85px; }}
+    .color-text {{ color: #38bdf8; font-weight: 700; font-size: 0.95rem; min-width: 80px; }}
     
     .size-box {{
         display: inline-flex; align-items: center;
-        background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15);
         border-radius: 6px; padding: 2px 10px; margin-right: 6px;
     }}
     .qty-text {{ color: #38bdf8; font-weight: 800; font-size: 0.85rem; }}
 
-    /* ✨ SN 码点击特效 */
-    .sn-side {{ display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; max-width: 450px; min-width: 200px; }}
+    /* ✨ SN 极右对齐 ✨ */
+    .sn-grid {{ margin-left: auto; display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; max-width: 550px; }}
     .sn-pill {{
-        padding: 3px 12px; background: rgba(56, 189, 248, 0.1);
-        color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 20px; 
-        text-decoration: none !important; font-size: 0.7rem; font-weight: 600;
-        transition: 0.3s;
+        display: inline-block; padding: 3px 14px; background: rgba(255, 255, 255, 0.03);
+        color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 20px; 
+        text-decoration: none !important; font-size: 0.75rem; font-weight: 600; transition: 0.3s;
     }}
     .sn-pill:hover {{ 
         background: #38bdf8; color: #000 !important; 
-        box-shadow: 0 0 15px #38bdf8;
+        box-shadow: 0 0 12px rgba(56, 189, 248, 0.6); 
     }}
 
-    /* ✨ 上传框霓虹光效 */
-    [data-testid="stFileUploader"] {{
-        position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%); width: 420px; z-index: 9999;
-        background: rgba(255, 255, 255, 0.15) !important; 
-        border: 2px solid rgba(56, 189, 248, 0.5) !important;
-        border-radius: 50px !important; padding: 10px 30px !important; backdrop-filter: blur(25px);
-        box-shadow: 0 0 30px rgba(56, 189, 248, 0.4);
-        transition: 0.3s;
-    }}
-    [data-testid="stFileUploader"]:hover {{
-        box-shadow: 0 0 50px rgba(56, 189, 248, 0.6);
-        border-color: #38bdf8 !important;
-    }}
-
-    /* 按钮动效 */
+    /* 按钮 */
     div.stButton > button {{
         background: rgba(56, 189, 248, 0.05) !important; color: #38bdf8 !important;
         border: 2px solid rgba(56, 189, 248, 0.4) !important; border-radius: 50px !important;
-        padding: 10px 40px !important; margin: 30px auto !important; display: block !important;
-        transition: 0.3s !important;
+        padding: 12px 45px !important; font-weight: 900 !important;
+        display: block !important; margin: 40px auto !important; transition: 0.3s !important;
     }}
-    div.stButton > button:hover {{
-        background: #38bdf8 !important; color: #000 !important;
-        box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
+    div.stButton > button:hover {{ background: #38bdf8 !important; color: #000 !important; }}
+
+    /* ✨ 霓虹上传框 ✨ */
+    [data-testid="stFileUploader"] {{
+        position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 420px; z-index: 9999;
+        background: rgba(255, 255, 255, 0.12) !important; 
+        border: 2px solid rgba(56, 189, 248, 0.5) !important;
+        border-radius: 50px !important; padding: 10px 30px !important; backdrop-filter: blur(25px);
+        box-shadow: 0 0 30px rgba(56, 189, 248, 0.4);
     }}
+    [data-testid="stFileUploader"] label, [data-testid="stFileUploader"] small {{ display: none !important; }}
     </style>
 
     <div class="user-profile">
         <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
         <div class="user-info">
             <div class="user-name">{GITHUB_USERNAME}</div>
-            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● KERNEL V4.2 READY</div>
+            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● CONSOLIDATED ACTIVE</div>
         </div>
     </div>
     <div class="hero-container"><h1 class="grand-title">属性看板中枢</h1></div>
 """, unsafe_allow_html=True)
 
-# --- [逻辑处理函数逻辑保持不变] ---
+# --- 2. 逻辑层 ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
     df = pd.read_excel(uploaded_file, engine='openpyxl')
-    cols = df.columns
+    col_a, col_c, col_g, col_i = df.columns[0], df.columns[2], df.columns[6], df.columns[8]
     all_normal_data, all_error_rows = [], []
+    
     for index, row in df.iterrows():
-        c_raw = str(row[cols[2]]).strip()
+        c_raw = str(row[col_c]).strip()
         if not c_raw or c_raw == 'nan': continue
         cat = c_raw.split(' ')[0].upper()
         if cat.startswith('WZ'): cat = 'WZ'
-        g_text, i_val, sn = str(row[cols[6]]), str(row[cols[8]]), str(row[cols[0]])
+        
+        g_text, i_val, sn = str(row[col_g]), str(row[col_i]), str(row[col_a])
         i_qty = int(re.findall(r'\d+', i_val)[0]) if re.findall(r'\d+', i_val) else 0
-        if ';' in c_raw or '；' in c_raw:
-            all_error_rows.append({'SN': sn, 'Line': index+2, 'Reason': "品类冲突", 'Content': c_raw})
-            continue
         chunks = [c.strip() for c in re.split(r'[;；]', g_text) if c.strip()]
+        
+        if ';' in c_raw or '；' in c_raw:
+            all_error_rows.append({'SN': sn, '行号': index + 2, '原因': "复合品类阻断", '内容': g_text})
+            continue
+
         data_pairs = []
         for chunk in chunks:
             c_m, s_m = re.search(COLOR_REG, chunk), re.search(SIZE_REG, chunk)
             if c_m:
-                clr = c_m.group(1).strip().upper()
+                clr_v = c_m.group(1).strip().upper()
                 raw_s = s_m.group(1).strip().upper() if s_m else "FREE"
-                data_pairs.append((clr, SIZE_MAP.get(raw_s, raw_s)))
+                data_pairs.append((clr_v, SIZE_MAP.get(raw_s, raw_s)))
+        
         if len(data_pairs) == i_qty and i_qty > 0:
             for c_val, s_val in data_pairs:
                 all_normal_data.append({'Category': cat, 'Color': c_val, 'Size': s_val, 'SN': sn})
         else:
-            all_error_rows.append({'SN': sn, 'Line': index+2, 'Reason': f"数量异常({len(data_pairs)}/{i_qty})", 'Content': g_text})
+            all_error_rows.append({'SN': sn, '行号': index + 2, '原因': f"数量不符({len(data_pairs)}/{i_qty})", '内容': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- [渲染逻辑保持不变，确保 Tabs 和内容逻辑完整] ---
-uploaded_file = st.file_uploader("Upload", type=["xlsx"], key="v42")
+# --- 3. 渲染层 ---
+upload_placeholder = st.empty()
+uploaded_file = upload_placeholder.file_uploader("Upload", type=["xlsx"])
+
 if uploaded_file:
     v_df, e_df = process_sku_logic(uploaded_file)
+    upload_placeholder.empty()
+    
     t1, t2 = st.tabs(["💎 汇总数据流", "📡 异常拦截"])
+    
     with t1:
         if not v_df.empty:
-            for cat in sorted(v_df['Category'].unique()):
-                cat_group = v_df[v_df['Category'] == cat]
-                attr_html = ""
-                for clr in sorted(cat_group['Color'].unique()):
-                    clr_group = cat_group[cat_group['Color'] == clr]
-                    size_counts = clr_group['Size'].value_counts().sort_index()
-                    sizes_html = "".join([f'<div class="size-box"><span style="color:#fff; font-size:0.8rem; font-weight:600;">{("" if s=="FREE" else s)}</span><span class="qty-text">{"×" if s!="FREE" else ""}{q}</span></div>' for s, q in size_counts.items()])
-                    attr_html += f'<div class="attr-row"><div class="color-label">{clr}</div>{sizes_html}</div>'
-                sn_html = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill">{sn}</a>' for sn in sorted(cat_group['SN'].unique())])
-                st.markdown(f'<div class="wide-card normal-card"><div class="main-info"><div class="cat-header">{cat}</div>{attr_html}</div><div class="sn-side">{sn_html}</div></div>', unsafe_allow_html=True)
+            # ✨ 核心聚合逻辑：按 Category 和 Color 合并 ✨
+            for (cat, clr), group in v_df.groupby(['Category', 'Color']):
+                size_counts = group['Size'].value_counts().sort_index()
+                # ✨ FREE 不显示文字，只显示数量
+                attr_display = "".join([
+                    f'<div class="size-box"><span style="color:#fff; font-size:0.85rem; font-weight:600;">{("" if s=="FREE" else s)}</span><span class="qty-text">{"×" if s!="FREE" else ""}{q}</span></div>' 
+                    for s, q in size_counts.items()
+                ])
+                # ✨ SN 码去重并生成
+                sns = sorted(list(set(group['SN'].tolist())))
+                sn_pills = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill">{sn}</a>' for sn in sns])
+                
+                st.markdown(f'''
+                    <div class="wide-card normal-card">
+                        <div class="attr-cluster">
+                            <div class="cat-label">{cat}</div>
+                            <div class="color-text">{clr}</div>
+                            <div style="display:flex; flex-wrap:wrap; gap:2px;">{attr_display}</div>
+                        </div>
+                        <div class="sn-grid">{sn_pills}</div>
+                    </div>
+                ''', unsafe_allow_html=True)
             if st.button("↺ 重新部署系统"): st.rerun()
+
     with t2:
         if not e_df.empty:
             for _, err in e_df.iterrows():
-                st.markdown(f'<div class="wide-card error-card"><div class="main-info"><div style="color:#f59e0b; font-weight:900;">LINE {err["Line"]} | {err["Reason"]}</div><div style="font-size:0.8rem; color:#94a3b8; margin-top:5px;">{err["Content"]}</div></div><div class="sn-side"><a href="{BASE_URL}{err["SN"]}" target="_blank" class="sn-pill" style="color:#f59e0b !important; border-color:#f59e0b;">{err["SN"]}</a></div></div>', unsafe_allow_html=True)
+                st.markdown(f'''
+                    <div class="wide-card error-card">
+                        <div style="flex:1;">
+                            <div><span style="color:#f59e0b; font-weight:bold;">LINE: {err['行号']}</span><span style="color:#ffffff; margin-left:15px; font-weight:600;">{err['原因']}</span></div>
+                            <div style="margin-top:6px; font-size:0.8rem; color:#94a3b8;">{err['内容']}</div>
+                        </div>
+                        <div class="sn-grid"><a href="{BASE_URL}{err['SN']}" target="_blank" class="sn-pill" style="border-color:#f59e0b; color:#f59e0b !important;">{err['SN']}</a></div>
+                    </div>
+                ''', unsafe_allow_html=True)
+        else:
+            st.success("数据校验完成，暂无异常。")
