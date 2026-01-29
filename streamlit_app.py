@@ -10,14 +10,14 @@ BASE_URL = "https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id="
 
 st.markdown(f"""
     <style>
-    .stApp {{ background: radial-gradient(circle at 50% 50%, #1e293b, #010409); color: #ffffff; }}
+    .stApp {{ background: radial-gradient(circle at 50% 50%, #0f172a, #020617); color: #ffffff; }}
     header {{visibility: hidden;}}
 
     /* 固定悬浮面板 */
     .user-profile {{
         position: fixed; top: 25px; left: 25px; display: flex; align-items: center; gap: 12px; z-index: 1000000; 
         background: rgba(255, 255, 255, 0.05); padding: 6px 16px 6px 6px; border-radius: 50px;
-        border: 1px solid rgba(56, 189, 248, 0.3); backdrop-filter: blur(10px);
+        border: 1px solid rgba(56, 189, 248, 0.3); backdrop-filter: blur(15px);
     }}
     .avatar {{ width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; }}
     .user-name {{ font-weight: 700; font-size: 0.95rem; color: #ffffff; }}
@@ -26,56 +26,83 @@ st.markdown(f"""
     /* 大气标题 */
     .hero-container {{ text-align: center; padding: 100px 0 40px 0; }}
     .grand-title {{
-        font-family: 'Inter', sans-serif; font-size: 5.5rem !important; font-weight: 900; letter-spacing: 15px;
-        background: linear-gradient(to bottom, #ffffff 30%, #38bdf8 100%);
+        font-family: 'Inter', sans-serif; font-size: 5rem !important; font-weight: 900; letter-spacing: 12px;
+        background: linear-gradient(to bottom, #ffffff 40%, #38bdf8 100%);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }}
     
-    /* 网格布局样式 */
+    /* --- 毛玻璃卡片网格 --- */
     .grid-container {{
-        display: flex;
-        flex-wrap: wrap;
-        gap: 15px;
-        margin-bottom: 30px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 20px;
+        padding: 20px 0;
     }}
-    .color-card {{
+    
+    .glass-card {{
+        position: relative;
         background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
-        padding: 15px;
-        min-width: 200px;
-        flex: 1 1 calc(25% - 15px); /* 四列布局，自动收缩 */
+        border-radius: 20px;
+        padding: 24px 20px;
+        overflow: hidden;
         transition: all 0.3s ease;
-    }}
-    .color-card:hover {{
-        border-color: #38bdf8;
-        background: rgba(56, 189, 248, 0.05);
-        transform: translateY(-2px);
-    }}
-    .color-label {{
-        color: #94a3b8;
-        font-family: monospace;
-        font-size: 0.85rem;
-        margin-bottom: 10px;
-        display: block;
-        border-bottom: 1px solid rgba(148, 163, 184, 0.2);
-        padding-bottom: 5px;
-    }}
-    .tag-container {{
         display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 160px;
     }}
-    .size-tag {{
-        background: rgba(56, 189, 248, 0.1);
-        border: 1px solid rgba(56, 189, 248, 0.2);
-        color: #ffffff;
-        padding: 2px 8px;
-        border-radius: 4px;
-        font-size: 0.85rem;
+    
+    .glass-card:hover {{
+        border-color: rgba(56, 189, 248, 0.5);
+        background: rgba(255, 255, 255, 0.06);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
     }}
 
-    /* 异常跳转按钮样式 */
+    /* 左上角类目名称 */
+    .card-cat {{
+        position: absolute;
+        top: 12px;
+        left: 15px;
+        font-size: 0.65rem;
+        font-weight: 800;
+        color: #38bdf8;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        opacity: 0.8;
+    }}
+
+    /* 中间颜色名称 */
+    .card-color {{
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #ffffff;
+        margin-bottom: 15px;
+        text-align: center;
+        letter-spacing: 0.5px;
+    }}
+
+    /* 底部尺寸排版 */
+    .card-sizes {{
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+    }}
+    
+    .size-pill {{
+        background: rgba(56, 189, 248, 0.15);
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        color: #e2e8f0;
+    }}
+
     .sn-button {{
         display: inline-block; padding: 4px 14px; background: rgba(56, 189, 248, 0.15);
         color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.4);
@@ -136,33 +163,36 @@ uploaded_file = upload_container.file_uploader("", type=["xlsx"])
 
 if uploaded_file:
     upload_container.empty()
-    with st.spinner('重构数据矩阵...'):
+    with st.spinner('构建极光矩阵...'):
         final_df, error_df = process_sku_logic(uploaded_file)
     
     tab1, tab2 = st.tabs(["💎 结构化属性汇总", "📡 实时异常捕获"])
 
     with tab1:
         if not final_df.empty:
-            categories = sorted(final_df['Category'].unique())
-            for cat in categories:
-                st.markdown(f'<div style="color:#38bdf8; font-size:1.4rem; font-weight:800; margin:30px 0 15px 0;">◈ {cat} ◈</div>', unsafe_allow_html=True)
+            # 正常数据采用全网格毛玻璃布局
+            st.markdown('<div class="grid-container">', unsafe_allow_html=True)
+            
+            # 按品类排序但混合排列卡片，并在卡片上标出品类
+            final_df = final_df.sort_values(by=['Category', 'Color'])
+            summary = final_df.groupby(['Category', 'Color', 'Size']).size().reset_index(name='Count')
+            
+            # 为了实现你说的“中间显示Color跟Size”，我们需要重新聚合
+            unique_color_groups = final_df.groupby(['Category', 'Color'])
+            
+            for (cat, clr), group in unique_color_groups:
+                size_counts = group['Size'].value_counts()
+                size_html = "".join([f'<div class="size-pill">{s if s!="" else "FREE"} <b style="color:#38bdf8;">× {q}</b></div>' for s, q in size_counts.items()])
                 
-                # 开始网格布局
-                st.markdown('<div class="grid-container">', unsafe_allow_html=True)
-                cat_data = final_df[final_df['Category'] == cat]
-                color_groups = cat_data.groupby('Color')
+                st.markdown(f"""
+                    <div class="glass-card">
+                        <div class="card-cat">{cat}</div>
+                        <div class="card-color">{clr}</div>
+                        <div class="card-sizes">{size_html}</div>
+                    </div>
+                """, unsafe_allow_html=True)
                 
-                for clr, group in color_groups:
-                    size_counts = group['Size'].value_counts()
-                    tags_html = "".join([f'<div class="size-tag">{s if s!="" else "FREE"} <b style="color:#38bdf8;">× {q}</b></div>' for s, q in size_counts.items()])
-                    
-                    st.markdown(f"""
-                        <div class="color-card">
-                            <span class="color-label">{clr}</span>
-                            <div class="tag-container">{tags_html}</div>
-                        </div>
-                    """, unsafe_allow_html=True)
-                st.markdown('</div>', unsafe_allow_html=True) # 结束网格
+            st.markdown('</div>', unsafe_allow_html=True)
         
         st.button("↺ 重新部署数据源", on_click=lambda: st.rerun())
 
@@ -171,12 +201,12 @@ if uploaded_file:
             for _, err in error_df.iterrows():
                 sn_val, full_link = str(err['订单编号']), f"{BASE_URL}{err['订单编号']}"
                 st.markdown(f"""
-                <div style="background:rgba(245,158,11,0.03); border:1px solid rgba(245,158,11,0.2); border-radius:10px; padding:15px; margin-bottom:10px;">
+                <div style="background:rgba(245,158,11,0.03); border:1px solid rgba(245,158,11,0.2); border-radius:15px; padding:18px; margin-bottom:12px; backdrop-filter: blur(10px);">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div><span style="color:#f59e0b; font-weight:bold;">LINE: {err['行号']}</span> <span style="margin-left:15px;">{err['原因']}</span></div>
+                        <div><span style="color:#f59e0b; font-weight:bold;">LINE: {err['行号']}</span> <span style="margin-left:15px; opacity:0.9;">{err['原因']}</span></div>
                         <a href="{full_link}" target="_blank" class="sn-button">SN: {sn_val}</a>
                     </div>
-                    <div style="margin-top:8px; font-size:0.85rem; color:#64748b;"><b>LOG:</b> {err['原始属性']}</div>
+                    <div style="margin-top:10px; font-size:0.85rem; color:#94a3b8; font-family: monospace;">{err['原始属性']}</div>
                 </div>
                 """, unsafe_allow_html=True)
 
