@@ -41,7 +41,7 @@ st.markdown(f"""
     .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.6); }}
     .error-card {{ border-left: 5px solid rgba(245, 158, 11, 0.6); background: rgba(245, 158, 11, 0.02); }}
 
-    /* Size 框 */
+    /* Size 框配色：Size白色，Qty蓝色 */
     .size-box {{
         display: inline-flex; align-items: center;
         background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15);
@@ -57,32 +57,23 @@ st.markdown(f"""
         text-decoration: none !important; font-size: 0.75rem; font-weight: 600;
     }}
 
-    /* ✨ 重新部署按钮 - 强制置顶与高响应 ✨ */
+    /* ✨ 重新部署按钮：强制交互 ✨ */
     .stButton > button {{
-        position: relative !important;
-        z-index: 999999 !important; /* 极高层级 */
-        background: rgba(56, 189, 248, 0.1) !important;
-        color: #38bdf8 !important;
-        border: 2px solid #38bdf8 !important;
-        border-radius: 50px !important;
-        padding: 10px 40px !important;
-        margin-top: 30px !important;
-        transition: 0.3s !important;
-        pointer-events: auto !important; /* 强制接收点击 */
-    }}
-    .stButton > button:hover {{
-        background: rgba(56, 189, 248, 0.3) !important;
-        box-shadow: 0 0 20px rgba(56, 189, 248, 0.4) !important;
+        position: relative !important; z-index: 999999 !important;
+        background: rgba(56, 189, 248, 0.15) !important; color: #38bdf8 !important;
+        border: 2px solid #38bdf8 !important; border-radius: 50px !important;
+        padding: 10px 45px !important; margin: 40px auto !important; display: block !important;
+        pointer-events: auto !important;
     }}
 
-    /* ✨ 上传框：上移 + 增加光效 ✨ */
+    /* ✨ 上传框：底部 60px + 蓝色光效 ✨ */
     [data-testid="stFileUploader"] {{
         position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%); width: 400px; z-index: 100000;
         background: rgba(255, 255, 255, 0.12) !important; 
         border: 1px solid rgba(56, 189, 248, 0.3) !important;
         border-radius: 50px !important; padding: 10px 30px !important; 
         backdrop-filter: blur(25px);
-        box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+        box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
     }}
     [data-testid="stFileUploader"] label, [data-testid="stFileUploader"] small {{ display: none !important; }}
     </style>
@@ -100,9 +91,21 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-# --- 2. 逻辑层 ---
+# --- 2. 状态重置逻辑 ---
+# 使用计数器来强制刷新上传组件
+if 'deploy_count' not in st.session_state:
+    st.session_state.deploy_count = 0
+
+def reset_system():
+    st.session_state.deploy_count += 1
+    # 强制清理文件缓存
+    for key in st.session_state.keys():
+        if "main_uploader" in key:
+            del st.session_state[key]
+    st.rerun()
+
+# --- 3. 解析逻辑 ---
 def process_sku_logic(uploaded_file):
-    # (逻辑部分保持不变，确保解析精准)
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
     df = pd.read_excel(uploaded_file, engine='openpyxl')
@@ -136,19 +139,13 @@ def process_sku_logic(uploaded_file):
             all_error_rows.append({'SN': sn, '行号': index + 2, '原因': f"数量不符({len(data_pairs)}/{i_qty})", '内容': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 3. 渲染层 ---
-# 如果没有文件上传，显示上传组件
-if 'show_results' not in st.session_state:
-    st.session_state.show_results = False
-
-uploaded_file = st.file_uploader("Upload", type=["xlsx"], key="uploader")
+# --- 4. 渲染逻辑 ---
+# 动态 Key 确保每次重置都会销毁并重新生成上传框
+uploader_key = f"main_uploader_{st.session_state.deploy_count}"
+uploaded_file = st.file_uploader("Upload", type=["xlsx"], key=uploader_key)
 
 if uploaded_file:
-    st.session_state.show_results = True
     v_df, e_df = process_sku_logic(uploaded_file)
-    
-    # 建立一个容器专门放按钮，方便定位
-    btn_container = st.container()
     
     t1, t2 = st.tabs(["💎 汇总数据流", "📡 异常拦截"])
     
@@ -159,11 +156,22 @@ if uploaded_file:
                 attr_display = "".join([f'<div class="size-box"><span class="size-text">{("" if s=="FREE" else s)}</span><span class="qty-text">×{q}</span></div>' for s, q in size_counts.items()])
                 sns = sorted(list(set(group['SN'].tolist())))
                 sn_pills = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill">{sn}</a>' for sn in sns])
-                st.markdown(f'''<div class="wide-card normal-card"><div style="display:flex;align-items:center;gap:15px;"><div class="cat-label">{cat}</div><div style="color:#38bdf8;font-weight:700;width:60px;">{clr}</div>{attr_display}</div><div style="margin-left:auto;display:flex;gap:8px;">{sn_pills}</div></div>''', unsafe_allow_html=True)
-        
-        # 将按钮放在数据下方
-        if st.button("↺ 重新部署系统", key="reset_trigger"):
-            st.rerun()
+                
+                st.markdown(f'''
+                    <div class="wide-card normal-card">
+                        <div style="display:flex;align-items:center;gap:15px;">
+                            <div class="cat-label">{cat}</div>
+                            <div style="color:#38bdf8;font-weight:700;width:60px;">{clr}</div>
+                            {attr_display}
+                        </div>
+                        <div style="margin-left:auto;display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;max-width:500px;">
+                            {sn_pills}
+                        </div>
+                    </div>
+                ''', unsafe_allow_html=True)
+            
+            # 使用 callback 方式触发重置，这是最稳妥的
+            st.button("↺ 重新部署系统", on_click=reset_system)
 
     with t2:
         if not e_df.empty:
