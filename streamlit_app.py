@@ -22,7 +22,7 @@ st.markdown(f"""
     }}
     .avatar {{ width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; }}
     .user-info {{ line-height: 1.1; }}
-    .user-name {{ font-size: 0.9rem; font-weight: 700; color: #fff; }}
+    .user-name {{ font-size: 0.9rem; font-weight: 500; color: #fff; }}
     
     /* 标题居中 */
     .hero-container {{ text-align: center; width: 100%; padding: 60px 0 20px 0; }}
