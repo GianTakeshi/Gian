@@ -3,52 +3,77 @@ import pandas as pd
 import re
 import time
 
-# --- 1. UI 重塑：保留大气标题 + 回归亲切头像栏 ---
-st.set_page_config(page_title="GianTakeshi | Data System", page_icon="🚀", layout="wide")
+# --- 1. UI 重塑：真正的不随滚动条移动的悬浮面板 ---
+st.set_page_config(page_title="GianTakeshi | Data Engine", page_icon="🚀", layout="wide")
 
 GITHUB_USERNAME = "GianTakeshi" 
 
 st.markdown(f"""
     <style>
+    /* 全局背景 */
     .stApp {{ background: radial-gradient(circle at 50% 50%, #1e293b, #010409); color: #ffffff; }}
     header {{visibility: hidden;}}
 
-    /* --- 回归：个人名字面板 --- */
-    .user-profile {{
-        position: fixed; top: 25px; left: 25px; display: flex; align-items: center; gap: 12px; z-index: 9999;
-        background: rgba(255, 255, 255, 0.05); padding: 6px 16px 6px 6px; border-radius: 50px;
-        border: 1px solid rgba(56, 189, 248, 0.3); backdrop-filter: blur(10px);
+    /* --- 核心：真正悬浮在最顶层的面板 --- */
+    .floating-user-panel {{
+        position: fixed; 
+        top: 30px; 
+        left: 30px; 
+        z-index: 1000000; /* 极高层级，确保永远在最上方 */
+        display: flex; 
+        align-items: center; 
+        gap: 15px;
+        background: rgba(15, 23, 42, 0.6); 
+        padding: 10px 20px; 
+        border-radius: 60px;
+        border: 1px solid rgba(56, 189, 248, 0.4); 
+        backdrop-filter: blur(15px);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
     }}
-    .avatar {{ width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; }}
-    .user-name {{ font-weight: 700; font-size: 0.9rem; color: #ffffff; }}
-    .user-status {{ font-size: 0.65rem; color: #10b981; font-weight: bold; }}
+    
+    /* 呼吸灯圆环代替照片 */
+    .status-ring {{
+        width: 12px;
+        height: 12px;
+        background-color: #10b981;
+        border-radius: 50%;
+        box-shadow: 0 0 10px #10b981, 0 0 20px #10b981;
+        animation: pulse 2s infinite;
+    }}
+    
+    @keyframes pulse {{
+        0% {{ transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }}
+        70% {{ transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }}
+        100% {{ transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }}
+    }}
+
+    .user-info-text {{ display: flex; flex-direction: column; }}
+    .user-name {{ font-weight: 800; font-size: 1rem; color: #ffffff; letter-spacing: 0.5px; }}
+    .version-tag {{ font-size: 0.65rem; color: #38bdf8; font-weight: bold; opacity: 0.8; }}
 
     /* 大气标题 */
-    .hero-container {{ text-align: center; padding: 60px 0 40px 0; }}
+    .hero-container {{ text-align: center; padding: 100px 0 60px 0; }}
     .grand-title {{
-        font-family: 'Inter', 'Segoe UI', sans-serif;
-        font-size: 5.5rem !important;
+        font-family: 'Inter', sans-serif;
+        font-size: 5rem !important;
         font-weight: 900;
-        letter-spacing: 15px;
-        margin: 0;
-        background: linear-gradient(to bottom, #ffffff 30%, #38bdf8 100%);
+        letter-spacing: 12px;
+        background: linear-gradient(to bottom, #ffffff 40%, #38bdf8 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        filter: drop-shadow(0 10px 20px rgba(56, 189, 248, 0.3));
-        text-transform: uppercase;
+        margin-bottom: 0;
     }}
-    .grand-subtitle {{ font-size: 1.1rem; letter-spacing: 6px; color: rgba(148, 163, 184, 0.7); margin-top: -5px; }}
+    .grand-subtitle {{ font-size: 1rem; letter-spacing: 6px; color: rgba(148, 163, 184, 0.6); }}
 
-    /* 上传区域汉化 */
-    [data-testid="stFileUploadDropzone"]::before {{ content: "部署数据源文件"; position: absolute; top: 40%; color: #ffffff; font-size: 1.5rem; font-weight: 800; }}
-    [data-testid="stFileUploadDropzone"]::after {{ content: "仅限 XLSX 高级报表格式"; position: absolute; top: 55%; color: #64748b; font-size: 0.9rem; }}
+    /* 选项卡间距优化 */
+    .stTabs {{ margin-top: 20px; }}
     </style>
     
-    <div class="user-profile">
-        <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
-        <div class="user-info">
+    <div class="floating-user-panel">
+        <div class="status-ring"></div>
+        <div class="user-info-text">
             <div class="user-name">{GITHUB_USERNAME}</div>
-            <div class="user-status">● 测试版 V0.3</div>
+            <div class="version-tag">测试版 V0.3</div>
         </div>
     </div>
 
@@ -58,7 +83,7 @@ st.markdown(f"""
     </div>
     """, unsafe_allow_html=True)
 
-# --- 2. 核心逻辑 (保持不变) ---
+# --- 2. 核心逻辑 (保持你的源代码提取方案) ---
 def process_sku_logic(uploaded_file):
     COLOR_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)'
     SIZE_REG = r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
@@ -96,7 +121,7 @@ def process_sku_logic(uploaded_file):
 uploaded_file = st.file_uploader("", type=["xlsx"])
 
 if uploaded_file:
-    with st.spinner('执行多维数据矩阵重构...'):
+    with st.spinner('重构逻辑矩阵中...'):
         final_df, error_df = process_sku_logic(uploaded_file)
     
     tab1, tab2 = st.tabs(["💎 结构化属性汇总", "📡 实时异常捕获"])
@@ -105,13 +130,13 @@ if uploaded_file:
         if not final_df.empty:
             categories = sorted(final_df['Category'].unique())
             for cat in categories:
-                st.markdown(f'<div style="color:#38bdf8; font-size:1.4rem; font-weight:800; margin:20px 0 10px 0;">◈ {cat} ◈</div>', unsafe_allow_html=True)
+                st.markdown(f'<div style="color:#38bdf8; font-size:1.4rem; font-weight:800; margin:30px 0 15px 0;">◈ {cat} ◈</div>', unsafe_allow_html=True)
                 cat_data = final_df[final_df['Category'] == cat]
                 color_groups = cat_data.groupby('Color')
                 for clr, group in color_groups:
                     size_counts = group['Size'].value_counts()
-                    tags = " ".join([f'<span style="background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.2); color:#ffffff; padding:4px 12px; border-radius:4px; margin-right:8px;">{s if s!="" else "FREE"} <b style="color:#38bdf8;">× {q}</b></span>' for s, q in size_counts.items()])
-                    st.markdown(f"<div style='margin-bottom:12px; background:rgba(255,255,255,0.02); padding:10px; border-radius:8px;'><span style='color:#94a3b8; margin-right:20px; font-family:monospace;'>COLOR_{clr}</span> {tags}</div>", unsafe_allow_html=True)
+                    tags = " ".join([f'<span style="background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.2); color:#ffffff; padding:4px 12px; border-radius:4px; margin-right:8px; font-family: sans-serif;">{s if s!="" else "FREE"} <b style="color:#38bdf8;">× {q}</b></span>' for s, q in size_counts.items()])
+                    st.markdown(f"<div style='margin-bottom:12px; background:rgba(255,255,255,0.02); padding:12px; border-radius:12px;'><span style='color:#94a3b8; margin-right:20px; font-family:monospace; font-size:1.1rem;'>{clr}</span> {tags}</div>", unsafe_allow_html=True)
         else:
             st.info("数据链路空载。")
 
@@ -120,14 +145,12 @@ if uploaded_file:
             for _, err in error_df.iterrows():
                 st.markdown(f"""
                 <div style="background:rgba(245,158,11,0.03); border:1px solid rgba(245,158,11,0.2); border-radius:10px; padding:15px; margin-bottom:10px;">
-                    <span style="color:#f59e0b; font-weight:bold; font-size:0.8rem;">REF_LINE: {err['行号']}</span>
+                    <span style="color:#f59e0b; font-weight:bold; font-size:0.8rem;">LINE: {err['行号']}</span>
                     <span style="color:#ffffff; margin-left:15px; font-weight:600;">{err['原因']}</span>
                     <div style="margin-top:8px; font-size:0.85rem; color:#64748b;">
                         <b>SN:</b> {err['订单编号']} | <b>LOG:</b> {err['原始属性']}
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
-        else:
-            st.success("环境监测：所有数据单元均通过合规性校验。")
 
-st.markdown("<div style='text-align:center; margin-top:60px; color:rgba(148,163,184,0.15); letter-spacing:10px; font-size:0.65rem;'>ENCRYPTED DATA FLOW | GIAN TAKESHI CORE V0.3</div>", unsafe_allow_html=True)
+st.markdown("<div style='height:100px;'></div>", unsafe_allow_html=True) # 底部留白
