@@ -24,16 +24,13 @@ st.markdown(f"""
         50% {{ box-shadow: 0 0 20px rgba(56, 189, 248, 0.6); border-color: rgba(56, 189, 248, 0.8); }}
         100% {{ box-shadow: 0 0 5px rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.3); }}
     }}
-
     .user-profile {{
         position: fixed; top: 25px; left: 25px; display: flex; align-items: center; gap: 12px; z-index: 1000000; 
-        background: rgba(255, 255, 255, 0.05); padding: 8px 18px 8px 8px; border-radius: 50px;
+        background: rgba(255, 255, 255, 0.05); padding: 8px 20px 8px 8px; border-radius: 50px;
         border: 1px solid rgba(56, 189, 248, 0.2); backdrop-filter: blur(15px);
-        transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
     }}
     .avatar {{ 
-        width: 40px; height: 40px; border-radius: 50%; 
-        border: 2px solid #38bdf8; object-fit: cover; 
+        width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; 
         animation: avatarPulse 2.5s infinite ease-in-out; 
     }}
     
@@ -54,81 +51,67 @@ st.markdown(f"""
         transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
     }}
     .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.5); }}
-    .normal-card:hover {{
-        background: rgba(56, 189, 248, 0.06); transform: translateY(-8px) scale(1.005); border-color: #38bdf8;
-        box-shadow: 0 25px 50px rgba(0,0,0,0.6), 0 0 45px rgba(56, 189, 248, 0.35);
-    }}
+    .normal-card:hover {{ background: rgba(56, 189, 248, 0.06); transform: translateY(-5px); border-color: #38bdf8; }}
     .error-card {{ border-left: 5px solid rgba(245, 158, 11, 0.5); }}
-    .error-card:hover {{
-        background: rgba(245, 158, 11, 0.06); transform: translateY(-8px) scale(1.005); border-color: #f59e0b;
-        box-shadow: 0 25px 50px rgba(0,0,0,0.6), 0 0 45px rgba(245, 158, 11, 0.35);
-    }}
+    .error-card:hover {{ background: rgba(245, 158, 11, 0.06); transform: translateY(-5px); border-color: #f59e0b; }}
 
-    /* 💊 精致微药丸 Tabs (无红线) */
+    /* 💊 交互增强药丸 Tabs */
     .stTabs [data-baseweb="tab-highlight"] {{ display: none !important; }}
     .stTabs [data-baseweb="tab-list"] {{ gap: 12px; background-color: transparent !important; border-bottom: none !important; }}
     .stTabs [data-baseweb="tab"] {{
-        height: 32px !important; padding: 0 20px !important; border-radius: 50px !important;
+        height: 34px !important; padding: 0 22px !important; border-radius: 50px !important;
         border: 1px solid rgba(255, 255, 255, 0.1) !important; background: rgba(255, 255, 255, 0.02) !important;
-        color: rgba(255, 255, 255, 0.4) !important; transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1) !important;
+        color: rgba(255, 255, 255, 0.4) !important; transition: all 0.2s ease !important;
         font-size: 0.85rem !important; font-weight: 600 !important;
     }}
-    /* 药丸激活状态 */
+    .stTabs [data-baseweb="tab"]:active {{ transform: scale(0.92) !important; }}
+    
     .stTabs [data-baseweb="tab"]:nth-child(1)[aria-selected="true"] {{
         color: #38bdf8 !important; background: rgba(56, 189, 248, 0.1) !important;
-        border: 1px solid #38bdf8 !important; box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
+        border: 1.5px solid #38bdf8 !important; box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
     }}
     .stTabs [data-baseweb="tab"]:nth-child(2)[aria-selected="true"] {{
         color: #f59e0b !important; background: rgba(245, 158, 11, 0.1) !important;
-        border: 1px solid #f59e0b !important; box-shadow: 0 0 15px rgba(245, 158, 11, 0.25);
+        border: 1.5px solid #f59e0b !important; box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
     }}
 
-    /* 🌪️ 内容淡入平移动效 */
-    @keyframes slideIn {{
-        from {{ opacity: 0; transform: translateX(15px); filter: blur(4px); }}
-        to {{ opacity: 1; transform: translateX(0); filter: blur(0); }}
-    }}
-    [data-baseweb="tab-panel"] {{ animation: slideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1); }}
+    /* 🌪️ 内容切入动效 */
+    @keyframes slideIn {{ from {{ opacity: 0; transform: translateX(12px); }} to {{ opacity: 1; transform: translateX(0); }} }}
+    [data-baseweb="tab-panel"] {{ animation: slideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); }}
 
     /* SN 码药丸 */
-    .sn-pill {{
-        padding: 5px 15px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; 
-        transition: 0.3s ease; text-decoration: none !important; display: inline-block;
-    }}
+    .sn-pill {{ padding: 5px 15px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; transition: 0.2s; text-decoration: none !important; display: inline-block; }}
+    .sn-pill:active {{ transform: scale(0.9) !important; }}
     .normal-sn {{ background: rgba(56, 189, 248, 0.1); color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.2); }}
-    .normal-sn:hover {{ background: #38bdf8 !important; color: #000 !important; box-shadow: 0 0 15px #38bdf8; transform: translateY(-2px); }}
+    .normal-sn:hover {{ background: #38bdf8 !important; color: #000 !important; }}
     .error-sn {{ background: rgba(245, 158, 11, 0.1); color: #f59e0b !important; border: 1px solid rgba(245, 158, 11, 0.3); }}
-    .error-sn:hover {{ background: #f59e0b !important; color: #000 !important; box-shadow: 0 0 15px #f59e0b; transform: translateY(-2px); }}
+    .error-sn:hover {{ background: #f59e0b !important; color: #000 !important; }}
 
-    /* 重制按钮与底部上传框 */
+    /* 重制按钮 */
     div.stButton > button {{
         background: rgba(255, 255, 255, 0.03) !important; color: #38bdf8 !important;
         border: 1px solid rgba(56, 189, 248, 0.3) !important; border-radius: 50px !important;
         padding: 10px 50px !important; font-weight: 800 !important; backdrop-filter: blur(10px) !important;
-        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important; margin: 30px auto !important; display: block !important;
+        transition: all 0.2s !important; margin: 30px auto !important; display: block !important;
     }}
-    div.stButton > button:hover {{ background: #38bdf8 !important; color: #000 !important; box-shadow: 0 0 30px rgba(56, 189, 248, 0.5); transform: translateY(-5px); }}
+    div.stButton > button:active {{ transform: scale(0.95) !important; }}
 
     [data-testid="stFileUploader"] {{
         position: fixed; bottom: 35px; left: 50%; transform: translateX(-50%); width: 450px; z-index: 9999;
         background: rgba(255, 255, 255, 0.08) !important; border: 1px solid rgba(56, 189, 248, 0.3) !important;
         border-radius: 50px !important; padding: 15px 35px !important; backdrop-filter: blur(25px) !important;
-        box-shadow: 0 0 40px rgba(0,0,0,0.7);
     }}
     [data-testid="stFileUploader"] label, [data-testid="stFileUploader"] small {{ display: none !important; }}
     </style>
 
     <div class="user-profile">
         <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
-        <div class="user-info">
-            <div style="font-size: 0.9rem; font-weight: 900; color: #fff;">{GITHUB_USERNAME}</div>
-            <div style="font-size: 0.6rem; color: #38bdf8; font-weight: bold;">● QUANTUM ANALYZER</div>
-        </div>
+        <div style="font-size: 0.95rem; font-weight: 900; color: #fff; margin-left: 5px;">{GITHUB_USERNAME}</div>
     </div>
     <div class="hero-container"><h1 class="grand-title">SKU 属性解析中枢</h1></div>
 """, unsafe_allow_html=True)
 
-# --- 3. 核心逻辑 ---
+# --- 3. 核心逻辑 (略) ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -160,7 +143,7 @@ def process_sku_logic(uploaded_file):
             all_error_rows.append({'SN': sn, 'Line': index+2, 'Reason': f"数量异常({len(data_pairs)}/{i_qty})", 'Content': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 4. 渲染引擎 ---
+# --- 4. 渲染 ---
 upload_zone = st.empty()
 uploaded_file = upload_zone.file_uploader("Upload", type=["xlsx"])
 
@@ -174,47 +157,22 @@ if uploaded_file:
         if not v_df.empty:
             for cat in sorted(v_df['Category'].unique()):
                 cat_group = v_df[v_df['Category'] == cat]
-                
-                # 构建属性组 HTML
                 attr_html = ""
                 for clr in sorted(cat_group['Color'].unique()):
                     clr_group = cat_group[cat_group['Color'] == clr]
                     size_counts = clr_group['Size'].value_counts().sort_index()
-                    
-                    sizes_html = ""
-                    for s, q in size_counts.items():
-                        s_lab = s if s != 'FREE' else ''
-                        x_m = '×' if s != 'FREE' else ''
-                        sizes_html += f"<div style='display:inline-flex; align-items:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:3px 12px; margin-right:8px;'><span style='color:#fff; font-size:0.8rem; font-weight:600;'>{s_lab}</span><span style='color:#38bdf8; font-weight:800; margin-left:5px;'>{x_m}{q}</span></div>"
-                    
+                    sizes_html = "".join([f"<div style='display:inline-flex; align-items:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:3px 12px; margin-right:8px;'><span style='color:#fff; font-size:0.8rem; font-weight:600;'>{(s if s!='FREE' else '')}</span><span style='color:#38bdf8; font-weight:800; margin-left:5px;'>{('×' if s!='FREE' else '')}{q}</span></div>" for s, q in size_counts.items()])
                     attr_html += f"<div style='display:flex; align-items:center; gap:20px; padding:8px 0;'><div style='color:#38bdf8; font-weight:700; font-size:1rem; min-width:100px;'>{clr}</div><div>{sizes_html}</div></div>"
                 
                 sns = sorted(list(set(cat_group['SN'].tolist())))
                 sn_html = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill normal-sn">{sn}</a>' for sn in sns])
-                
-                st.markdown(f'''
-                    <div class="wide-card normal-card">
-                        <div style="flex:1;">
-                            <div style="color:#38bdf8; font-weight:900; font-size:1.6rem; margin-bottom:12px; letter-spacing:1px;">{cat}</div>
-                            {attr_html}
-                        </div>
-                        <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;">{sn_html}</div>
-                    </div>
-                ''', unsafe_allow_html=True)
+                st.markdown(f'<div class="wide-card normal-card"><div style="flex:1;"><div style="color:#38bdf8; font-weight:900; font-size:1.6rem; margin-bottom:12px; letter-spacing:1px;">{cat}</div>{attr_html}</div><div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;">{sn_html}</div></div>', unsafe_allow_html=True)
             if st.button("↺ 重制系统"): st.rerun()
 
     with t2:
         if not e_df.empty:
             for _, err in e_df.iterrows():
                 sn_link = f'<a href="{BASE_URL}{err["SN"]}" target="_blank" class="sn-pill error-sn">{err["SN"]}</a>'
-                st.markdown(f'''
-                    <div class="wide-card error-card">
-                        <div style="flex:1;">
-                            <div style="color:#f59e0b; font-weight:900; font-size:1.1rem;">LINE {err["Line"]} | {err["Reason"]}</div>
-                            <div style="font-size:0.85rem; color:#cbd5e1; margin-top:8px; line-height:1.5;">{err["Content"]}</div>
-                        </div>
-                        <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;">{sn_link}</div>
-                    </div>
-                ''', unsafe_allow_html=True)
+                st.markdown(f'<div class="wide-card error-card"><div style="flex:1;"><div style="color:#f59e0b; font-weight:900; font-size:1.1rem;">LINE {err["Line"]} | {err["Reason"]}</div><div style="font-size:0.85rem; color:#cbd5e1; margin-top:8px; line-height:1.5;">{err["Content"]}</div></div><div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;">{sn_link}</div></div>', unsafe_allow_html=True)
         else:
-            st.success("数据校验完成，未发现逻辑阻塞。")
+            st.success("数据校验完成，系统逻辑闭环。")
