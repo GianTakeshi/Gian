@@ -1,135 +1,150 @@
-import streamlit as st
 import pandas as pd
 import re
-import io
-import time
+import os
+import sys
+from openpyxl import load_workbook
+from openpyxl.styles import PatternFill, Alignment, Border, Side
 
-# --- 1. 页面配置与 CSS ---
-st.set_page_config(page_title="SKU汇总工具", page_icon="🚀", layout="centered")
+# --- 配置信息 ---
+COLOR_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)'
+SIZE_REG = r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
+SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
+BLUE_FILL = PatternFill(start_color='D9E1F2', end_color='D9E1F2', fill_type='solid')
+THIN_BORDER = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
 
-GITHUB_USERNAME = "GianTakeshi" 
+def process_file(file_path):
+    if not os.path.exists(file_path):
+        print(f"错误: 找不到文件 {file_path}")
+        return
 
-st.markdown(f"""
-    <style>
-    .stApp {{ background: radial-gradient(circle at 50% 50%, #1e293b, #010409); color: #ffffff; }}
-    header {{visibility: hidden;}}
+    base_dir = os.path.dirname(file_path)
+    file_name = os.path.basename(file_path)
+    name_part = os.path.splitext(file_name)[0]
+    save_path = os.path.join(base_dir, f"汇总_{name_part}.xlsx")
+    error_log_path = os.path.join(base_dir, f"异常_{name_part}.xlsx")
 
-    /* 磨砂玻璃通用卡片 */
-    .glass-card {{
-        border-radius: 20px; padding: 20px; text-align: center;
-        backdrop-filter: blur(10px); animation: fadeIn 0.6s ease-out; margin-bottom: 20px;
-    }}
-    .success-card {{ background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; }}
-    .error-card {{ background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; }}
+    try:
+        print(f"正在处理: {file_name} ...")
+        df = pd.read_excel(file_path, engine='openpyxl')
+        
+        if len(df.columns) < 9:
+            print("错误:傻逼选错表了！")
+            return
 
-    @keyframes fadeIn {{ from {{ opacity: 0; transform: translateY(10px); }} to {{ opacity: 1; transform: translateY(0); }} }}
+        col_a, col_c, col_g, col_i = df.columns[0], df.columns[2], df.columns[6], df.columns[8]
+        all_normal_data, all_error_rows = [], []
 
-    /* 左上角头像 */
-    .user-profile {{
-        position: fixed; top: 25px; left: 25px; display: flex; align-items: center; gap: 12px; z-index: 9999;
-        background: rgba(255, 255, 255, 0.05); padding: 6px 16px 6px 6px; border-radius: 50px;
-        border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px);
-    }}
-    .avatar {{ width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; }}
-
-    /* 上传框汉化覆盖 */
-    [data-testid="stFileUploadDropzone"] > div {{ color: transparent !important; }}
-    [data-testid="stFileUploadDropzone"]::before {{ content: "拖拽文件到这里"; position: absolute; top: 40%; color: #ffffff; font-size: 1.4rem; font-weight: bold; }}
-    [data-testid="stFileUploadDropzone"] button::after {{ content: "选择文件"; position: absolute; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 800; visibility: visible; }}
-    .stFileUploader section {{ background: rgba(255, 255, 255, 0.03) !important; backdrop-filter: blur(20px) !important; border: 1px solid rgba(56, 189, 248, 0.3) !important; border-radius: 30px !important; min-height: 250px; }}
-    </style>
-    
-    <div class="user-profile">
-        <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
-        <div style="display: flex; flex-direction: column;">
-            <span style="font-weight:700; font-size:0.9rem;">{GITHUB_USERNAME}</span>
-            <span style="font-size:0.65rem; color:#10b981;">● 核心模式</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-# --- 2. 增强的数据处理函数 ---
-def process_sku_data(uploaded_file):
-    COLOR_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)'
-    SIZE_REG = r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,，;；]))'
-    SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
-    
-    df = pd.read_excel(uploaded_file, engine='openpyxl')
-    all_normal_data = []
-    error_logs = []
-    
-    for index, row in df.iterrows():
-        try:
-            c_raw = str(row[df.columns[2]]).strip()
+        for index, row in df.iterrows():
+            c_raw = str(row[col_c]).strip()
             if not c_raw or c_raw == 'nan': continue
             
-            cat = c_raw.split(' ')[0].upper()
-            if cat.startswith('WZ'): cat = 'WZ'
-            
-            qty_match = re.findall(r'\d+', str(row[df.columns[8]]))
-            qty = int(qty_match[0]) if qty_match else 0
-            
-            prop_str = str(row[df.columns[6]])
-            chunks = re.split(r'[;；,，\n]', prop_str)
-            pairs = []
+            if ';' in c_raw or '；' in c_raw:
+                all_error_rows.append({'商品名称': c_raw, '订单编号': row[col_a], '原因': "多个商品", 'SKU属性': str(row[col_g])})
+                continue
+
+            category_name = c_raw.split(' ')[0].upper()
+            if category_name.startswith('WZ'): category_name = 'WZ'
+
+            g_text = str(row[col_g])
+            i_val = str(row[col_i])
+            i_nums = re.findall(r'\d+', i_val)
+            i_qty = int(i_nums[0]) if i_nums else 0
+
+            # --- 【核心改动：分号块切割提取法】 ---
+            # 逻辑：先按分号切开，解决多组数据问题。如果没有分号，chunks 也包含整行内容。
+            chunks = re.split(r'[;；]', g_text)
+            data_pairs = []
+
             for chunk in chunks:
-                c_m = re.search(COLOR_REG, chunk)
-                s_m = re.search(SIZE_REG, chunk)
-                if c_m:
-                    cv = c_m.group(1).strip().upper()
-                    sv = s_m.group(1).strip().upper() if s_m else ""
-                    pairs.append((cv, SIZE_MAP.get(sv, sv)))
-            
-            # 校验：解析出的属性数量必须等于订单数量
-            if len(pairs) == qty and qty > 0:
-                for cv, sv in pairs:
-                    all_normal_data.append({'Category': cat, 'Color': cv, 'Size': sv})
+                chunk = chunk.strip()
+                if not chunk: continue
+                
+                # 在每个分号块内部独立搜寻 Color 和 Size，无视先后顺序
+                c_match = re.search(COLOR_REG, chunk)
+                s_match = re.search(SIZE_REG, chunk)
+                
+                if c_match:
+                    color_val = c_match.group(1).strip().upper()
+                    # 【改动】如果没有 Size 关键字，设为空字符串 ""，输出时会自动变 *数量
+                    raw_size = s_match.group(1).strip().upper() if s_match else ""
+                    size_val = SIZE_MAP.get(raw_size, raw_size) 
+                    data_pairs.append((color_val, size_val))
+            # --- 【改动结束】 ---
+
+            if len(data_pairs) == i_qty and i_qty > 0:
+                for c_val, s_val in data_pairs:
+                    all_normal_data.append({'Category': category_name, 'Color': c_val, 'Size': s_val})
             else:
-                error_logs.append({
-                    '行号': index + 2,
-                    '品名': c_raw,
-                    '原始属性': prop_str,
-                    '订单数量': qty,
-                    '解析数量': len(pairs),
-                    '原因': '数量不匹配或属性格式错误'
-                })
-        except Exception as e:
-            error_logs.append({'行号': index + 2, '原因': str(e)})
+                all_error_rows.append({'商品名称': category_name, '订单编号': row[col_a], '原因': f"解析数({len(data_pairs)})与购买数量({i_qty})不符", 'SKU属性': g_text})
 
-    return pd.DataFrame(all_normal_data), pd.DataFrame(error_logs)
+        if all_error_rows:
+            pd.DataFrame(all_error_rows).to_excel(error_log_path, index=False)
+            print(f"已记录异常数据至: {os.path.basename(error_log_path)}")
 
-# --- 3. 页面布局 ---
-st.markdown("<div style='text-align:center; padding-top:50px;'><h1 style='font-size:4rem; font-weight:800;'>智能商品</h1><h1 style='color:#38bdf8; font-size:2.5rem; margin-top:-15px;'>属性汇总大师 🚀</h1></div>", unsafe_allow_html=True)
+        if all_normal_data:
+            final_df = pd.DataFrame(all_normal_data)
+            categories = sorted(final_df['Category'].unique())
+            
+            # 【检查】确保排序逻辑包含空字符串 ""
+            size_order = ['XXS', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', 'FREE', '']
+            def sort_sizes(s_list):
+                return sorted(s_list, key=lambda x: size_order.index(x) if x in size_order else 99)
+            def extract_num(s):
+                nums = re.findall(r'\d+', str(s))
+                return int(nums[0]) if nums else 999999
 
-uploaded_file = st.file_uploader("", type=["xlsx"])
+            output_rows, category_blocks = [], []
 
-if uploaded_file:
-    progress = st.progress(0)
-    for i in range(100):
-        time.sleep(0.005)
-        progress.progress(i + 1)
-    
-    final_df, error_df = process_sku_data(uploaded_file)
-    progress.empty()
+            for cat in categories:
+                start_row = len(output_rows) + 1 
+                cat_data = final_df[final_df['Category'] == cat]
+                distinct_sizes = sort_sizes(cat_data['Size'].unique())
+                
+                output_rows.append({'A': cat}) 
+                
+                sorted_colors = sorted(cat_data['Color'].unique(), key=extract_num)
+                for color in sorted_colors:
+                    color_data = cat_data[cat_data['Color'] == color]
+                    size_counts = color_data['Size'].value_counts()
+                    row_dict = {'A': f"Color {color}"}
+                    for idx, s_name in enumerate(distinct_sizes):
+                        col_key = chr(66 + idx) if idx < 25 else f"Z{idx}"
+                        if s_name in size_counts:
+                            qty = size_counts[s_name]
+                            # 【改动】空尺码直接显示 *数量，不再显示 N/A*数量
+                            row_dict[col_key] = f"*{qty}" if s_name == "" else f"{s_name}*{qty}"
+                    output_rows.append(row_dict)
+                
+                category_blocks.append((start_row, len(output_rows), 1 + len(distinct_sizes)))
+                output_rows.append({}) 
 
-    # 1. 处理成功展示
-    if not final_df.empty:
-        st.markdown("<div class='glass-card success-card'><h3 style='color:#10b981; margin:0;'>✨ 解析成功</h3><p style='color:#a7f3d0; margin-top:5px;'>已成功提取 {} 条 SKU 属性</p></div>".format(len(final_df)), unsafe_allow_html=True)
-        
-        out_ok = io.BytesIO()
-        with pd.ExcelWriter(out_ok, engine='openpyxl') as writer:
-            final_df.to_excel(writer, index=False, sheet_name='汇总')
-        
-        st.download_button("📥 下载汇总报表 (XLSX)", out_ok.getvalue(), f"汇总_{uploaded_file.name}", use_container_width=True)
+            pd.DataFrame(output_rows).to_excel(save_path, index=False, header=False)
+            
+            wb = load_workbook(save_path)
+            ws = wb.active
+            for start, end, col_limit in category_blocks:
+                ws.cell(row=start, column=1).alignment = Alignment(horizontal='center')
+                for r in range(start + 1, end + 1):
+                    for c in range(1, col_limit + 1):
+                        cell = ws.cell(row=r, column=c)
+                        cell.fill, cell.border, cell.alignment = BLUE_FILL, THIN_BORDER, Alignment(horizontal='center')
+            
+            for col in ws.columns: ws.column_dimensions[col[0].column_letter].width = 15
+            wb.save(save_path)
+            print(f"成功! 结果已保存至: {os.path.basename(save_path)}")
+        else:
+            print("提示: 未发现有效数据，未生成汇总表。")
 
-    # 2. 处理错误展示
-    if not error_df.empty:
-        st.markdown(f"<div class='glass-card error-card'><h3 style='color:#f59e0b; margin:0;'>⚠️ 异常提醒</h3><p style='color:#fcd34d; margin-top:5px;'>发现 {len(error_df)} 行数据无法自动解析，请人工核对</p></div>", unsafe_allow_html=True)
-        
-        out_err = io.BytesIO()
-        with pd.ExcelWriter(out_err, engine='openpyxl') as writer:
-            error_df.to_excel(writer, index=False, sheet_name='错误记录')
-        
-        st.download_button("🚩 下载错误记录以便核对", out_err.getvalue(), f"错误检查_{uploaded_file.name}", use_container_width=True)
+    except Exception as e:
+        print(f"运行出错: {e}")
 
-st.markdown("<div style='text-align:center; margin-top:80px; color:rgba(148,163,184,0.4); font-size:0.8rem;'>GianTakeshi CUSTOM SYSTEM v2.0</div>", unsafe_allow_html=True)
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        for path in sys.argv[1:]:
+            process_file(path)
+        print("\n所有任务处理完毕。")
+    else:
+        print("="*40)
+        print("使用说明: 直接将 Excel 文件拖动到此脚本图标上运行")
+        print("="*40)
+        input("\n按回车键退出...")
