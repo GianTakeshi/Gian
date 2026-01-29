@@ -7,128 +7,121 @@ from openpyxl.styles import PatternFill, Alignment, Border, Side
 # --- 1. 页面配置 ---
 st.set_page_config(page_title="SKU汇总工具", page_icon="🚀", layout="centered")
 
-## ----------------- 请确认这里的用户名 ----------------- ##
-# 比如你的主页是 https://github.com/gian-code，那这里就填 gian-code
+## ----------------- 用户名锁定 ----------------- ##
 GITHUB_USERNAME = "GianTakeshi" 
-## --------------------------------------------------- ##
+## --------------------------------------------- ##
 
 st.markdown(f"""
     <style>
-    /* 全局背景 */
+    /* 全局背景：加深径向渐变，增强对比度 */
     .stApp {{
-        background: radial-gradient(circle at 50% 50%, #1e293b, #020617);
+        background: radial-gradient(circle at 50% 50%, #1e293b, #010409);
         color: #ffffff;
     }}
     header {{visibility: hidden;}}
 
-    /* --- 精修左上角个人资料 --- */
+    /* --- 左上角 GianTakeshi 个人面板 --- */
     .user-profile {{
         position: fixed;
         top: 25px;
         left: 25px;
         display: flex;
         align-items: center;
-        gap: 15px;
+        gap: 12px;
         z-index: 9999;
-        background: rgba(255, 255, 255, 0.03);
-        padding: 6px 18px 6px 6px;
-        border-radius: 60px;
-        border: 1px solid rgba(56, 189, 248, 0.3);
-        backdrop-filter: blur(15px);
-        transition: all 0.3s ease;
-    }}
-    .user-profile:hover {{
-        background: rgba(255, 255, 255, 0.08);
-        border-color: #38bdf8;
-        box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+        background: rgba(255, 255, 255, 0.05); /* 玻璃底色 */
+        padding: 6px 16px 6px 6px;
+        border-radius: 50px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(15px); /* 核心磨砂效果 */
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
     }}
     .avatar {{
-        width: 40px;
-        height: 40px;
+        width: 38px;
+        height: 38px;
         border-radius: 50%;
-        object-fit: cover;
         border: 2px solid #38bdf8;
-        background-color: #0f172a; /* 防止加载前白边 */
+        object-fit: cover;
     }}
-    .user-info {{
-        display: flex;
-        flex-direction: column;
-    }}
-    .user-name {{
-        font-weight: 700;
-        font-size: 0.85rem;
-        color: #ffffff;
-        letter-spacing: 0.5px;
-    }}
-    .user-status {{
-        font-size: 0.65rem;
-        color: #38bdf8;
-        text-transform: uppercase;
-    }}
+    .user-name {{ font-weight: 700; font-size: 0.9rem; color: #ffffff; }}
+    .user-status {{ font-size: 0.65rem; color: #10b981; font-weight: bold; }}
 
-    /* 标题部分 */
-    .hero-section {{
-        text-align: center;
-        padding-top: 60px;
-        margin-bottom: 40px;
-    }}
+    /* 标题美化 */
+    .hero-section {{ text-align: center; padding-top: 50px; margin-bottom: 40px; }}
     .hero-title {{
-        font-size: 4rem !important;
+        font-size: 4.2rem !important;
         font-weight: 800;
-        background: linear-gradient(to bottom, #ffffff, #94a3b8);
+        background: linear-gradient(to bottom, #ffffff, #64748b);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }}
     .hero-subtitle {{
-        font-size: 2.5rem !important;
+        font-size: 2.6rem !important;
         font-weight: 700;
         color: #38bdf8;
         margin-top: -10px;
+        text-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
     }}
 
-    /* --- 上传区域汉化 --- */
-    [data-testid="stFileUploadDropzone"] > div {{ color: transparent !important; }}
-    [data-testid="stFileUploadDropzone"] button {{
-        color: transparent !important;
-        background-color: #38bdf8 !important;
-        border: none !important;
-        position: relative;
-        width: 140px; height: 45px;
+    /* --- 核心升级：上传框磨砂玻璃化 --- */
+    .stFileUploader section {{
+        background: rgba(255, 255, 255, 0.03) !important; /* 极透底色 */
+        backdrop-filter: blur(20px) !important; /* 更强烈的模糊 */
+        border: 1px solid rgba(56, 189, 248, 0.3) !important;
+        border-radius: 30px !important;
+        min-height: 280px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        transition: all 0.4s ease;
     }}
+    
+    .stFileUploader section:hover {{
+        background: rgba(255, 255, 255, 0.07) !important;
+        border-color: #38bdf8 !important;
+        transform: translateY(-5px); /* 悬浮动效 */
+    }}
+
+    /* 强制汉化文字 */
+    [data-testid="stFileUploadDropzone"] > div {{ color: transparent !important; }}
     [data-testid="stFileUploadDropzone"]::before {{
-        content: "请将 Excel 文件拖拽至此处";
-        position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
-        color: #ffffff !important; font-size: 1.3rem; font-weight: bold; z-index: 1;
+        content: "拖拽文件到这里";
+        position: absolute; top: 40%; color: #ffffff; font-size: 1.4rem; font-weight: bold;
     }}
     [data-testid="stFileUploadDropzone"]::after {{
-        content: "支持 XLSX 格式 | 最大 200MB";
-        position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%);
-        color: #94a3b8 !important; font-size: 0.9rem; z-index: 1;
+        content: "支持 XLSX 报表 | 最大 200MB";
+        position: absolute; top: 55%; color: #94a3b8; font-size: 0.9rem;
+    }}
+    
+    /* 汉化按钮 */
+    [data-testid="stFileUploadDropzone"] button {{
+        color: transparent !important;
+        background: #38bdf8 !important;
+        border-radius: 12px !important;
+        width: 150px; height: 48px;
     }}
     [data-testid="stFileUploadDropzone"] button::after {{
         content: "选择文件";
-        position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+        position: absolute; left: 0; width: 100%; height: 100%;
         display: flex; align-items: center; justify-content: center;
-        color: #000000 !important; font-weight: bold; visibility: visible;
+        color: #000000 !important; font-weight: 800; visibility: visible;
     }}
-    .stFileUploader section {{
-        background: rgba(255, 255, 255, 0.05) !important;
-        border: 2px dashed #38bdf8 !important;
-        border-radius: 24px !important;
-        min-height: 250px; display: flex; justify-content: center; align-items: center;
-    }}
+
+    /* 底部美化 */
+    .footer {{ text-align: center; margin-top: 100px; color: rgba(148, 163, 184, 0.4); font-size: 0.8rem; letter-spacing: 2px; }}
     </style>
     
     <div class="user-profile">
-        <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar" alt="Avatar">
+        <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
         <div class="user-info">
             <span class="user-name">{GITHUB_USERNAME}</span>
-            <span class="user-status">已连接</span>
+            <span class="user-status">● 已连接</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-# --- 后续逻辑处理与之前一致 ---
+# --- 数据处理逻辑 (保持不变) ---
 def process_sku_data(uploaded_file):
     COLOR_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)'
     SIZE_REG = r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,，;；]))'
@@ -156,27 +149,28 @@ def process_sku_data(uploaded_file):
                 all_normal_data.append({'Category': cat, 'Color': cv, 'Size': sv})
     return pd.DataFrame(all_normal_data)
 
+# --- 布局 ---
 st.markdown("<div class='hero-section'>", unsafe_allow_html=True)
 st.markdown("<h1 class='hero-title'>智能商品</h1>", unsafe_allow_html=True)
 st.markdown("<h1 class='hero-subtitle'>属性汇总大师 🚀</h1>", unsafe_allow_html=True)
-st.markdown("<p style='color: #94a3b8; font-size: 1.1rem;'>专业的 SKU 数据自动化处理工具</p>", unsafe_allow_html=True)
+st.markdown("<p style='color: #64748b; font-size: 1.1rem;'>GianTakeshi 专属自动化工作台</p>", unsafe_allow_html=True)
 st.markdown("</div>", unsafe_allow_html=True)
 
 uploaded_file = st.file_uploader("", type=["xlsx"])
 
 if uploaded_file:
-    with st.spinner('⚡ 解析中...'):
+    with st.spinner('⚡ 正在穿透玻璃面板处理数据...'):
         final_df = process_sku_data(uploaded_file)
         if not final_df.empty:
-            st.toast("✅ 完成！")
+            st.toast("✅ 数据处理完成！")
             output = io.BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
                 final_df.to_excel(writer, index=False, sheet_name='汇总')
             st.markdown("<br>", unsafe_allow_html=True)
             col1, col2, col3 = st.columns([1, 2, 1])
             with col2:
-                st.download_button("📥 立即下载汇总表", output.getvalue(), f"汇总_{uploaded_file.name}", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
+                st.download_button("📥 立即获取汇总报表", output.getvalue(), f"汇总_{uploaded_file.name}", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
         else:
             st.error("未识别到 SKU 数据")
 
-st.markdown("<div style='text-align: center; margin-top: 100px; color: rgba(71, 85, 105, 0.6); font-size: 0.8rem;'>高效工作流 | 纯净中文版</div>", unsafe_allow_html=True)
+st.markdown("<div class='footer'>UI CRAFTED WITH GLASSMORPHISM | 2024</div>", unsafe_allow_html=True)
