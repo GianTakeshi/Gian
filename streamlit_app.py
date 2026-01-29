@@ -155,7 +155,7 @@ if uploaded_file:
                         <span style="color:#ffffff; margin-left:15px; font-weight:600;">{err['原因']}</span>
                         <div style="margin-top:6px; font-size:0.8rem; color:#64748b;"><b>原始属性:</b> {err['原始属性']}</div>
                     </div>
-                    <a href="{BASE_URL}{sn_v}" target="_blank" class="sn-button">查看详情 SN: {sn_v}</a>
+                    <a href="{BASE_URL}{sn_v}" target="_blank" class="sn-button">跳转至Flylink SN: {sn_v}</a>
                 </div>
                 """, unsafe_allow_html=True)
         else: st.success("所有数据均通过校验。")
