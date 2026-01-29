@@ -6,6 +6,7 @@ import re
 st.set_page_config(page_title="GianTakeshi | Data System", page_icon="🚀", layout="wide")
 
 GITHUB_USERNAME = "GianTakeshi" 
+BASE_URL = "https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id="
 
 st.markdown(f"""
     <style>
@@ -30,6 +31,27 @@ st.markdown(f"""
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }}
     .grand-subtitle {{ font-size: 1.1rem; letter-spacing: 6px; color: rgba(148, 163, 184, 0.7); }}
+
+    /* 异常跳转按钮样式 */
+    .sn-button {{
+        display: inline-block;
+        padding: 4px 14px;
+        background: rgba(56, 189, 248, 0.15);
+        color: #38bdf8 !important;
+        border: 1px solid rgba(56, 189, 248, 0.4);
+        border-radius: 20px;
+        text-decoration: none !important;
+        font-size: 0.8rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        margin-left: 10px;
+    }}
+    .sn-button:hover {{
+        background: #38bdf8;
+        color: #000000 !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+    }}
     </style>
     
     <div class="user-profile">
@@ -80,25 +102,16 @@ def process_sku_logic(uploaded_file):
             all_error_rows.append({'行号': index + 2, '订单编号': row[col_a], '品名': cat, '原因': f"校验不匹配({len(data_pairs)}/{i_qty})", '原始属性': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 3. 动态上传与渲染区 ---
-# 使用 empty 容器来包装上传组件
+# --- 3. 动态上传与渲染 ---
 upload_container = st.empty()
-
-# 如果 session_state 里没有文件状态，就显示上传框
-if 'processed' not in st.session_state:
-    st.session_state.processed = False
-
 uploaded_file = upload_container.file_uploader("", type=["xlsx"])
 
 if uploaded_file:
-    # 1. 隐藏上传框：直接清空容器
-    upload_container.empty()
+    upload_container.empty() # 解析后隐藏上传框
     
-    # 2. 执行解析
-    with st.spinner('正在重构多维数据...'):
+    with st.spinner('执行数据流解析...'):
         final_df, error_df = process_sku_logic(uploaded_file)
     
-    # 3. 显示结果
     tab1, tab2 = st.tabs(["💎 结构化属性汇总", "📡 实时异常捕获"])
 
     with tab1:
@@ -112,24 +125,29 @@ if uploaded_file:
                     size_counts = group['Size'].value_counts()
                     tags = " ".join([f'<span style="background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.2); color:#ffffff; padding:4px 12px; border-radius:4px; margin-right:8px;">{s if s!="" else "FREE"} <b style="color:#38bdf8;">× {q}</b></span>' for s, q in size_counts.items()])
                     st.markdown(f"<div style='margin-bottom:12px; background:rgba(255,255,255,0.02); padding:10px; border-radius:8px;'><span style='color:#94a3b8; margin-right:20px; font-family:monospace;'>COLOR_{clr}</span> {tags}</div>", unsafe_allow_html=True)
-        
-        # 增加一个“重新上传”的按钮，方便宝宝操作
         if st.button("↺ 重新部署数据源"):
             st.rerun()
 
     with tab2:
         if not error_df.empty:
             for _, err in error_df.iterrows():
+                sn_val = str(err['订单编号'])
+                full_link = f"{BASE_URL}{sn_val}"
                 st.markdown(f"""
                 <div style="background:rgba(245,158,11,0.03); border:1px solid rgba(245,158,11,0.2); border-radius:10px; padding:15px; margin-bottom:10px;">
-                    <span style="color:#f59e0b; font-weight:bold; font-size:0.8rem;">REF_LINE: {err['行号']}</span>
-                    <span style="color:#ffffff; margin-left:15px; font-weight:600;">{err['原因']}</span>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <span style="color:#f59e0b; font-weight:bold; font-size:0.8rem;">LINE: {err['行号']}</span>
+                            <span style="color:#ffffff; margin-left:15px; font-weight:600;">{err['原因']}</span>
+                        </div>
+                        <a href="{full_link}" target="_blank" class="sn-button">查看详情 SN: {sn_val}</a>
+                    </div>
                     <div style="margin-top:8px; font-size:0.85rem; color:#64748b;">
-                        <b>SN:</b> {err['订单编号']} | <b>LOG:</b> {err['原始属性']}
+                        <b>原始属性:</b> {err['原始属性']}
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
         else:
-            st.success("环境监测：所有数据单元均通过合规性校验。")
+            st.success("所有数据均通过校验。")
 
 st.markdown("<div style='height:100px;'></div>", unsafe_allow_html=True)
