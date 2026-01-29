@@ -22,7 +22,7 @@ st.markdown(f"""
     }}
     .avatar {{ width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; }}
 
-    /* 标题绝对居中 */
+    /* 标题居中 */
     .hero-container {{ text-align: center; width: 100%; padding: 60px 0 20px 0; }}
     .grand-title {{
         display: block; font-family: 'Inter', sans-serif; font-size: 3.2rem !important; font-weight: 900; letter-spacing: 8px;
@@ -36,36 +36,38 @@ st.markdown(f"""
         position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); width: 480px; z-index: 9999;
         background: rgba(255, 255, 255, 0.12) !important; border: 1px solid rgba(255, 255, 255, 0.3) !important;
         border-radius: 50px !important; padding: 8px 25px !important; backdrop-filter: blur(25px) saturate(180%);
-        box-shadow: 0 15px 35px rgba(0,0,0,0.3); transition: all 0.4s ease;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.3);
     }}
 
-    /* 宽条卡片样式 */
+    /* 宽条卡片 */
     .wide-card {{
         background: rgba(255, 255, 255, 0.04);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 12px; padding: 15px 25px; margin-bottom: 12px;
-        display: flex; align-items: center; gap: 30px;
+        display: flex; align-items: center; justify-content: space-between; gap: 20px;
         transition: all 0.3s ease;
     }}
-    .wide-card:hover {{ background: rgba(255, 255, 255, 0.08); transform: scale(1.002); }}
-
+    .wide-card:hover {{ background: rgba(255, 255, 255, 0.08); }}
     .normal-card {{ border-left: 5px solid #38bdf8; }}
     .error-card {{ border-left: 5px solid #f59e0b; background: rgba(245, 158, 11, 0.02); }}
 
-    /* 聚合样式 */
-    .info-cluster {{ min-width: 220px; }}
-    .cat-text {{ color: #38bdf8; font-weight: 900; font-size: 1.1rem; margin-bottom: 2px; }}
-    .attr-text {{ color: #ffffff; font-size: 0.9rem; }}
-    .attr-val {{ color: #38bdf8; font-weight: 600; }}
+    /* 属性显示区域 */
+    .attr-cluster {{ display: flex; align-items: center; min-width: 350px; flex-shrink: 0; }}
+    .cat-label {{ color: #38bdf8; font-weight: 900; font-size: 1rem; width: 80px; }}
+    .clr-label {{ color: #ffffff; font-weight: 700; font-size: 0.95rem; min-width: 60px; margin-right: 15px; border-right: 1px solid rgba(255,255,255,0.1); padding-right: 15px; }}
+    
+    /* 尺码徽章样式（恢复原样） */
+    .size-badge {{ background: rgba(56, 189, 248, 0.1); padding: 2px 8px; border-radius: 6px; color: #eee; font-size: 0.8rem; border: 1px solid rgba(56, 189, 248, 0.2); margin-right: 5px; }}
+    .size-badge b {{ color: #38bdf8; margin-left: 3px; }}
 
     /* SN 按钮网格 */
-    .sn-grid {{ flex: 1; display: flex; flex-wrap: wrap; gap: 8px; border-left: 1px solid rgba(255,255,255,0.05); padding-left: 25px; }}
+    .sn-grid {{ flex: 1; display: flex; flex-wrap: wrap; gap: 6px; border-left: 1px solid rgba(255,255,255,0.05); padding-left: 20px; }}
     .sn-pill {{
-        display: inline-block; padding: 3px 12px; background: rgba(56, 189, 248, 0.1);
-        color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 15px; 
-        text-decoration: none !important; font-size: 0.75rem; font-weight: 600; transition: all 0.2s;
+        display: inline-block; padding: 2px 10px; background: rgba(255, 255, 255, 0.05);
+        color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 12px; 
+        text-decoration: none !important; font-size: 0.7rem; font-weight: 600; transition: all 0.2s;
     }}
-    .sn-pill:hover {{ background: rgba(56, 189, 248, 0.4); box-shadow: 0 0 12px rgba(56, 189, 248, 0.5); transform: translateY(-2px); }}
+    .sn-pill:hover {{ background: rgba(56, 189, 248, 0.3); transform: translateY(-1px); }}
 
     [data-testid="stFileUploader"] label, [data-testid="stFileUploader"] small {{ display: none !important; }}
     </style>
@@ -74,7 +76,7 @@ st.markdown(f"""
         <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
         <div class="user-info">
             <div class="user-name">{GITHUB_USERNAME}</div>
-            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● AGGREGATION MODE</div>
+            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● CLASSIC MODE + SN</div>
         </div>
     </div>
 
@@ -89,23 +91,18 @@ def process_sku_logic(uploaded_file):
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
     df = pd.read_excel(uploaded_file, engine='openpyxl')
     col_a, col_c, col_g, col_i = df.columns[0], df.columns[2], df.columns[6], df.columns[8]
-    
     all_normal_data, all_error_rows = [], []
-    
     for index, row in df.iterrows():
         c_raw = str(row[col_c]).strip()
         if not c_raw or c_raw == 'nan': continue
         cat = c_raw.split(' ')[0].upper()
         if cat.startswith('WZ'): cat = 'WZ'
-        
         g_text, i_val, sn = str(row[col_g]), str(row[col_i]), str(row[col_a])
         i_qty = int(re.findall(r'\d+', i_val)[0]) if re.findall(r'\d+', i_val) else 0
         chunks = re.split(r'[;；]', g_text)
-        
         if ';' in c_raw or '；' in c_raw:
             all_error_rows.append({'SN': sn, '行号': index + 2, '原因': "复合品类阻断", '内容': g_text})
             continue
-
         data_pairs = []
         for chunk in chunks:
             chunk = chunk.strip()
@@ -115,13 +112,11 @@ def process_sku_logic(uploaded_file):
                 clr_v = c_m.group(1).strip().upper()
                 raw_s = s_m.group(1).strip().upper() if s_m else ""
                 data_pairs.append((clr_v, SIZE_MAP.get(raw_s, raw_s)))
-        
         if len(data_pairs) == i_qty and i_qty > 0:
             for c_val, s_val in data_pairs:
                 all_normal_data.append({'Category': cat, 'Color': c_val, 'Size': s_val, 'SN': sn})
         else:
             all_error_rows.append({'SN': sn, '行号': index + 2, '原因': f"数量不符({len(data_pairs)}/{i_qty})", '内容': g_text})
-            
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
 # --- 3. 主程序流程 ---
@@ -129,25 +124,29 @@ upload_placeholder = st.empty()
 uploaded_file = upload_placeholder.file_uploader("Upload", type=["xlsx"])
 
 if uploaded_file:
-    with st.spinner('AGGREGATING...'):
+    with st.spinner('SYNCING...'):
         v_df, e_df = process_sku_logic(uploaded_file)
     upload_placeholder.empty()
     
-    t1, t2 = st.tabs(["💎 属性聚合流", "📡 异常拦截流"])
+    t1, t2 = st.tabs(["💎 汇总数据流", "📡 异常拦截流"])
     
     with t1:
         if not v_df.empty:
-            # 【核心修改】按属性（Category, Color, Size）聚合 SN
-            agg_df = v_df.groupby(['Category', 'Color', 'Size'])['SN'].apply(list).reset_index()
-            for _, r in agg_df.iterrows():
-                sn_pills = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill">{sn}</a>' for sn in r['SN']])
+            # 按 Category 和 Color 分组
+            for (cat, clr), group in v_df.groupby(['Category', 'Color']):
+                # 汇总尺码
+                size_counts = group['Size'].value_counts().sort_index()
+                size_html = "".join([f'<span class="size-badge">{s if s else "FREE"}<b>×{q}</b></span>' for s, q in size_counts.items()])
+                # 提取所有 SN (去重排序)
+                sns = sorted(list(set(group['SN'].tolist())))
+                sn_pills = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill">{sn}</a>' for sn in sns])
+                
                 st.markdown(f'''
                     <div class="wide-card normal-card">
-                        <div class="info-cluster">
-                            <div class="cat-text">{r['Category']}</div>
-                            <div class="attr-text">
-                                <span class="attr-val">{r['Color']}</span> / {r['Size']}
-                            </div>
+                        <div class="attr-cluster">
+                            <div class="cat-label">{cat}</div>
+                            <div class="clr-label">{clr}</div>
+                            <div style="display:flex; flex-wrap:wrap; gap:2px;">{size_html}</div>
                         </div>
                         <div class="sn-grid">
                             {sn_pills}
