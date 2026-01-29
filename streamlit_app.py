@@ -3,12 +3,12 @@ import pandas as pd
 import re
 import html
 
-# --- 1. UI 视觉配置 (重点：圆角矩形 + 悬浮动效) ---
+# --- 1. UI 视觉配置 (核心：强效毛玻璃 + 圆角 + 悬浮) ---
 st.set_page_config(page_title="GianTakeshi | Matrix Hub", page_icon="💎", layout="wide")
 
 st.markdown(f"""
     <style>
-    /* 背景保持：聚光灯渐变 */
+    /* 背景：聚光灯渐变 */
     .stApp {{ 
         background: radial-gradient(circle at center, #001d3d 0%, #000814 70%, #000000 100%) !important;
         color: #ffffff; 
@@ -19,41 +19,44 @@ st.markdown(f"""
     .mist-light {{
         position: fixed;
         top: 0; right: 0; width: 70%; height: 100%;
-        background: radial-gradient(circle at 100% 50%, rgba(56, 189, 248, 0.12) 0%, transparent 70%);
+        background: radial-gradient(circle at 100% 50%, rgba(56, 189, 248, 0.15) 0%, transparent 70%);
         filter: blur(100px); animation: flow 10s ease-in-out infinite alternate; z-index: -1;
     }}
-    @keyframes flow {{ from {{ transform: translateX(15%); opacity: 0.4; }} to {{ transform: translateX(-5%); opacity: 0.7; }} }}
+    @keyframes flow {{ from {{ transform: translateX(15%); opacity: 0.4; }} to {{ transform: translateX(-5%); opacity: 0.8; }} }}
     
-    /* 【核心修改】大的属性框：圆角矩形 + 悬浮效果 */
+    /* 【核心修改】大的属性框：极强毛玻璃效果 */
     div[data-testid="stVerticalBlockBorderWrapper"] {{
         height: 380px !important; 
         overflow-y: auto !important;
-        background: rgba(255, 255, 255, 0.03) !important;
-        border-radius: 24px !important; /* 大圆角 */
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        backdrop-filter: blur(20px);
-        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); /* 平滑过渡 */
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        /* 背景色透明度降低，以便透出底色 */
+        background: rgba(255, 255, 255, 0.05) !important; 
+        border-radius: 24px !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        /* 毛玻璃核心代码 */
+        backdrop-filter: blur(35px) saturate(200%) !important; 
+        -webkit-backdrop-filter: blur(35px) saturate(200%) !important;
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     }}
     
-    /* 鼠标悬停动效 */
+    /* 鼠标悬停：毛玻璃质感增强 */
     div[data-testid="stVerticalBlockBorderWrapper"]:hover {{
-        transform: translateY(-8px); /* 向上浮动 */
-        background: rgba(255, 255, 255, 0.06) !important;
-        border: 1px solid rgba(56, 189, 248, 0.4) !important; /* 边框亮起 */
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(56, 189, 248, 0.1); /* 增加投影 */
+        transform: translateY(-10px);
+        background: rgba(255, 255, 255, 0.08) !important;
+        border: 1px solid rgba(56, 189, 248, 0.5) !important;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.2);
     }}
     
     /* 滚动条美化 */
     div[data-testid="stVerticalBlockBorderWrapper"]::-webkit-scrollbar {{ width: 4px; }}
     div[data-testid="stVerticalBlockBorderWrapper"]::-webkit-scrollbar-thumb {{
-        background: rgba(56, 189, 248, 0.3); border-radius: 10px;
+        background: rgba(56, 189, 248, 0.4); border-radius: 10px;
     }}
 
     .user-profile {{
         position: fixed; top: 20px; left: 20px; display: flex; align-items: center; gap: 12px; z-index: 99999; 
         background: rgba(255, 255, 255, 0.05); padding: 5px 15px 5px 5px; border-radius: 50px;
-        border: 1px solid rgba(56, 189, 248, 0.3); backdrop-filter: blur(10px);
+        border: 1px solid rgba(56, 189, 248, 0.3); backdrop-filter: blur(15px);
     }}
     .sn-link {{ color: #38bdf8 !important; text-decoration: none; font-weight: bold; border-bottom: 1px dashed #38bdf8; }}
     </style>
@@ -65,7 +68,7 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-# --- 2. 逻辑层 (保持不变) ---
+# --- 2. 逻辑层 (原封不动) ---
 def process_data(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -99,7 +102,7 @@ def process_data(uploaded_file):
             error.append({'Category': 'ERROR', 'SN': 'N/A', 'Reason': str(e)})
     return pd.DataFrame(valid), pd.DataFrame(error)
 
-# --- 3. 渲染组件 (保持不变) ---
+# --- 3. 渲染组件 (保持圆角风格) ---
 def render_matrix(data_df, is_error=False):
     if data_df.empty:
         st.info("暂无数据")
