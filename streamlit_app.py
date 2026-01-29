@@ -6,7 +6,7 @@ import html
 # =============================
 # ⚙️ CONFIG
 # =============================
-st.set_page_config("Matrix Hub Pro", "🧊", layout="wide")
+st.set_page_config("Matrix Hub Pro", "💎", layout="wide")
 
 st.markdown("""
 <style>
@@ -60,6 +60,17 @@ header{visibility:hidden;}
 """, unsafe_allow_html=True)
 
 # =============================
+# 🧠 COLUMN MATCH ENGINE
+# =============================
+def find_col(df, keywords):
+    for col in df.columns:
+        col_str = str(col).upper()
+        for k in keywords:
+            if k.upper() in col_str:
+                return col
+    return None
+
+# =============================
 # 🧠 PARSER ENGINE
 # =============================
 @st.cache_data(show_spinner=False)
@@ -69,50 +80,64 @@ def parse_excel(file):
     
     df = pd.read_excel(file, engine="openpyxl")
 
-    def find_col(keyword):
-        return next(c for c in df.columns if keyword in str(c).upper())
+    sn_col   = find_col(df, ["SN", "编号", "商品编号", "SKU", "货号"])
+    name_col = find_col(df, ["品", "NAME", "商品", "名称", "标题"])
+    attr_col = find_col(df, ["属", "ATTR", "属性", "规格", "参数"])
+    qty_col  = find_col(df, ["数", "QTY", "数量", "件数"])
 
-    sn_col = find_col("SN")
-    name_col = find_col("品")
-    attr_col = find_col("属")
-    qty_col = find_col("数")
+    # 🚨 防崩溃：列不存在
+    missing = []
+    if sn_col is None: missing.append("SN")
+    if name_col is None: missing.append("NAME")
+    if attr_col is None: missing.append("ATTR")
+    if qty_col is None: missing.append("QTY")
+
+    if missing:
+        st.error(f"❌ Excel 缺少关键列: {missing}")
+        st.write("📋 当前 Excel 列名：", list(df.columns))
+        return pd.DataFrame(), pd.DataFrame()
 
     valid, error = [], []
 
     for _, row in df.iterrows():
-        sn = str(row[sn_col]).strip()
-        name = str(row[name_col]).strip()
-        attr = str(row[attr_col]).strip()
-        qty_raw = str(row[qty_col]).strip()
+        try:
+            sn = str(row[sn_col]).strip()
+            name = str(row[name_col]).strip()
+            attr = str(row[attr_col]).strip()
+            qty_raw = str(row[qty_col]).strip()
 
-        if not name:
-            error.append({"Category":"EMPTY","SN":sn,"Reason":"EMPTY_ROW"})
-            continue
+            if not name or name == "nan":
+                error.append({"Category":"EMPTY","SN":sn,"Reason":"EMPTY_ROW"})
+                continue
 
-        cat = name.split()[0].upper()
-        if cat.startswith("WZ"): cat="WZ"
+            cat = name.split()[0].upper()
+            if cat.startswith("WZ"): cat="WZ"
 
-        if re.search(r'[;；]', name):
-            error.append({"Category":cat,"SN":sn,"Reason":"MULTI_ITEM"})
-            continue
+            if re.search(r'[;；]', name):
+                error.append({"Category":cat,"SN":sn,"Reason":"MULTI_ITEM"})
+                continue
 
-        qty = int(re.findall(r'\d+', qty_raw)[0]) if re.findall(r'\d+', qty_raw) else 0
+            qty_match = re.findall(r'\d+', qty_raw)
+            qty = int(qty_match[0]) if qty_match else 0
 
-        parsed=[]
-        for chunk in re.split(r'[;；]', attr):
-            c = re.search(COLOR_REG, chunk)
-            s = re.search(SIZE_REG, chunk)
-            if c:
-                clr = c.group(1).upper()
-                size = s.group(1).upper() if s else "FREE"
-                parsed.append({"Category":cat,"Color":clr,"Size":size})
+            parsed=[]
+            for chunk in re.split(r'[;；]', attr):
+                c = re.search(COLOR_REG, chunk)
+                s = re.search(SIZE_REG, chunk)
+                if c:
+                    clr = c.group(1).upper()
+                    size = s.group(1).upper() if s else "FREE"
+                    parsed.append({"Category":cat,"Color":clr,"Size":size})
 
-        if not parsed:
-            error.append({"Category":cat,"SN":sn,"Reason":"ATTR_PARSE_FAIL"})
-        elif len(parsed)!=qty:
-            error.append({"Category":cat,"SN":sn,"Reason":f"QTY_MISMATCH({len(parsed)}/{qty})"})
-        else:
-            valid.extend(parsed)
+            if not parsed:
+                error.append({"Category":cat,"SN":sn,"Reason":"ATTR_PARSE_FAIL"})
+            elif len(parsed)!=qty:
+                error.append({"Category":cat,"SN":sn,"Reason":f"QTY_MISMATCH({len(parsed)}/{qty})"})
+            else:
+                valid.extend(parsed)
+
+        except Exception as e:
+            error.append({"Category":"ERROR","SN":sn,"Reason":str(e)})
 
     return pd.DataFrame(valid), pd.DataFrame(error)
 
@@ -174,7 +199,7 @@ def render_matrix(df, error=False):
 # =============================
 # 🚀 MAIN
 # =============================
-st.markdown("<h2 style='text-align:center;margin-top:40px;'>🧊 Matrix Hub Pro</h2>", unsafe_allow_html=True)
+st.markdown("<h2 style='text-align:center;margin-top:40px;'>💎 Matrix Hub Pro</h2>", unsafe_allow_html=True)
 
 file = st.file_uploader("Upload Excel", type=["xlsx"])
 
