@@ -16,106 +16,114 @@ st.markdown(f"""
     /* 固定悬浮面板 */
     .user-profile {{
         position: fixed; top: 25px; left: 25px; display: flex; align-items: center; gap: 12px; z-index: 1000000; 
-        background: rgba(255, 255, 255, 0.05); padding: 5px 12px; border-radius: 50px;
+        background: rgba(255, 255, 255, 0.05); padding: 6px 16px 6px 6px; border-radius: 50px;
         border: 1px solid rgba(56, 189, 248, 0.3); backdrop-filter: blur(15px);
     }}
-    .avatar {{ width: 32px; height: 32px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; }}
-    .user-name {{ font-weight: 700; font-size: 0.85rem; color: #ffffff; }}
+    .avatar {{ width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; }}
+    .user-name {{ font-weight: 700; font-size: 0.95rem; color: #ffffff; }}
+    .user-status {{ font-size: 0.65rem; color: #10b981; font-weight: bold; }}
 
-    /* 标题微调 */
-    .hero-container {{ text-align: center; padding: 60px 0 20px 0; }}
+    /* 标题区域 */
+    .hero-container {{ text-align: center; padding: 100px 0 40px 0; }}
     .grand-title {{
-        font-family: 'Inter', sans-serif; font-size: 3.5rem !important; font-weight: 900; letter-spacing: 8px;
+        font-family: 'Inter', sans-serif; font-size: 4.5rem !important; font-weight: 900; letter-spacing: 10px;
         background: linear-gradient(to bottom, #ffffff 40%, #38bdf8 100%);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }}
     
-    /* --- 核心：强制 6 列横向排列 --- */
+    /* --- 核心：6列网格矩阵布局 --- */
     .grid-container {{
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: wrap !important;
-        gap: 12px !important;
-        justify-content: flex-start !important;
-        width: 100% !important;
+        display: grid;
+        grid-template-columns: repeat(6, 1fr); 
+        gap: 15px;
         padding: 20px 0;
     }}
     
+    /* 响应式：窄屏自动适配 */
+    @media (max-width: 1400px) {{ .grid-container {{ grid-template-columns: repeat(4, 1fr); }} }}
+    @media (max-width: 1000px) {{ .grid-container {{ grid-template-columns: repeat(2, 1fr); }} }}
+
     .glass-card {{
-        flex: 0 0 calc(16.66% - 12px); /* 这里的 16.66% 是关键，强制 6 等分 */
-        min-width: 150px; /* 最小保底宽度 */
+        position: relative;
         background: rgba(255, 255, 255, 0.03);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 12px;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 0;
         overflow: hidden;
-        transition: transform 0.2s ease;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         display: flex;
         flex-direction: column;
-        margin-bottom: 5px;
+        min-height: 160px;
     }}
     
     .glass-card:hover {{
-        border-color: rgba(56, 189, 248, 0.5);
-        transform: translateY(-3px);
+        border-color: rgba(56, 189, 248, 0.8);
+        background: rgba(255, 255, 255, 0.08);
+        transform: scale(1.05);
+        z-index: 10;
     }}
 
-    /* 瘦身版 Header */
     .card-header {{
-        background: rgba(56, 189, 248, 0.15);
-        padding: 4px 8px;
+        background: rgba(56, 189, 248, 0.2);
+        padding: 8px 10px;
         text-align: center;
-        border-bottom: 1px solid rgba(56, 189, 248, 0.1);
+        border-bottom: 1px solid rgba(56, 189, 248, 0.2);
     }}
     .card-cat {{
-        font-size: 0.65rem;
-        font-weight: 800;
+        font-size: 0.85rem;
+        font-weight: 900;
         color: #38bdf8;
-        letter-spacing: 1px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
     }}
 
-    /* 瘦身版 Body */
     .card-body {{
-        padding: 10px;
-        text-align: center;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex-grow: 1;
     }}
 
     .card-color {{
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #f8fafc;
-        margin-bottom: 8px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis; /* 文字过长显示省略号 */
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #ffffff;
+        margin-bottom: 10px;
+        text-align: center;
     }}
 
     .card-sizes {{
         display: flex;
         flex-wrap: wrap;
-        gap: 4px;
+        gap: 5px;
         justify-content: center;
     }}
     
     .size-pill {{
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.06);
-        padding: 1px 6px;
-        border-radius: 4px;
-        font-size: 0.7rem;
-        color: #94a3b8;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        white-space: nowrap;
     }}
-    .size-pill b {{ color: #38bdf8; }}
 
-    /* 适配窄屏 */
-    @media (max-width: 1200px) {{ .glass-card {{ flex: 0 0 calc(25% - 12px); }} }}
-    @media (max-width: 800px) {{ .glass-card {{ flex: 0 0 calc(50% - 12px); }} }}
+    .sn-button {{
+        display: inline-block; padding: 4px 14px; background: rgba(56, 189, 248, 0.15);
+        color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.4);
+        border-radius: 20px; text-decoration: none !important; font-size: 0.8rem; font-weight: 600;
+    }}
     </style>
     
     <div class="user-profile">
         <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
         <div class="user-info">
             <div class="user-name">{GITHUB_USERNAME}</div>
+            <div class="user-status">● 测试版 V0.3</div>
         </div>
     </div>
 
@@ -124,7 +132,7 @@ st.markdown(f"""
     </div>
     """, unsafe_allow_html=True)
 
-# --- 2. 核心逻辑 ---
+# --- 2. 核心解析逻辑 ---
 def process_sku_logic(uploaded_file):
     COLOR_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)'
     SIZE_REG = r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
@@ -164,23 +172,19 @@ uploaded_file = upload_container.file_uploader("", type=["xlsx"])
 
 if uploaded_file:
     upload_container.empty()
-    with st.spinner('重构矩阵方阵...'):
+    with st.spinner('恢复矩阵架构...'):
         final_df, error_df = process_sku_logic(uploaded_file)
     
     tab1, tab2 = st.tabs(["💎 结构化属性汇总", "📡 实时异常捕获"])
 
     with tab1:
         if not final_df.empty:
-            # 使用 flex 容器强制横向平铺
             st.markdown('<div class="grid-container">', unsafe_allow_html=True)
-            
             final_df = final_df.sort_values(by=['Category', 'Color'])
             unique_color_groups = final_df.groupby(['Category', 'Color'])
-            
             for (cat, clr), group in unique_color_groups:
                 size_counts = group['Size'].value_counts()
-                size_html = "".join([f'<div class="size-pill">{s if s!="" else "FREE"} <b>× {q}</b></div>' for s, q in size_counts.items()])
-                
+                size_html = "".join([f'<div class="size-pill">{s if s!="" else "FREE"} <b style="color:#38bdf8;">× {q}</b></div>' for s, q in size_counts.items()])
                 st.markdown(f"""
                     <div class="glass-card">
                         <div class="card-header"><div class="card-cat">{cat}</div></div>
@@ -190,7 +194,6 @@ if uploaded_file:
                         </div>
                     </div>
                 """, unsafe_allow_html=True)
-                
             st.markdown('</div>', unsafe_allow_html=True)
         st.button("↺ 重新部署数据源", on_click=lambda: st.rerun())
 
@@ -199,11 +202,12 @@ if uploaded_file:
             for _, err in error_df.iterrows():
                 sn_val, full_link = str(err['订单编号']), f"{BASE_URL}{err['订单编号']}"
                 st.markdown(f"""
-                <div style="background:rgba(245,158,11,0.03); border:1px solid rgba(245,158,11,0.2); border-radius:12px; padding:15px; margin-bottom:10px;">
+                <div style="background:rgba(245,158,11,0.03); border:1px solid rgba(245,158,11,0.2); border-radius:15px; padding:18px; margin-bottom:12px; backdrop-filter: blur(10px);">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div style="font-size:0.85rem;"><span style="color:#f59e0b; font-weight:bold;">LINE: {err['行号']}</span> <span style="margin-left:10px;">{err['原因']}</span></div>
-                        <a href="{full_link}" target="_blank" style="color:#38bdf8; text-decoration:none; font-size:0.8rem; border:1px solid #38bdf8; padding:2px 10px; border-radius:15px;">SN: {sn_val}</a>
+                        <div><span style="color:#f59e0b; font-weight:bold;">LINE: {err['行号']}</span> <span style="margin-left:15px;">{err['原因']}</span></div>
+                        <a href="{full_link}" target="_blank" class="sn-button">SN: {sn_val}</a>
                     </div>
+                    <div style="margin-top:10px; font-size:0.85rem; color:#94a3b8; font-family: monospace;">{err['原始属性']}</div>
                 </div>
                 """, unsafe_allow_html=True)
 
