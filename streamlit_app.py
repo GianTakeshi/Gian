@@ -47,7 +47,7 @@ st.markdown(f"""
     }}
 
     .color-card {{
-        flex: 0 0 calc(16.66% - 12px); /* 默认一行6个 */
+        flex: 0 0 calc(16.66% - 12px); 
         min-width: 150px;
         background: rgba(255, 255, 255, 0.04);
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -110,11 +110,15 @@ def process_logic(uploaded_file):
     for idx, row in df.iterrows():
         c_raw = str(row[df.columns[2]]).strip()
         g_text = str(row[df.columns[6]])
-        i_qty = int(re.findall(r'\d+', str(row[df.columns[8]]))[0]) if re.findall(r'\d+', str(row[df.columns[8]] else "0")) else 0
+        
+        # --- 修正后的数量提取逻辑 ---
+        qty_str = str(row[df.columns[8]])
+        found_qty = re.findall(r'\d+', qty_str)
+        i_qty = int(found_qty[0]) if found_qty else 0
         
         # 品类清洗
         if ';' in c_raw or '；' in c_raw:
-            error_rows.append({'行号': idx+2, '原因': '复合品类阻断'})
+            error_rows.append({'行号': idx+2, '原因': '复合品类阻断', '订单编号': str(row[df.columns[0]])})
             continue
             
         cat = c_raw.split(' ')[0].upper()
@@ -131,10 +135,10 @@ def process_logic(uploaded_file):
                 sze = s_m.group(1).strip().upper() if s_m else "FREE"
                 temp_items.append({'Category': cat, 'Color': clr, 'Size': SIZE_MAP.get(sze, sze)})
         
-        if len(temp_items) == i_qty:
+        if len(temp_items) == i_qty and i_qty > 0:
             valid_data.extend(temp_items)
         else:
-            error_rows.append({'行号': idx+2, '原因': f'数量不符({len(temp_items)}/{i_qty})'})
+            error_rows.append({'行号': idx+2, '原因': f'数量不符({len(temp_items)}/{i_qty})', '订单编号': str(row[df.columns[0]])})
             
     return pd.DataFrame(valid_data), pd.DataFrame(error_rows)
 
@@ -148,16 +152,16 @@ if file:
 
     with t1:
         if not v_df.empty:
-            # 按品类分大组
+            # 排序：品类 -> 颜色
+            v_df = v_df.sort_values(['Category', 'Color'])
+            
+            # 按品类分大组显示
             for cat, cat_group in v_df.groupby('Category'):
-                # 每一个 Category 开启一个大框
-                st.markdown(f'<div class="category-container"><div class="category-title">📂 CATEGORY: {cat}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="category-container"><div class="category-title">📂 品类分类: {cat}</div>', unsafe_allow_html=True)
                 
-                # 在大框内部，按 Color 分小组
                 color_groups = cat_group.groupby('Color')
-                
-                # 使用自定义 HTML 拼接 Color 九宫格
                 color_grid_html = '<div class="color-grid">'
+                
                 for clr, clr_group in color_groups:
                     size_counts = clr_group['Size'].value_counts()
                     size_html = "".join([f'<div class="size-mini">{s} <b>×{q}</b></div>' for s, q in size_counts.items()])
@@ -171,7 +175,11 @@ if file:
                 color_grid_html += '</div></div>'
                 st.markdown(color_grid_html, unsafe_allow_html=True)
         else:
-            st.info("暂无数据")
+            st.info("暂无有效汇总数据，请检查上传文件。")
 
     with t2:
-        st.dataframe(e_df, use_container_width=True)
+        if not e_df.empty:
+            st.warning(f"检测到 {len(e_df)} 条异常行：")
+            st.dataframe(e_df, use_container_width=True)
+        else:
+            st.success("数据解析完美！")
