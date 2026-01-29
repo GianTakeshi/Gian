@@ -8,7 +8,7 @@ st.set_page_config(page_title="SKU 属性解析中枢", page_icon="🚀", layout
 GITHUB_USERNAME = "GianTakeshi" 
 BASE_URL = "https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id="
 
-# --- 2. 注入深度定制 CSS ---
+# --- 2. 注入深度定制 CSS (包含头像点击反馈) ---
 st.markdown(f"""
     <style>
     /* 🎭 舞台光背景 */
@@ -18,17 +18,26 @@ st.markdown(f"""
     }}
     header {{visibility: hidden;}}
 
-    /* 🛡️ 用户面板 & 头像霓虹呼吸光效 */
+    /* 🛡️ 用户面板 - 增加点击物理回弹 */
     @keyframes avatarPulse {{
         0% {{ box-shadow: 0 0 5px rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.3); }}
         50% {{ box-shadow: 0 0 20px rgba(56, 189, 248, 0.6); border-color: rgba(56, 189, 248, 0.8); }}
         100% {{ box-shadow: 0 0 5px rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.3); }}
     }}
+    
     .user-profile {{
         position: fixed; top: 25px; left: 25px; display: flex; align-items: center; gap: 12px; z-index: 1000000; 
         background: rgba(255, 255, 255, 0.05); padding: 8px 20px 8px 8px; border-radius: 50px;
         border: 1px solid rgba(56, 189, 248, 0.2); backdrop-filter: blur(15px);
+        transition: all 0.2s ease; cursor: pointer; user-select: none;
     }}
+    
+    /* 💡 点击头像时的反馈：缩小 + 亮度提升 */
+    .user-profile:active {{
+        transform: scale(0.92);
+        background: rgba(56, 189, 248, 0.15);
+    }}
+
     .avatar {{ 
         width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; 
         animation: avatarPulse 2.5s infinite ease-in-out; 
@@ -42,52 +51,33 @@ st.markdown(f"""
         filter: drop-shadow(0 0 15px rgba(56, 189, 248, 0.3));
     }}
 
-    /* 🧊 毛玻璃卡片系统 */
+    /* 🧊 卡片与药丸样式保持 */
     .wide-card {{
         background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 20px; padding: 25px 30px; margin-bottom: 25px;
         display: flex; flex-direction: row; align-items: center; justify-content: space-between;
-        backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-        transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        backdrop-filter: blur(15px); transition: all 0.4s ease;
     }}
-    .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.5); }}
-    .normal-card:hover {{ background: rgba(56, 189, 248, 0.06); transform: translateY(-5px); border-color: #38bdf8; }}
-    .error-card {{ border-left: 5px solid rgba(245, 158, 11, 0.5); }}
-    .error-card:hover {{ background: rgba(245, 158, 11, 0.06); transform: translateY(-5px); border-color: #f59e0b; }}
-
-    /* 💊 交互增强药丸 Tabs */
+    .normal-card:hover {{ transform: translateY(-5px); border-color: #38bdf8; background: rgba(56, 189, 248, 0.06); }}
+    
     .stTabs [data-baseweb="tab-highlight"] {{ display: none !important; }}
     .stTabs [data-baseweb="tab-list"] {{ gap: 12px; background-color: transparent !important; border-bottom: none !important; }}
     .stTabs [data-baseweb="tab"] {{
         height: 34px !important; padding: 0 22px !important; border-radius: 50px !important;
         border: 1px solid rgba(255, 255, 255, 0.1) !important; background: rgba(255, 255, 255, 0.02) !important;
         color: rgba(255, 255, 255, 0.4) !important; transition: all 0.2s ease !important;
-        font-size: 0.85rem !important; font-weight: 600 !important;
     }}
     .stTabs [data-baseweb="tab"]:active {{ transform: scale(0.92) !important; }}
-    
-    .stTabs [data-baseweb="tab"]:nth-child(1)[aria-selected="true"] {{
-        color: #38bdf8 !important; background: rgba(56, 189, 248, 0.1) !important;
-        border: 1.5px solid #38bdf8 !important; box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
-    }}
-    .stTabs [data-baseweb="tab"]:nth-child(2)[aria-selected="true"] {{
-        color: #f59e0b !important; background: rgba(245, 158, 11, 0.1) !important;
-        border: 1.5px solid #f59e0b !important; box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
-    }}
+    .stTabs [data-baseweb="tab"]:nth-child(1)[aria-selected="true"] {{ color: #38bdf8 !important; border: 1.5px solid #38bdf8 !important; }}
+    .stTabs [data-baseweb="tab"]:nth-child(2)[aria-selected="true"] {{ color: #f59e0b !important; border: 1.5px solid #f59e0b !important; }}
 
     /* 🌪️ 内容切入动效 */
     @keyframes slideIn {{ from {{ opacity: 0; transform: translateX(12px); }} to {{ opacity: 1; transform: translateX(0); }} }}
-    [data-baseweb="tab-panel"] {{ animation: slideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); }}
+    [data-baseweb="tab-panel"] {{ animation: slideIn 0.4s ease-out; }}
 
-    /* SN 码药丸 */
-    .sn-pill {{ padding: 5px 15px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; transition: 0.2s; text-decoration: none !important; display: inline-block; }}
+    .sn-pill {{ padding: 5px 15px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; transition: 0.2s; text-decoration: none !important; }}
     .sn-pill:active {{ transform: scale(0.9) !important; }}
-    .normal-sn {{ background: rgba(56, 189, 248, 0.1); color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.2); }}
-    .normal-sn:hover {{ background: #38bdf8 !important; color: #000 !important; }}
-    .error-sn {{ background: rgba(245, 158, 11, 0.1); color: #f59e0b !important; border: 1px solid rgba(245, 158, 11, 0.3); }}
-    .error-sn:hover {{ background: #f59e0b !important; color: #000 !important; }}
 
-    /* 重制按钮 */
     div.stButton > button {{
         background: rgba(255, 255, 255, 0.03) !important; color: #38bdf8 !important;
         border: 1px solid rgba(56, 189, 248, 0.3) !important; border-radius: 50px !important;
@@ -103,15 +93,23 @@ st.markdown(f"""
     }}
     [data-testid="stFileUploader"] label, [data-testid="stFileUploader"] small {{ display: none !important; }}
     </style>
+""", unsafe_allow_html=True)
 
-    <div class="user-profile">
+# --- 3. 核心：找回头像点击重置逻辑 ---
+with st.sidebar: # 利用侧边栏隐藏真实的点击逻辑
+    if st.button("RESET", key="hidden_reset"):
+        st.rerun()
+
+# 渲染头像面板，并覆盖一个透明的“感应层”
+st.markdown(f"""
+    <div class="user-profile" onclick="document.querySelector('button[kind=secondary]').click();">
         <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
         <div style="font-size: 0.95rem; font-weight: 900; color: #fff; margin-left: 5px;">{GITHUB_USERNAME}</div>
     </div>
     <div class="hero-container"><h1 class="grand-title">SKU 属性解析中枢</h1></div>
 """, unsafe_allow_html=True)
 
-# --- 3. 核心逻辑 (略) ---
+# --- 4. 数据逻辑 ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -143,7 +141,7 @@ def process_sku_logic(uploaded_file):
             all_error_rows.append({'SN': sn, 'Line': index+2, 'Reason': f"数量异常({len(data_pairs)}/{i_qty})", 'Content': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 4. 渲染 ---
+# --- 5. 渲染 ---
 upload_zone = st.empty()
 uploaded_file = upload_zone.file_uploader("Upload", type=["xlsx"])
 
@@ -167,12 +165,10 @@ if uploaded_file:
                 sns = sorted(list(set(cat_group['SN'].tolist())))
                 sn_html = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill normal-sn">{sn}</a>' for sn in sns])
                 st.markdown(f'<div class="wide-card normal-card"><div style="flex:1;"><div style="color:#38bdf8; font-weight:900; font-size:1.6rem; margin-bottom:12px; letter-spacing:1px;">{cat}</div>{attr_html}</div><div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;">{sn_html}</div></div>', unsafe_allow_html=True)
-            if st.button("↺ 重制系统"): st.rerun()
+            if st.button("↺ 重制系统", key="manual_reset"): st.rerun()
 
     with t2:
         if not e_df.empty:
             for _, err in e_df.iterrows():
                 sn_link = f'<a href="{BASE_URL}{err["SN"]}" target="_blank" class="sn-pill error-sn">{err["SN"]}</a>'
                 st.markdown(f'<div class="wide-card error-card"><div style="flex:1;"><div style="color:#f59e0b; font-weight:900; font-size:1.1rem;">LINE {err["Line"]} | {err["Reason"]}</div><div style="font-size:0.85rem; color:#cbd5e1; margin-top:8px; line-height:1.5;">{err["Content"]}</div></div><div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;">{sn_link}</div></div>', unsafe_allow_html=True)
-        else:
-            st.success("数据校验完成，系统逻辑闭环。")
