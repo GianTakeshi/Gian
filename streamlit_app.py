@@ -14,70 +14,60 @@ st.markdown(f"""
     .hero-container {{ padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 25px; }}
     .grand-title {{ font-size: 1.8rem !important; font-weight: 800; color: #38bdf8; }}
     
-    /* 核心布局：强制横向九宫格排列 */
-    div[data-testid="stVerticalBlock"] > div:has(div.grid-unit) {{
+    /* --- 关键：强制并排的容器 --- */
+    .matrix-wrapper {{
         display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: wrap !important;
-        gap: 12px !important;
+        flex-wrap: wrap !important; /* 核心：允许换行 */
+        gap: 12px !important;      /* 单元格间距 */
+        width: 100% !important;
         justify-content: flex-start !important;
+        align-items: stretch !important;
     }}
 
     /* 单个九宫格单元 */
     .grid-unit {{
-        flex: 0 0 auto;
-        width: 160px; /* 固定宽度，实现整齐的九宫格感 */
+        flex: 0 0 160px; /* 固定宽度，不收缩 */
         background: rgba(255, 255, 255, 0.03);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 10px;
         overflow: hidden;
         display: flex;
-        flex-direction: column; /* 内部纵向排列 */
+        flex-direction: column;
         transition: all 0.2s ease;
-        margin-bottom: 5px;
     }}
     
     .grid-unit:hover {{
         border-color: #38bdf8;
-        transform: translateY(-2px);
         background: rgba(56, 189, 248, 0.05);
+        transform: translateY(-3px);
     }}
 
-    /* 顶部属性名 (Category) */
     .unit-header {{
         background: rgba(56, 189, 248, 0.2);
         color: #38bdf8;
         font-size: 0.7rem;
         font-weight: 800;
-        padding: 4px;
+        padding: 5px;
         text-align: center;
-        text-transform: uppercase;
         border-bottom: 1px solid rgba(56, 189, 248, 0.1);
     }}
 
-    /* 中间内容区 (Color) */
     .unit-body {{
-        padding: 10px 5px;
+        padding: 12px 8px;
         text-align: center;
         flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
     }}
     
     .unit-color {{
-        font-size: 0.9rem;
+        font-size: 0.95rem;
         font-weight: 700;
         color: #ffffff;
-        word-break: break-all;
-        margin-bottom: 5px;
+        margin-bottom: 8px;
     }}
 
-    /* 底部内容区 (Size) */
     .unit-footer {{
         padding: 6px;
         background: rgba(255, 255, 255, 0.02);
-        border-top: 1px solid rgba(255, 255, 255, 0.05);
         display: flex;
         flex-wrap: wrap;
         gap: 4px;
@@ -87,14 +77,11 @@ st.markdown(f"""
     .size-tag {{
         font-size: 0.7rem;
         color: #94a3b8;
-        background: rgba(255,255,255,0.05);
-        padding: 1px 5px;
+        background: rgba(255,255,255,0.06);
+        padding: 1px 6px;
         border-radius: 4px;
     }}
     .size-tag b {{ color: #38bdf8; }}
-
-    /* 异常链接 */
-    .err-link {{ color: #f59e0b; text-decoration: none; font-size: 0.8rem; }}
     </style>
     
     <div class="hero-container">
@@ -102,7 +89,7 @@ st.markdown(f"""
     </div>
     """, unsafe_allow_html=True)
 
-# --- 2. 解析逻辑 (保持不变) ---
+# --- 2. 解析逻辑 (稳定版) ---
 def process_sku_logic(uploaded_file):
     COLOR_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)'
     SIZE_REG = r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
@@ -136,7 +123,7 @@ def process_sku_logic(uploaded_file):
             all_error_rows.append({'行号': index+2, '订单编号': row[col_a], '原因': f"不匹配({len(data_pairs)}/{i_qty})"})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 3. 界面渲染 ---
+# --- 3. 渲染 ---
 uploaded_file = st.file_uploader("", type=["xlsx"])
 
 if uploaded_file:
@@ -148,12 +135,14 @@ if uploaded_file:
             final_df = final_df.sort_values(by=['Category', 'Color'])
             groups = final_df.groupby(['Category', 'Color'])
             
-            # 开始渲染横向排列的单元
+            # --- 关键改动：先拼接完整 HTML 再一次性输出 ---
+            matrix_html = '<div class="matrix-wrapper">'
+            
             for (cat, clr), group in groups:
                 size_counts = group['Size'].value_counts()
                 size_html = "".join([f'<div class="size-tag">{s if s!="" else "FREE"} <b>×{q}</b></div>' for s, q in size_counts.items()])
                 
-                st.markdown(f"""
+                matrix_html += f"""
                     <div class="grid-unit">
                         <div class="unit-header">{cat}</div>
                         <div class="unit-body">
@@ -163,13 +152,15 @@ if uploaded_file:
                             {size_html}
                         </div>
                     </div>
-                """, unsafe_allow_html=True)
+                """
+            
+            matrix_html += '</div>'
+            st.markdown(matrix_html, unsafe_allow_html=True)
         
-        st.button("↺ 重新上传")
+        st.button("↺ 刷新数据")
 
     with tab2:
         if not error_df.empty:
-            for _, err in error_df.iterrows():
-                st.markdown(f"🚩 行 {err['行号']} | {err['原因']} | SN: {err['订单编号']}")
+            st.table(error_df)
         else:
             st.success("无异常")
