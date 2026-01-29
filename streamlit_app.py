@@ -3,43 +3,104 @@ import pandas as pd
 import re
 import html
 
-# --- 1. UI 视觉配置 ---
-st.set_page_config(page_title="GianTakeshi | Matrix Hub", page_icon="💎", layout="wide")
+# --- 1. UI 视觉配置 (Grok 艺术风格) ---
+st.set_page_config(page_title="Gian Matrix", page_icon="💎", layout="wide")
 
 st.markdown(f"""
     <style>
-    .stApp {{ background: #020617; color: #ffffff; }}
+    /* 1. 基础背景：极简深空黑 */
+    .stApp {{
+        background: #000000;
+        color: #ffffff;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }}
     header {{ visibility: hidden; }}
+
+    /* 2. 背景流雾效果 (动态光影) */
+    .mist-container {{
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: 
+            radial-gradient(circle at 80% 50%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+            radial-gradient(circle at 90% 20%, rgba(139, 92, 246, 0.05) 0%, transparent 30%);
+        pointer-events: none;
+        z-index: 0;
+    }}
     
-    /* 悬浮头像 */
-    .user-profile {{
-        position: fixed; top: 20px; left: 20px; display: flex; align-items: center; gap: 12px; z-index: 99999; 
-        background: rgba(255, 255, 255, 0.05); padding: 5px 15px 5px 5px; border-radius: 50px;
-        border: 1px solid rgba(56, 189, 248, 0.3); backdrop-filter: blur(10px);
+    .mist-flow {{
+        position: fixed; top: 0; right: -50%; width: 100%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
+        transform: skewX(-20deg);
+        animation: flow 8s linear infinite;
+        z-index: 1;
+    }}
+    @keyframes flow {{
+        from {{ transform: translateX(0) skewX(-20deg); }}
+        to {{ transform: translateX(-150%) skewX(-20deg); }}
     }}
 
-    /* 内部格子样式：固定高度+内部滚动 */
-    .cat-card-inner {{
-        height: 380px;
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
-        overflow-y: auto;
-        margin-bottom: 20px;
+    /* 3. 核心标题：Gian (动态扫光) */
+    .hero-container {{
+        position: relative;
+        text-align: center;
+        padding: 80px 0 40px 0;
+        z-index: 2;
     }}
-    .cat-card-inner::-webkit-scrollbar {{ width: 4px; }}
-    .cat-card-inner::-webkit-scrollbar-thumb {{ background: rgba(56, 189, 248, 0.3); border-radius: 10px; }}
+    
+    .gian-title {{
+        font-size: 10rem;
+        font-weight: 800;
+        letter-spacing: -5px;
+        background: linear-gradient(90deg, #111, #fff, #111);
+        background-size: 80% 100%;
+        background-repeat: no-repeat;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: shine 5s linear infinite;
+        margin: 0;
+    }}
+    @keyframes shine {{
+        0% {{ background-position: -500%; }}
+        100% {{ background-position: 500%; }}
+    }}
 
-    .err-link {{ color: #38bdf8 !important; text-decoration: none; font-weight: bold; border-bottom: 1px dashed #38bdf8; }}
+    /* 4. 格子样式：Grok 悬浮玻璃 */
+    div[data-testid="stVerticalBlockBorderWrapper"] {{
+        height: 380px !important;
+        background: rgba(15, 15, 15, 0.6) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 16px !important;
+        backdrop-filter: blur(20px);
+        overflow-y: auto !important;
+        transition: border 0.3s;
+    }}
+    div[data-testid="stVerticalBlockBorderWrapper"]:hover {{
+        border: 1px solid rgba(56, 189, 248, 0.4) !important;
+    }}
+
+    /* 5. 异常链接样式 */
+    .err-link {{ 
+        color: #38bdf8 !important; 
+        text-decoration: none; 
+        border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+    }}
+    
+    /* 隐藏上传组件的默认样式以适配黑色 */
+    .stFileUploader section {{
+        background: rgba(255, 255, 255, 0.02) !important;
+        border: 1px dashed rgba(255, 255, 255, 0.2) !important;
+    }}
     </style>
     
-    <div class="user-profile">
-        <img src="https://avatars.githubusercontent.com/GianTakeshi" style="width:35px;height:35px;border-radius:50%;">
-        <div style="font-weight:700; font-size:0.85rem; color:white;">GianTakeshi</div>
+    <div class="mist-container"></div>
+    <div class="mist-flow"></div>
+    
+    <div class="hero-container">
+        <h1 class="gian-title">Gian</h1>
+        <p style="color: rgba(255,255,255,0.4); letter-spacing: 2px;">MATRIX LOGISTICS HUB</p>
     </div>
 """, unsafe_allow_html=True)
 
-# --- 2. 逻辑层 ---
+# --- 2. 逻辑层 (稳健解析) ---
 def process_data(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -50,9 +111,6 @@ def process_data(uploaded_file):
             sn, name, attr, qty_raw = str(row.iloc[1]).strip(), str(row.iloc[2]).strip(), str(row.iloc[6]).strip(), str(row.iloc[8]).strip()
             cat = name.split(' ')[0].upper()
             if cat.startswith('WZ'): cat = 'WZ'
-            if ';' in name or '；' in name:
-                error.append({'Category': cat, 'SN': sn, 'Reason': '复合品类'})
-                continue
             target_qty = int(re.findall(r'\d+', qty_raw)[0]) if re.findall(r'\d+', qty_raw) else 0
             chunks = [c.strip() for c in re.split(r'[;；]', attr) if c.strip()]
             parsed = []
@@ -63,66 +121,44 @@ def process_data(uploaded_file):
                     sze = s_m.group(1).strip().upper() if s_m else "FREE"
                     parsed.append({'Category': cat, 'SN': sn, 'Color': clr, 'Size': SIZE_MAP.get(sze, sze)})
             if len(parsed) == target_qty and parsed: valid.extend(parsed)
-            else: error.append({'Category': cat, 'SN': sn, 'Reason': f'数量不符({len(parsed)}/{target_qty})'})
+            else: error.append({'Category': cat, 'SN': sn, 'Reason': f'解析异常({len(parsed)}/{target_qty})'})
         except: continue
     return pd.DataFrame(valid), pd.DataFrame(error)
 
 # --- 3. 渲染函数 ---
-def render_item_box(cat, group, is_error):
-    head_bg = "rgba(239, 68, 68, 0.2)" if is_error else "rgba(56, 189, 248, 0.2)"
-    head_clr = "#f87171" if is_error else "#38bdf8"
-    
+def render_item(cat, group, is_error):
+    head_clr = "#f87171" if is_error else "#ffffff"
     body_html = ""
     if is_error:
         for _, r in group.iterrows():
             url = f"https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id={r['SN']}"
-            body_html += f'''
-                <div style="background:rgba(239,68,68,0.05); margin-bottom:6px; padding:8px; border-radius:6px; font-size:11px; border:1px solid rgba(239,68,68,0.1);">
-                    SN: <a class="err-link" href="{url}" target="_blank">{r['SN']}</a><br>
-                    <span style="color:#94a3b8;">{r['Reason']}</span>
-                </div>'''
+            body_html += f'<div style="margin-bottom:8px; padding:8px; font-size:11px; border-left:2px solid #ef4444; background:rgba(239,68,68,0.02);"><a class="err-link" href="{url}" target="_blank">#{r["SN"][-6:]}</a><br><span style="color:#666;">{r["Reason"]}</span></div>'
     else:
-        color_groups = group.groupby('Color')
-        for clr, clr_data in color_groups:
+        for clr, clr_data in group.groupby('Color'):
             size_stats = clr_data['Size'].value_counts().sort_index()
-            size_badges = "".join([f'<span style="background:rgba(56,189,248,0.1); padding:2px 6px; border-radius:4px; margin-left:4px; color:#fff;">{"×"+str(q) if s=="FREE" else s+"<b style=\'color:#38bdf8; margin-left:2px;\'>×"+str(q)+"</b>"}</span>' for s, q in size_stats.items()])
-            body_html += f'''
-                <div style="display:flex; align-items:center; background:rgba(255,255,255,0.05); margin-bottom:4px; padding:6px 10px; border-radius:6px; font-size:11px; border:1px solid rgba(255,255,255,0.05); flex-wrap:wrap;">
-                    <span style="color:#38bdf8; font-weight:bold; border-right:1px solid rgba(255,255,255,0.1); padding-right:8px; min-width:45px;">{html.escape(str(clr))}</span>
-                    <div style="display:flex; flex-wrap:wrap; gap:4px;">{size_badges}</div>
-                </div>'''
+            size_badges = " ".join([f'<span>{s if s!="FREE" else ""}<b>×{q}</b></span>' for s, q in size_stats.items()])
+            body_html += f'<div style="margin-bottom:10px; font-size:12px;"><div style="color:#38bdf8; font-weight:bold; margin-bottom:2px;">{clr}</div><div style="color:#888; font-size:11px;">{size_badges}</div></div>'
     
-    # 封装进内部滚动的 div
     st.markdown(f'''
-        <div class="cat-card-inner">
-            <div style="background:{head_bg}; padding:10px; text-align:center; color:{head_clr}; font-weight:900; font-size:1.1rem; border-bottom:1px solid rgba(255,255,255,0.1); position:sticky; top:0; z-index:10;">{cat}</div>
-            <div style="padding:10px;">{body_html}</div>
+        <div style="height:350px;">
+            <div style="padding:15px 0; text-align:center; color:{head_clr}; font-weight:bold; letter-spacing:1px; border-bottom:1px solid rgba(255,255,255,0.05); position:sticky; top:0; background:rgba(15,15,15,0.9); z-index:5;">{cat}</div>
+            <div style="padding:15px;">{body_html}</div>
         </div>
     ''', unsafe_allow_html=True)
 
 # --- 4. 主程序 ---
-st.markdown("<h2 style='text-align:center; padding-top:50px;'>📊 智能横向平铺看板</h2>", unsafe_allow_html=True)
 file = st.file_uploader("", type=["xlsx"])
-
 if file:
     v_df, e_df = process_data(file)
-    t1, t2 = st.tabs(["✅ 正常汇总", "❌ 异常拦截"])
+    t1, t2 = st.tabs(["EXISTING", "ANOMALY"])
     
-    # 定义每行显示几个格子（根据屏幕大小可调）
-    cols_per_row = 6 
-
+    cols_count = 6 # 基准列数
     for tab, df, is_err in zip([t1, t2], [v_df, e_df], [False, True]):
         with tab:
             if not df.empty:
-                df = df.sort_values(['Category'])
                 cat_list = list(df.groupby('Category'))
-                
-                # --- 关键：使用分行 columns 实现横向平铺 ---
-                for i in range(0, len(cat_list), cols_per_row):
-                    batch = cat_list[i : i + cols_per_row]
-                    cols = st.columns(cols_per_row) # 开启一行中的列
+                for i in range(0, len(cat_list), cols_count):
+                    cols = st.columns(cols_count)
+                    batch = cat_list[i : i + cols_count]
                     for col, (cat, g) in zip(cols, batch):
-                        with col:
-                            render_item_box(cat, g, is_err)
-            else:
-                st.info("暂无数据")
+                        with col: render_item(cat, g, is_err)
