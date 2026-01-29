@@ -23,32 +23,30 @@ st.markdown(f"""
     .avatar {{ width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; }}
 
     /* 标题 */
-    .hero-container {{ text-align: center; padding: 40px 0 10px 0; }}
+    .hero-container {{ text-align: center; padding: 60px 0 20px 0; }}
     .grand-title {{
-        font-family: 'Inter', sans-serif; font-size: 3rem !important; font-weight: 900; letter-spacing: 8px;
+        font-family: 'Inter', sans-serif; font-size: 3.2rem !important; font-weight: 900; letter-spacing: 8px;
         background: linear-gradient(to bottom, #ffffff 30%, #38bdf8 100%);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }}
 
-    /* 【核心修改】深色药丸上传框 - 定位于屏幕中下方 */
+    /* 深色药丸上传框：位置调高至 120px，解析后会被 Python 逻辑隐藏 */
     [data-testid="stFileUploader"] {{
         position: fixed;
-        bottom: 40px;
+        bottom: 120px;
         left: 50%;
         transform: translateX(-50%);
-        width: 450px;
+        width: 480px;
         z-index: 9999;
-        background: rgba(15, 23, 42, 0.8) !important;
-        border: 1px solid rgba(56, 189, 248, 0.4) !important;
+        background: rgba(15, 23, 42, 0.9) !important;
+        border: 2px solid rgba(56, 189, 248, 0.5) !important;
         border-radius: 50px !important;
-        padding: 5px 20px !important;
-        backdrop-filter: blur(15px);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        padding: 8px 25px !important;
+        backdrop-filter: blur(20px);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.6);
     }}
-    /* 隐藏上传框内部的多余文字和图标 */
-    [data-testid="stFileUploader"] section {{ padding: 0 !important; min-height: 50px !important; }}
-    [data-testid="stFileUploader"] label {{ display: none !important; }}
-    [data-testid="stFileUploader"] small {{ display: none !important; }}
+    [data-testid="stFileUploader"] section {{ padding: 0 !important; min-height: 60px !important; }}
+    [data-testid="stFileUploader"] label, [data-testid="stFileUploader"] small {{ display: none !important; }}
     
     /* 正常汇总格子样式 */
     .cat-card-inner {{
@@ -71,7 +69,7 @@ st.markdown(f"""
         <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
         <div class="user-info">
             <div class="user-name">{GITHUB_USERNAME}</div>
-            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● CONSOLE ACTIVE</div>
+            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● CONSOLE READY</div>
         </div>
     </div>
 
@@ -110,10 +108,10 @@ def process_sku_logic(uploaded_file):
         if len(data_pairs) == i_qty and i_qty > 0:
             for c_val, s_val in data_pairs: all_normal_data.append({'Category': cat, 'Color': c_val, 'Size': s_val})
         else:
-            all_error_rows.append({'行号': index + 2, '订单编号': row[col_a], '原因': f"校验失败({len(data_pairs)}/{i_qty})", '原始属性': g_text})
+            all_error_rows.append({'行号': index + 2, '订单编号': row[col_a], '原因': f"校验不匹配({len(data_pairs)}/{i_qty})", '原始属性': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 3. 正常数据渲染函数 (矩阵) ---
+# --- 3. 正常数据渲染函数 ---
 def render_normal_card(cat, group):
     body_html = ""
     for clr, clr_data in group.groupby('Color'):
@@ -124,7 +122,6 @@ def render_normal_card(cat, group):
                 <span style="color:#38bdf8; font-weight:700; font-size:10px; margin-right:6px; border-right:1px solid rgba(255,255,255,0.05); padding-right:6px; min-width:35px; white-space:nowrap;">{html.escape(str(clr))}</span>
                 <div style="display:flex; flex-wrap:wrap; gap:1px;">{size_badges}</div>
             </div>'''
-    
     st.markdown(f'''
         <div class="cat-card-inner">
             <div style="background:rgba(56,189,248,0.2); padding:8px; text-align:center; color:#38bdf8; font-weight:800; font-size:0.9rem; border-bottom:1px solid rgba(255,255,255,0.05); border-radius: 16px 16px 0 0;">{cat}</div>
@@ -132,12 +129,18 @@ def render_normal_card(cat, group):
         </div>
     ''', unsafe_allow_html=True)
 
-# --- 4. 主程序 ---
-uploaded_file = st.file_uploader("Upload XLSX", type=["xlsx"])
+# --- 4. 主程序流程控制 ---
+# 使用 empty 容器实现解析后隐藏上传框
+upload_box = st.empty()
+uploaded_file = upload_box.file_uploader("Upload XLSX", type=["xlsx"])
 
 if uploaded_file:
-    with st.spinner('ANALYZING...'):
+    # 核心步骤：解析文件
+    with st.spinner('ANALYZING DATA FLOW...'):
         v_df, e_df = process_sku_logic(uploaded_file)
+    
+    # 解析完成后，清空占位符，上传框消失
+    upload_box.empty()
     
     t1, t2 = st.tabs(["💎 结构化看板", "📡 实时异常捕获"])
 
@@ -149,7 +152,10 @@ if uploaded_file:
                 batch, cols = cat_list[i : i + cols_per_row], st.columns(cols_per_row)
                 for col, (cat, g) in zip(cols, batch):
                     with col: render_normal_card(cat, g)
-        else: st.info("请上传数据源")
+            st.markdown("<br>", unsafe_allow_html=True)
+            if st.button("↺ 重新部署数据源"):
+                st.rerun()
+        else: st.info("数据源解析为空")
 
     with t2:
         if not e_df.empty:
@@ -165,5 +171,6 @@ if uploaded_file:
                     <a href="{BASE_URL}{sn_v}" target="_blank" class="sn-button">SN: {sn_v}</a>
                 </div>
                 """, unsafe_allow_html=True)
+        else: st.success("校验全通过。")
 
-st.markdown("<div style='height:120px;'></div>", unsafe_allow_html=True)
+st.markdown("<div style='height:50px;'></div>", unsafe_allow_html=True)
