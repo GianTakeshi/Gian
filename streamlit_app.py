@@ -3,7 +3,7 @@ import pandas as pd
 import re
 import html
 
-# --- 1. UI 视觉配置 ---
+# --- 1. UI 视觉配置 (完全保留你要求的样式) ---
 st.set_page_config(page_title="GianTakeshi | Matrix Hub", page_icon="💎", layout="wide")
 
 st.markdown(f"""
@@ -24,13 +24,13 @@ st.markdown(f"""
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 12px;
         margin-bottom: 15px;
-        min-height: 160px; /* 保证高度对齐 */
+        min-height: 160px;
         display: flex;
         flex-direction: column;
         overflow: hidden;
     }}
 
-    /* 品类名称加大 */
+    /* 品类名称 */
     .cat-name {{
         background: rgba(56, 189, 248, 0.2);
         color: #38bdf8;
@@ -41,26 +41,34 @@ st.markdown(f"""
         border-bottom: 1px solid rgba(56, 189, 248, 0.1);
     }}
 
-    /* 内部胶囊容器 */
+    /* 内部容器：改为竖向排列 */
     .capsule-area {{
         padding: 10px;
         display: flex;
-        flex-wrap: wrap;
+        flex-direction: column; /* 强制颜色块竖着排 */
         gap: 6px;
-        justify-content: center;
     }}
 
-    /* 嵌套的小格子 */
+    /* 嵌套的小格子行 */
     .inner-cap {{
-        display: inline-flex;
+        display: flex; /* 改为 flex 布局实现同行对齐 */
+        align-items: center;
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 4px;
         font-size: 11px;
         background: rgba(255, 255, 255, 0.02);
+        overflow: hidden;
     }}
-    .c-clr {{ background: rgba(56, 189, 248, 0.1); padding: 2px 6px; color: #fff; font-weight: bold; border-right: 1px solid rgba(255,255,255,0.1); }}
-    .c-sze {{ padding: 2px 6px; color: #ccc; }}
-    .c-sze b {{ color: #38bdf8; }}
+    .c-clr {{ 
+        background: rgba(56, 189, 248, 0.1); 
+        padding: 4px 8px; 
+        color: #fff; 
+        font-weight: bold; 
+        border-right: 1px solid rgba(255,255,255,0.1);
+        min-width: 60px; /* 保证颜色名有一定的对齐度 */
+    }}
+    .c-sze {{ padding: 4px 8px; color: #ccc; flex-grow: 1; }}
+    .c-sze b {{ color: #38bdf8; font-size: 12px; }}
     </style>
     
     <div class="user-profile">
@@ -69,7 +77,7 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-# --- 2. 逻辑层 (保持稳健) ---
+# --- 2. 逻辑层 ---
 def process_data(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -77,7 +85,8 @@ def process_data(uploaded_file):
     valid, error = [], []
     for idx, row in df.iterrows():
         try:
-            name, attr, qty = str(row[df.columns[2]]), str(row[df.columns[6]]), str(row[df.columns[8]])
+            # 兼容性 iloc 定位
+            name, attr, qty = str(row.iloc[2]), str(row.iloc[6]), str(row.iloc[8])
             if ';' in name or '；' in name:
                 error.append({'行': idx+2, '原因': '复合品类'})
                 continue
@@ -90,14 +99,15 @@ def process_data(uploaded_file):
                 c_m, s_m = re.search(COLOR_REG, chunk), re.search(SIZE_REG, chunk)
                 if c_m:
                     clr = c_m.group(1).strip().upper()
-                    sze = s_m.group(1).strip().upper() if s_m else "FREE"
-                    parsed.append({'Category': cat, 'Color': clr, 'Size': SIZE_MAP.get(sze, sze)})
+                    sze_raw = s_m.group(1).strip().upper() if s_m else "FREE"
+                    parsed.append({'Category': cat, 'Color': clr, 'Size': SIZE_MAP.get(sze_raw, sze_raw)})
+            
             if len(parsed) == target_qty: valid.extend(parsed)
             else: error.append({'行': idx+2, '原因': f'数量不符({len(parsed)}/{target_qty})'})
         except: continue
     return pd.DataFrame(valid), pd.DataFrame(error)
 
-# --- 3. 渲染层 (恢复一排六个大格子) ---
+# --- 3. 渲染层 ---
 st.markdown("<h2 style='text-align:center; padding-top:50px;'>🚀 属性矩阵看板</h2>", unsafe_allow_html=True)
 file = st.file_uploader("", type=["xlsx"])
 
@@ -110,23 +120,28 @@ if file:
             v_df = v_df.sort_values(['Category', 'Color'])
             cat_groups = list(v_df.groupby('Category'))
             
-            # --- 关键：恢复一排 6 个 ---
             cols_per_row = 6
             for i in range(0, len(cat_groups), cols_per_row):
                 batch = cat_groups[i : i + cols_per_row]
                 cols = st.columns(cols_per_row)
                 
                 for idx, (cat, group) in enumerate(batch):
-                    # 统计该品类下所有 Color+Size 组合
+                    # 聚合 Color + Size
                     sub_stats = group.groupby(['Color', 'Size']).size().reset_index(name='count')
                     
-                    # 极简 HTML 构建胶囊，防止乱码
                     inner_html = ""
                     for _, r in sub_stats.iterrows():
                         safe_clr = html.escape(str(r['Color']))
-                        inner_html += f'<div class="inner-cap"><span class="c-clr">{safe_clr}</span><span class="c-sze">{r["Size"]} <b>×{r["count"]}</b></span></div>'
+                        # FREE 判定逻辑
+                        size_display = f'<b>×{r["count"]}</b>' if r["Size"] == "FREE" else f'{r["Size"]} <b>×{r["count"]}</b>'
+                        
+                        inner_html += f'''
+                        <div class="inner-cap">
+                            <span class="c-clr">{safe_clr}</span>
+                            <span class="c-sze">{size_display}</span>
+                        </div>
+                        '''
                     
-                    # 在对应的列渲染大盒子
                     cols[idx].markdown(f"""
                     <div class="cat-box">
                         <div class="cat-name">{cat}</div>
