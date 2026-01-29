@@ -34,8 +34,8 @@ st.markdown(f"""
     /* --- 毛玻璃卡片网格 --- */
     .grid-container {{
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-        gap: 20px;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 25px;
         padding: 20px 0;
     }}
     
@@ -45,48 +45,57 @@ st.markdown(f"""
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 20px;
-        padding: 24px 20px;
+        border-radius: 24px;
+        padding: 0; /* 改为0，内部单独控制间距 */
         overflow: hidden;
         transition: all 0.3s ease;
         display: flex;
         flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 160px;
+        min-height: 180px;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
     }}
     
     .glass-card:hover {{
-        border-color: rgba(56, 189, 248, 0.5);
-        background: rgba(255, 255, 255, 0.06);
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        border-color: rgba(56, 189, 248, 0.6);
+        background: rgba(255, 255, 255, 0.07);
+        transform: translateY(-8px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
     }}
 
-    /* 左上角类目名称 */
+    /* --- 加大显眼的类目顶部条 --- */
+    .card-header {{
+        background: rgba(56, 189, 248, 0.15);
+        padding: 8px 15px;
+        text-align: center;
+        border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+    }}
     .card-cat {{
-        position: absolute;
-        top: 12px;
-        left: 15px;
-        font-size: 0.65rem;
-        font-weight: 800;
+        font-size: 0.9rem; /* 字体加大 */
+        font-weight: 900;
         color: #38bdf8;
         text-transform: uppercase;
-        letter-spacing: 1.5px;
-        opacity: 0.8;
+        letter-spacing: 3px; /* 字间距拉开，更显眼 */
+        text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
     }}
 
-    /* 中间颜色名称 */
+    /* 中间内容区 */
+    .card-body {{
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex-grow: 1;
+    }}
+
     .card-color {{
-        font-size: 1.3rem;
+        font-size: 1.4rem;
         font-weight: 800;
         color: #ffffff;
-        margin-bottom: 15px;
+        margin-bottom: 12px;
         text-align: center;
-        letter-spacing: 0.5px;
     }}
 
-    /* 底部尺寸排版 */
     .card-sizes {{
         display: flex;
         flex-wrap: wrap;
@@ -95,12 +104,12 @@ st.markdown(f"""
     }}
     
     .size-pill {{
-        background: rgba(56, 189, 248, 0.15);
-        border: 1px solid rgba(56, 189, 248, 0.2);
-        padding: 4px 10px;
-        border-radius: 8px;
-        font-size: 0.8rem;
-        color: #e2e8f0;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 4px 12px;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        color: #f1f5f9;
     }}
 
     .sn-button {{
@@ -163,21 +172,16 @@ uploaded_file = upload_container.file_uploader("", type=["xlsx"])
 
 if uploaded_file:
     upload_container.empty()
-    with st.spinner('构建极光矩阵...'):
+    with st.spinner('同步矩阵架构...'):
         final_df, error_df = process_sku_logic(uploaded_file)
     
     tab1, tab2 = st.tabs(["💎 结构化属性汇总", "📡 实时异常捕获"])
 
     with tab1:
         if not final_df.empty:
-            # 正常数据采用全网格毛玻璃布局
             st.markdown('<div class="grid-container">', unsafe_allow_html=True)
             
-            # 按品类排序但混合排列卡片，并在卡片上标出品类
             final_df = final_df.sort_values(by=['Category', 'Color'])
-            summary = final_df.groupby(['Category', 'Color', 'Size']).size().reset_index(name='Count')
-            
-            # 为了实现你说的“中间显示Color跟Size”，我们需要重新聚合
             unique_color_groups = final_df.groupby(['Category', 'Color'])
             
             for (cat, clr), group in unique_color_groups:
@@ -186,9 +190,13 @@ if uploaded_file:
                 
                 st.markdown(f"""
                     <div class="glass-card">
-                        <div class="card-cat">{cat}</div>
-                        <div class="card-color">{clr}</div>
-                        <div class="card-sizes">{size_html}</div>
+                        <div class="card-header">
+                            <div class="card-cat">{cat}</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-color">{clr}</div>
+                            <div class="card-sizes">{size_html}</div>
+                        </div>
                     </div>
                 """, unsafe_allow_html=True)
                 
@@ -203,7 +211,7 @@ if uploaded_file:
                 st.markdown(f"""
                 <div style="background:rgba(245,158,11,0.03); border:1px solid rgba(245,158,11,0.2); border-radius:15px; padding:18px; margin-bottom:12px; backdrop-filter: blur(10px);">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div><span style="color:#f59e0b; font-weight:bold;">LINE: {err['行号']}</span> <span style="margin-left:15px; opacity:0.9;">{err['原因']}</span></div>
+                        <div><span style="color:#f59e0b; font-weight:bold;">LINE: {err['行号']}</span> <span style="margin-left:15px;">{err['原因']}</span></div>
                         <a href="{full_link}" target="_blank" class="sn-button">SN: {sn_val}</a>
                     </div>
                     <div style="margin-top:10px; font-size:0.85rem; color:#94a3b8; font-family: monospace;">{err['原始属性']}</div>
