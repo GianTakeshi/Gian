@@ -13,7 +13,7 @@ st.markdown(f"""
     .stApp {{ background: radial-gradient(circle at 50% 50%, #1e293b, #010409); color: #ffffff; }}
     header {{visibility: hidden;}}
 
-    /* 标题与头像样式（同前，保持一致性） */
+    /* 头像与标题样式 */
     .user-profile {{
         position: fixed; top: 25px; left: 25px; display: flex; align-items: center; gap: 12px; z-index: 1000000; 
         background: rgba(255, 255, 255, 0.05); padding: 6px 16px 6px 6px; border-radius: 50px;
@@ -25,10 +25,9 @@ st.markdown(f"""
         display: block; font-family: 'Inter', sans-serif; font-size: 3.2rem !important; font-weight: 900; letter-spacing: 8px;
         background: linear-gradient(to bottom, #ffffff 30%, #38bdf8 100%);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.2));
     }}
 
-    /* 核心卡片光效动画 */
+    /* 宽条卡片浮动与光效 */
     .wide-card {{
         background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 14px; padding: 16px 25px; margin-bottom: 12px;
@@ -46,7 +45,8 @@ st.markdown(f"""
         transform: translateY(-5px); box-shadow: 0 10px 30px rgba(245, 158, 11, 0.2);
     }}
 
-    /* SN 按钮样式 */
+    /* SN 按钮极右排版 */
+    .sn-grid {{ margin-left: auto; display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; max-width: 600px; }}
     .sn-pill {{
         display: inline-block; padding: 3px 14px; background: rgba(255, 255, 255, 0.03);
         color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 20px; 
@@ -54,37 +54,32 @@ st.markdown(f"""
     }}
     .sn-pill:hover {{ background: rgba(56, 189, 248, 0.2); transform: scale(1.1); box-shadow: 0 0 12px rgba(56, 189, 248, 0.4); }}
 
-    /* 自定义重新部署按钮 (模拟 st.button) */
-    .deploy-btn-container {{
-        display: flex; justify-content: center; padding: 40px 0 100px 0;
+    /* ✨ 重新部署按钮样式强化 ✨ */
+    div.stButton > button {{
+        background: rgba(56, 189, 248, 0.05) !important;
+        color: #38bdf8 !important;
+        border: 2px solid rgba(56, 189, 248, 0.4) !important;
+        border-radius: 50px !important;
+        padding: 12px 45px !important;
+        font-weight: 900 !important;
+        font-size: 1rem !important;
+        letter-spacing: 2px !important;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        display: block !important;
+        margin: 40px auto !important;
+        text-transform: uppercase !important;
+        box-shadow: 0 0 15px rgba(56, 189, 248, 0.1) !important;
     }}
-    .custom-deploy-btn {{
-        background: rgba(56, 189, 248, 0.05);
-        color: #38bdf8;
-        border: 2px solid rgba(56, 189, 248, 0.4);
-        padding: 12px 40px;
-        border-radius: 50px;
-        font-weight: 900;
-        letter-spacing: 2px;
-        cursor: pointer;
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        text-transform: uppercase;
-        box-shadow: 0 0 15px rgba(56, 189, 248, 0.1);
-        animation: breath 3s infinite ease-in-out;
+    div.stButton > button:hover {{
+        background: rgba(56, 189, 248, 0.2) !important;
+        color: #ffffff !important;
+        border-color: #38bdf8 !important;
+        transform: translateY(-8px) scale(1.05) !important;
+        box-shadow: 0 15px 35px rgba(56, 189, 248, 0.3), 0 0 20px rgba(56, 189, 248, 0.2) !important;
     }}
-    .custom-deploy-btn:hover {{
-        background: rgba(56, 189, 248, 0.2);
-        transform: translateY(-5px) scale(1.05);
-        border-color: #38bdf8;
-        box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
-        color: #ffffff;
-    }}
-    @keyframes breath {{
-        0%, 100% {{ opacity: 0.8; box-shadow: 0 0 10px rgba(56, 189, 248, 0.1); }}
-        50% {{ opacity: 1; box-shadow: 0 0 25px rgba(56, 189, 248, 0.3); }}
-    }}
+    div.stButton > button:active {{ transform: translateY(-2px) !important; }}
 
-    /* 隐藏上传组件自带的标签 */
+    /* 上传框样式保持 */
     [data-testid="stFileUploader"] {{
         position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 400px; z-index: 9999;
         background: rgba(255, 255, 255, 0.12) !important; border: 1px solid rgba(255, 255, 255, 0.2) !important;
@@ -92,12 +87,12 @@ st.markdown(f"""
     }}
     [data-testid="stFileUploader"] label, [data-testid="stFileUploader"] small {{ display: none !important; }}
     </style>
-
+    
     <div class="user-profile">
         <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
         <div class="user-info">
             <div class="user-name">{GITHUB_USERNAME}</div>
-            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● FULL INTERACTIVE</div>
+            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● INTERACTIVE HUB</div>
         </div>
     </div>
 
@@ -106,7 +101,7 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-# --- 2. 逻辑层 (略，保持原有逻辑) ---
+# --- 2. 逻辑层（保持不变） ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -146,7 +141,7 @@ upload_placeholder = st.empty()
 uploaded_file = upload_placeholder.file_uploader("Upload", type=["xlsx"])
 
 if uploaded_file:
-    with st.spinner('ENERGIZING...'):
+    with st.spinner('SYNCING...'):
         v_df, e_df = process_sku_logic(uploaded_file)
     upload_placeholder.empty()
     
@@ -171,35 +166,11 @@ if uploaded_file:
                     </div>
                 ''', unsafe_allow_html=True)
             
-            # --- 【核心修改】自定义按钮触发 ---
-            st.markdown('<div class="deploy-btn-container">', unsafe_allow_html=True)
-            if st.button("↺ 重新部署系统", key="redeploy_final", use_container_width=False):
+            # 按钮现在会自动应用上面的 CSS 特效
+            if st.button("↺ 重新部署系统"):
                 st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
-            
-            # 这里的 st.button 会被上面的 CSS .stButton>button 强制覆盖样式（如果需要极致效果建议用 html 注入，但为了功能稳健，我通过 CSS 注入到原生按钮）
-            st.markdown("""
-                <style>
-                div.stButton > button {
-                    background: rgba(56, 189, 248, 0.05) !important;
-                    color: #38bdf8 !important;
-                    border: 2px solid rgba(56, 189, 248, 0.4) !important;
-                    border-radius: 50px !important;
-                    padding: 10px 40px !important;
-                    font-weight: 900 !important;
-                    transition: all 0.4s !important;
-                    display: block; margin: 0 auto;
-                }
-                div.stButton > button:hover {
-                    background: rgba(56, 189, 248, 0.2) !important;
-                    transform: translateY(-5px) !important;
-                    box-shadow: 0 0 20px rgba(56, 189, 248, 0.4) !important;
-                    border-color: #38bdf8 !important;
-                }
-                </style>
-            """, unsafe_allow_html=True)
         else:
-            st.info("数据解析中...")
+            st.info("解析完毕，请查收。")
 
     with t2:
         if not e_df.empty:
@@ -214,3 +185,5 @@ if uploaded_file:
                         <div class="sn-grid"><a href="{BASE_URL}{err['SN']}" target="_blank" class="sn-pill" style="border-color:#f59e0b; color:#f59e0b !important;">{err['SN']}</a></div>
                     </div>
                 ''', unsafe_allow_html=True)
+        else:
+            st.success("全线通过")
