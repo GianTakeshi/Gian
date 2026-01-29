@@ -4,7 +4,7 @@ import re
 import html
 
 # --- 1. UI 配置与全局样式 ---
-st.set_page_config(page_title="GianTakeshi | Hub", page_icon="🚀", layout="wide")
+st.set_page_config(page_title="GianTakeshi | Matrix Hub", page_icon="🚀", layout="wide")
 
 GITHUB_USERNAME = "GianTakeshi" 
 BASE_URL = "https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id="
@@ -40,47 +40,39 @@ st.markdown(f"""
     }}
     [data-testid="stFileUploader"]:hover {{ border: 1px solid rgba(56, 189, 248, 0.6) !important; transform: translateX(-50%) translateY(-5px); }}
 
-    /* 通用长条卡片样式 */
+    /* 通用长条卡片 */
     .wide-card {{
         background: rgba(255, 255, 255, 0.04);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px; padding: 16px; margin-bottom: 12px;
+        border-radius: 12px; padding: 12px 20px; margin-bottom: 8px;
         display: flex; align-items: center; justify-content: space-between;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
     }}
-    .wide-card:hover {{
-        background: rgba(255, 255, 255, 0.07);
-        transform: scale(1.005);
-    }}
+    .wide-card:hover {{ background: rgba(255, 255, 255, 0.08); transform: translateX(5px); }}
 
-    /* 正常汇总特定样式 */
     .normal-card {{ border-left: 4px solid #38bdf8; }}
-    .normal-card:hover {{ border-color: #38bdf8; box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); }}
-
-    /* 异常拦截特定样式 */
     .error-card {{ border-left: 4px solid #f59e0b; background: rgba(245, 158, 11, 0.02); }}
-    .error-card:hover {{ border-color: #f59e0b; box-shadow: 0 0 15px rgba(245, 158, 11, 0.15); }}
 
-    .cat-label {{ font-weight: 800; color: #38bdf8; min-width: 120px; font-size: 1.1rem; }}
-    .badge-container {{ display: flex; flex-wrap: wrap; gap: 8px; flex: 1; margin-left: 20px; }}
-    .size-badge {{ background: rgba(56, 189, 248, 0.1); padding: 2px 10px; border-radius: 6px; color: #eee; font-size: 0.85rem; border: 1px solid rgba(56, 189, 248, 0.2); }}
+    .cat-tag {{ color: #38bdf8; font-weight: 800; font-size: 0.9rem; min-width: 100px; }}
+    .attr-info {{ flex: 1; margin-left: 20px; color: #eee; font-size: 0.9rem; }}
+    .attr-highlight {{ color: #38bdf8; font-weight: 600; margin-right: 15px; }}
 
     .sn-button {{
-        display: inline-block; padding: 5px 15px; background: rgba(56, 189, 248, 0.1);
+        display: inline-block; padding: 4px 14px; background: rgba(56, 189, 248, 0.1);
         color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 20px; 
         text-decoration: none !important; font-size: 0.8rem; font-weight: 600; transition: all 0.2s;
     }}
-    .sn-button:hover {{ background: rgba(56, 189, 248, 0.3); box-shadow: 0 0 8px #38bdf8; }}
+    .sn-button:hover {{ background: rgba(56, 189, 248, 0.3); box-shadow: 0 0 10px #38bdf8; }}
 
     [data-testid="stFileUploader"] section {{ padding: 0 !important; min-height: 60px !important; }}
     [data-testid="stFileUploader"] label, [data-testid="stFileUploader"] small {{ display: none !important; }}
     </style>
-
+    
     <div class="user-profile">
         <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
         <div class="user-info">
             <div class="user-name">{GITHUB_USERNAME}</div>
-            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● UNIFIED LAYOUT</div>
+            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● DATA SYNC ACTIVE</div>
         </div>
     </div>
 
@@ -89,24 +81,30 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-# --- 2. 逻辑层 ---
+# --- 2. 逻辑层 (增加 SN 追踪) ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
     df = pd.read_excel(uploaded_file, engine='openpyxl')
     col_a, col_c, col_g, col_i = df.columns[0], df.columns[2], df.columns[6], df.columns[8]
+    
     all_normal_data, all_error_rows = [], []
+    
     for index, row in df.iterrows():
         c_raw = str(row[col_c]).strip()
         if not c_raw or c_raw == 'nan': continue
         cat = c_raw.split(' ')[0].upper()
         if cat.startswith('WZ'): cat = 'WZ'
-        if ';' in c_raw or '；' in c_raw:
-            all_error_rows.append({'行号': index + 2, '订单编号': row[col_a], '原因': "复合品类阻断", '内容': str(row[col_g])})
-            continue
-        g_text, i_val = str(row[col_g]), str(row[col_i])
+        
+        g_text, i_val, sn = str(row[col_g]), str(row[col_i]), str(row[col_a])
         i_qty = int(re.findall(r'\d+', i_val)[0]) if re.findall(r'\d+', i_val) else 0
         chunks = re.split(r'[;；]', g_text)
+        
+        # 错误拦截：复合品类
+        if ';' in c_raw or '；' in c_raw:
+            all_error_rows.append({'SN': sn, '行号': index + 2, '原因': "复合品类阻断", '内容': g_text})
+            continue
+
         data_pairs = []
         for chunk in chunks:
             chunk = chunk.strip()
@@ -116,10 +114,14 @@ def process_sku_logic(uploaded_file):
                 clr_v = c_m.group(1).strip().upper()
                 raw_s = s_m.group(1).strip().upper() if s_m else ""
                 data_pairs.append((clr_v, SIZE_MAP.get(raw_s, raw_s)))
+        
+        # 校验数量
         if len(data_pairs) == i_qty and i_qty > 0:
-            for c_val, s_val in data_pairs: all_normal_data.append({'Category': cat, 'Color': c_val, 'Size': s_val})
+            for c_val, s_val in data_pairs:
+                all_normal_data.append({'Category': cat, 'Color': c_val, 'Size': s_val, 'SN': sn})
         else:
-            all_error_rows.append({'行号': index + 2, '订单编号': row[col_a], '原因': f"校验不符({len(data_pairs)}/{i_qty})", '内容': g_text})
+            all_error_rows.append({'SN': sn, '行号': index + 2, '原因': f"数量不符({len(data_pairs)}/{i_qty})", '内容': g_text})
+            
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
 # --- 3. 主程序流程 ---
@@ -127,39 +129,32 @@ upload_placeholder = st.empty()
 uploaded_file = upload_placeholder.file_uploader("Upload", type=["xlsx"])
 
 if uploaded_file:
-    with st.spinner('PROCESSING...'):
+    with st.spinner('SYNCING DATA...'):
         v_df, e_df = process_sku_logic(uploaded_file)
     upload_placeholder.empty()
     
-    t1, t2 = st.tabs(["💎 结构化汇总", "📡 异常实时拦截"])
+    t1, t2 = st.tabs(["💎 汇总订单流", "📡 异常拦截流"])
     
     with t1:
         if not v_df.empty:
-            for cat, group in v_df.sort_values(['Category']).groupby('Category'):
-                # 进一步按颜色聚合，以便展示
-                clr_summary = ""
-                for clr, clr_data in group.groupby('Color'):
-                    size_counts = clr_data['Size'].value_counts().sort_index()
-                    badges = " ".join([f'<span>{s}<b>×{q}</b></span>' for s, q in size_counts.items()])
-                    clr_summary += f'''
-                        <div style="display:flex; align-items:center; margin-right:20px; padding:4px 10px; background:rgba(255,255,255,0.03); border-radius:8px;">
-                            <span style="color:#38bdf8; font-weight:bold; margin-right:10px;">{clr}</span>
-                            <div class="size-badge">{badges}</div>
-                        </div>'''
-                
+            # 按品类排序显示
+            for _, r in v_df.sort_values(['Category', 'SN']).iterrows():
                 st.markdown(f'''
                     <div class="wide-card normal-card">
-                        <div class="cat-label">{cat}</div>
-                        <div class="badge-container">{clr_summary}</div>
+                        <div class="cat-tag">{r['Category']}</div>
+                        <div class="attr-info">
+                            <span class="attr-highlight">{r['Color']}</span>
+                            <span style="opacity: 0.7;">SIZE: {r['Size']}</span>
+                        </div>
+                        <a href="{BASE_URL}{r['SN']}" target="_blank" class="sn-button">SN: {r['SN']}</a>
                     </div>
                 ''', unsafe_allow_html=True)
-            if st.button("↺ 重新部署"): st.rerun()
-        else: st.info("空数据")
+            if st.button("↺ 重新加载"): st.rerun()
+        else: st.info("暂无正常数据")
 
     with t2:
         if not e_df.empty:
             for _, err in e_df.iterrows():
-                sn_v = str(err['订单编号'])
                 st.markdown(f'''
                     <div class="wide-card error-card">
                         <div style="flex: 1;">
@@ -167,7 +162,7 @@ if uploaded_file:
                             <span style="color:#ffffff; margin-left:15px; font-weight:600;">{err['原因']}</span>
                             <div style="margin-top:4px; font-size:0.8rem; color:#64748b;">{err['内容']}</div>
                         </div>
-                        <a href="{BASE_URL}{sn_v}" target="_blank" class="sn-button">SN: {sn_v}</a>
+                        <a href="{BASE_URL}{err['SN']}" target="_blank" class="sn-button">SN: {err['SN']}</a>
                     </div>
                 ''', unsafe_allow_html=True)
-        else: st.success("全部校验通过")
+        else: st.success("全线通过校验")
