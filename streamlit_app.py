@@ -3,7 +3,7 @@ import pandas as pd
 import re
 import html
 
-# --- 1. UI 视觉配置 (只保留最基础的全局样式) ---
+# --- 1. UI 视觉配置 ---
 st.set_page_config(page_title="GianTakeshi | Matrix Hub", page_icon="💎", layout="wide")
 
 st.markdown(f"""
@@ -11,7 +11,6 @@ st.markdown(f"""
     .stApp {{ background: #020617; color: #ffffff; }}
     header {{ visibility: hidden; }}
     
-    /* 悬浮头像 */
     .user-profile {{
         position: fixed; top: 20px; left: 20px; display: flex; align-items: center; gap: 12px; z-index: 99999; 
         background: rgba(255, 255, 255, 0.05); padding: 5px 15px 5px 5px; border-radius: 50px;
@@ -53,7 +52,7 @@ def process_data(uploaded_file):
         except: continue
     return pd.DataFrame(valid), pd.DataFrame(error)
 
-# --- 3. 渲染层 (改用原生容器分块渲染) ---
+# --- 3. 渲染层 ---
 st.markdown("<h2 style='text-align:center; padding-top:50px;'>🚀 属性矩阵看板</h2>", unsafe_allow_html=True)
 file = st.file_uploader("", type=["xlsx"])
 
@@ -72,25 +71,23 @@ if file:
                 cols = st.columns(cols_per_row)
                 
                 for idx, (cat, group) in enumerate(batch):
-                    # 使用原生容器 (border=True) 替代手动拼接的大盒子
                     with cols[idx].container(border=True):
-                        # 品类名头部
+                        # 渲染品类头
                         st.markdown(f"""
                             <div style="background:rgba(56, 189, 248, 0.2); margin:-1rem -1rem 10px -1rem; padding:10px; text-align:center; color:#38bdf8; font-weight:900; font-size:1.1rem; border-bottom:1px solid rgba(56,189,248,0.1);">
                                 {cat}
                             </div>
                         """, unsafe_allow_html=True)
                         
-                        # 竖向排列颜色行
                         sub_stats = group.groupby(['Color', 'Size']).size().reset_index(name='count')
                         for _, r in sub_stats.iterrows():
                             safe_clr = html.escape(str(r['Color']))
                             size_info = f"<b style='color:#38bdf8;'>×{r['count']}</b>" if r["Size"] == "FREE" else f"{r['Size']} <b style='color:#38bdf8;'>×{r['count']}</b>"
                             
-                            # 每一行独立渲染，极简 HTML 结构
+                            # 渲染颜色行
                             st.markdown(f"""
-                                <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.05); margin-bottom:4px; padding:4px 8px; border-radius:4px; font-size:12px; border:1px solid rgba(255,255,255,0.05);">
-                                    <span style="color:#38bdf8; font-weight:bold; border-right:1px solid rgba(255,255,255,0.1); padding-right:8px; min-width:50px;">{safe_clr}</span>
+                                <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.05); margin-bottom:4px; padding:4px 8px; border-radius:4px; font-size:11px; border:1px solid rgba(255,255,255,0.05);">
+                                    <span style="color:#38bdf8; font-weight:bold; border-right:1px solid rgba(255,255,255,0.1); padding-right:8px; min-width:45px;">{safe_clr}</span>
                                     <span style="color:#ccc; padding-left:8px;">{size_info}</span>
                                 </div>
                             """, unsafe_allow_html=True)
@@ -98,4 +95,5 @@ if file:
             st.info("数据解析后为空")
             
     with t2:
-        st.dataframe(e_df, use
+        # 这里就是之前报错的地方，现在括号已经完美补齐！
+        st.dataframe(e_df, use_container_width=True)
