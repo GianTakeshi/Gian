@@ -22,7 +22,7 @@ st.markdown(f"""
     }}
     .avatar {{ width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; }}
     .user-info {{ line-height: 1.1; }}
-    .user-name {{ font-size: 0.9rem; font-weight: 700; color: #fff; }}
+    .user-name {{ font-size: 0.9rem; font-weight: 900; color: #fff; }}
     
     /* 标题居中 */
     .hero-container {{ text-align: center; width: 100%; padding: 60px 0 20px 0; }}
@@ -73,6 +73,15 @@ st.markdown(f"""
     }}
     .sn-pill:hover {{ background: rgba(56, 189, 248, 0.2); transform: scale(1.1); box-shadow: 0 0 12px rgba(56, 189, 248, 0.4); }}
 
+    /* 重新部署按钮 */
+    div.stButton > button {{
+        background: rgba(56, 189, 248, 0.05) !important; color: #38bdf8 !important;
+        border: 2px solid rgba(56, 189, 248, 0.4) !important; border-radius: 50px !important;
+        padding: 12px 45px !important; font-weight: 900 !important;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        display: block !important; margin: 40px auto !important;
+    }}
+    div.stButton > button:hover {{ background: rgba(56, 189, 248, 0.2) !important; transform: translateY(-8px) !important; box-shadow: 0 15px 35px rgba(56, 189, 248, 0.3) !important; }}
 
     /* 上传框固定 */
     [data-testid="stFileUploader"] {{
@@ -115,7 +124,7 @@ def process_sku_logic(uploaded_file):
         chunks = re.split(r'[;；]', g_text)
         
         if ';' in c_raw or '；' in c_raw:
-            all_error_rows.append({'SN': sn, '行号': index + 2, '原因': "多个商品", '内容': g_text})
+            all_error_rows.append({'SN': sn, '行号': index + 2, '原因': "复合品类阻断", '内容': g_text})
             continue
 
         data_pairs = []
@@ -144,7 +153,7 @@ if uploaded_file:
     v_df, e_df = process_sku_logic(uploaded_file)
     upload_placeholder.empty()
     
-    t1, t2 = st.tabs(["汇总数据流", "异常拦截"])
+    t1, t2 = st.tabs(["💎 汇总数据流", "📡 异常拦截"])
     
     with t1:
         if not v_df.empty:
