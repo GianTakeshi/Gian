@@ -18,10 +18,10 @@ st.markdown(f"""
     }}
     header {{visibility: hidden;}}
 
-    /* 🛡️ 用户面板 & 头像呼吸光效 */
+    /* 🛡️ 用户面板 & 头像霓虹呼吸光效 */
     @keyframes avatarPulse {{
         0% {{ box-shadow: 0 0 5px rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.3); }}
-        50% {{ box-shadow: 0 0 15px rgba(56, 189, 248, 0.6); border-color: rgba(56, 189, 248, 0.8); }}
+        50% {{ box-shadow: 0 0 20px rgba(56, 189, 248, 0.6); border-color: rgba(56, 189, 248, 0.8); }}
         100% {{ box-shadow: 0 0 5px rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.3); }}
     }}
 
@@ -31,8 +31,6 @@ st.markdown(f"""
         border: 1px solid rgba(56, 189, 248, 0.2); backdrop-filter: blur(15px);
         transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
     }}
-    .user-profile:hover {{ transform: scale(1.05); background: rgba(56, 189, 248, 0.05); }}
-
     .avatar {{ 
         width: 40px; height: 40px; border-radius: 50%; 
         border: 2px solid #38bdf8; object-fit: cover; 
@@ -66,7 +64,7 @@ st.markdown(f"""
         box-shadow: 0 25px 50px rgba(0,0,0,0.6), 0 0 45px rgba(245, 158, 11, 0.35);
     }}
 
-    /* 💊 微型药丸 Tabs */
+    /* 💊 精致微药丸 Tabs (无红线) */
     .stTabs [data-baseweb="tab-highlight"] {{ display: none !important; }}
     .stTabs [data-baseweb="tab-list"] {{ gap: 12px; background-color: transparent !important; border-bottom: none !important; }}
     .stTabs [data-baseweb="tab"] {{
@@ -75,6 +73,7 @@ st.markdown(f"""
         color: rgba(255, 255, 255, 0.4) !important; transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1) !important;
         font-size: 0.85rem !important; font-weight: 600 !important;
     }}
+    /* 药丸激活状态 */
     .stTabs [data-baseweb="tab"]:nth-child(1)[aria-selected="true"] {{
         color: #38bdf8 !important; background: rgba(56, 189, 248, 0.1) !important;
         border: 1px solid #38bdf8 !important; box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
@@ -84,12 +83,14 @@ st.markdown(f"""
         border: 1px solid #f59e0b !important; box-shadow: 0 0 15px rgba(245, 158, 11, 0.25);
     }}
 
+    /* 🌪️ 内容淡入平移动效 */
     @keyframes slideIn {{
         from {{ opacity: 0; transform: translateX(15px); filter: blur(4px); }}
         to {{ opacity: 1; transform: translateX(0); filter: blur(0); }}
     }}
     [data-baseweb="tab-panel"] {{ animation: slideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1); }}
 
+    /* SN 码药丸 */
     .sn-pill {{
         padding: 5px 15px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; 
         transition: 0.3s ease; text-decoration: none !important; display: inline-block;
@@ -99,6 +100,7 @@ st.markdown(f"""
     .error-sn {{ background: rgba(245, 158, 11, 0.1); color: #f59e0b !important; border: 1px solid rgba(245, 158, 11, 0.3); }}
     .error-sn:hover {{ background: #f59e0b !important; color: #000 !important; box-shadow: 0 0 15px #f59e0b; transform: translateY(-2px); }}
 
+    /* 重制按钮与底部上传框 */
     div.stButton > button {{
         background: rgba(255, 255, 255, 0.03) !important; color: #38bdf8 !important;
         border: 1px solid rgba(56, 189, 248, 0.3) !important; border-radius: 50px !important;
@@ -158,7 +160,7 @@ def process_sku_logic(uploaded_file):
             all_error_rows.append({'SN': sn, 'Line': index+2, 'Reason': f"数量异常({len(data_pairs)}/{i_qty})", 'Content': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 4. 渲染逻辑 ---
+# --- 4. 渲染引擎 ---
 upload_zone = st.empty()
 uploaded_file = upload_zone.file_uploader("Upload", type=["xlsx"])
 
@@ -173,6 +175,7 @@ if uploaded_file:
             for cat in sorted(v_df['Category'].unique()):
                 cat_group = v_df[v_df['Category'] == cat]
                 
+                # 构建属性组 HTML
                 attr_html = ""
                 for clr in sorted(cat_group['Color'].unique()):
                     clr_group = cat_group[cat_group['Color'] == clr]
@@ -214,4 +217,4 @@ if uploaded_file:
                     </div>
                 ''', unsafe_allow_html=True)
         else:
-            st.success("数据校验完成，系统逻辑闭环。")
+            st.success("数据校验完成，未发现逻辑阻塞。")
