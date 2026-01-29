@@ -82,7 +82,7 @@ def process_sku_logic(uploaded_file):
         c_raw = str(row[col_c]).strip()
         if not c_raw or c_raw == 'nan': continue
         if ';' in c_raw or '；' in c_raw:
-            all_error_rows.append({'行号': index + 2, '订单编号': row[col_a], '品名': c_raw, '原因': "复合品类阻断", '原始属性': str(row[col_g])})
+            all_error_rows.append({'行号': index + 2, '订单编号': row[col_a], '品名': c_raw, '原因': "多个商品", '原始属性': str(row[col_g])})
             continue
         cat = c_raw.split(' ')[0].upper()
         if cat.startswith('WZ'): cat = 'WZ'
