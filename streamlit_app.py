@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import re
 import io
-import plotly.express as px  # 用于生成右侧的科技感柱状图
+import plotly.express as px
 from openpyxl.styles import PatternFill, Alignment, Border, Side
 
 # --- 1. 页面配置与深色主题 CSS ---
@@ -15,59 +15,37 @@ st.markdown("""
         background: radial-gradient(circle at top right, #1e293b, #0f172a);
         color: #ffffff;
     }
-    /* 隐藏顶部白条 */
-    header {visibility: hidden;}
-    
-    /* 自定义大标题 */
+    /* 自定义标题样式 */
     .hero-title {
-        font-size: 3.5rem !important;
+        font-size: 3rem !important;
         font-weight: 800;
         background: linear-gradient(to right, #ffffff, #94a3b8);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0px;
     }
     .hero-subtitle {
-        font-size: 2.5rem !important;
+        font-size: 2.2rem !important;
         font-weight: 700;
-        color: #38bdf8; /* 天蓝色 */
-        margin-bottom: 1.5rem;
+        color: #38bdf8;
+        margin-bottom: 1rem;
     }
-    .hero-desc {
-        color: #94a3b8;
-        font-size: 1.1rem;
-        line-height: 1.6;
-        margin-bottom: 2rem;
+    /* 底部统计栏 */
+    .stat-container {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 50px;
+        border-top: 1px solid rgba(255,255,255,0.1);
+        padding-top: 20px;
     }
-    
-    /* 上传按钮模拟样式的容器 */
-    .upload-card {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 20px;
-        padding: 30px;
-        backdrop-filter: blur(10px);
-    }
-
-    /* 真正的上传组件样式覆盖 */
-    .stFileUploader section {
-        background-color: transparent !important;
-        border: 2px dashed #38bdf8 !important;
-        border-radius: 15px !important;
-    }
-
-    /* 底部统计栏样式 */
-    .stat-box {
-        text-align: center;
-        padding: 20px;
-    }
-    .stat-val { font-size: 2rem; font-weight: bold; color: #fff; }
-    .stat-label { color: #64748b; font-size: 0.9rem; }
+    .stat-box { text-align: center; flex: 1; }
+    .stat-val { font-size: 1.8rem; font-weight: bold; margin-bottom: 0; }
+    .stat-label { color: #64748b; font-size: 0.8rem; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. 核心逻辑函数 ---
-def process_data(uploaded_file):
+# --- 2. 核心数据解析函数 ---
+def process_sku_data(uploaded_file):
     COLOR_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)'
     SIZE_REG = r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,，;；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -75,6 +53,7 @@ def process_data(uploaded_file):
     df = pd.read_excel(uploaded_file, engine='openpyxl')
     all_normal_data = []
     
+    # 假设你的列顺序：0-订单, 2-品名, 6-属性, 8-数量
     for _, row in df.iterrows():
         c_raw = str(row[df.columns[2]]).strip()
         if not c_raw or c_raw == 'nan': continue
@@ -100,62 +79,63 @@ def process_data(uploaded_file):
     return pd.DataFrame(all_normal_data)
 
 # --- 3. 页面布局 ---
-# 顶部 Logo 栏
-st.markdown("✨ **Smart Tools** &nbsp;&nbsp; Features &nbsp;&nbsp; Pricing &nbsp;&nbsp; Blog")
+st.markdown("✨ **Smart Tools** &nbsp;&nbsp;&nbsp; Features &nbsp;&nbsp; Blog &nbsp;&nbsp; Pricing")
 
-# 主内容区：左文右图
 col_left, col_right = st.columns([1, 1.2], gap="large")
 
 with col_left:
-    st.markdown("<div style='margin-top: 50px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-top: 80px;'></div>", unsafe_allow_html=True)
     st.markdown("<h1 class='hero-title'>智能商品</h1>", unsafe_allow_html=True)
     st.markdown("<h1 class='hero-subtitle'>属性汇总大师 🚀</h1>", unsafe_allow_html=True)
-    st.markdown("""
-        <p class='hero-desc'>
-        We are bringing data processing to a new level.<br>
-        一键上传，精准解析，轻松获取美化报表。
-        </p>
-    """, unsafe_allow_html=True)
+    st.markdown("<p style='color: #94a3b8;'>一键上传 Excel，自动识别 Color 与 Size，<br>生成最专业的 SKU 汇总报表。</p>", unsafe_allow_html=True)
     
-    # 上传卡片
-    with st.container():
-        uploaded_file = st.file_uploader("点击下方上传 Excel 插件", type=["xlsx"])
-        if uploaded_file:
-            st.success("文件已就绪")
+    # 文件上传
+    uploaded_file = st.file_uploader("", type=["xlsx"])
+    
+    if uploaded_file:
+        final_df = process_sku_data(uploaded_file)
+        if not final_df.empty:
+            st.success("解析成功！")
+            
+            # --- 导出美化后的 Excel ---
+            output = io.BytesIO()
+            with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                final_df.to_excel(writer, index=False, sheet_name='汇总')
+            
+            st.download_button(
+                label="📥 立即获取汇总报表",
+                data=output.getvalue(),
+                file_name=f"汇总_{uploaded_file.name}",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
 
 with col_right:
-    # 右侧放置模拟图表或实际数据预览
-    if uploaded_file:
-        final_df = process_data(uploaded_file)
-        if not final_df.empty:
-            # 生成柱状图
-            fig_df = final_df['Category'].value_counts().reset_index()
-            fig_df.columns = ['Category', 'Count']
-            fig = px.bar(fig_df, x='Category', y='Count', 
-                         color='Count', template="plotly_dark",
-                         color_continuous_scale=['#38bdf8', '#818cf8'])
-            fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
-                              margin=dict(t=20, b=20, l=20, r=20))
-            st.plotly_chart(fig, use_container_width=True)
-        else:
-            st.warning("未能解析数据")
-    else:
-        # 默认占位图（未上传时显示）
-        st.markdown("<div style='height: 100px;'></div>", unsafe_allow_html=True)
-        dummy_df = pd.DataFrame({'Category': ['WZ', 'Clothing', 'Shoes', 'Accessories'], 'Count': [20, 45, 30, 60]})
-        fig = px.bar(dummy_df, x='Category', y='Count', template="plotly_dark")
+    st.markdown("<div style='margin-top: 50px;'></div>", unsafe_allow_html=True)
+    if uploaded_file and 'final_df' in locals() and not final_df.empty:
+        # 实时生成右侧统计柱状图
+        fig_df = final_df['Category'].value_counts().reset_index()
+        fig_df.columns = ['Category', 'Count']
+        fig = px.bar(fig_df, x='Category', y='Count', 
+                     title="商品类别数量分布",
+                     color='Count',
+                     template="plotly_dark",
+                     color_continuous_scale=['#38bdf8', '#818cf8'])
         fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        # 未上传时的默认展示图表
+        st.markdown("<p style='text-align:center; color:#64748b;'>等待数据上传以生成分析图表...</p>", unsafe_allow_html=True)
+        dummy_df = pd.DataFrame({'Category': ['WZ', 'Clothing', 'Shoes', 'Socks'], 'Count': [15, 35, 20, 45]})
+        fig = px.bar(dummy_df, x='Category', y='Count', template="plotly_dark")
+        fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', opacity=0.3)
         st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-# 底部统计信息
-st.markdown("<br><br>", unsafe_allow_html=True)
-c1, c2, c3, c4 = st.columns(4)
-with c1: st.markdown("<div class='stat-box'><p class='stat-val'>Earn More</p><p class='stat-label'>快速处理</p></div>", unsafe_allow_html=True)
-with c2: st.markdown("<div class='stat-box'><p class='stat-val'>10M +</p><p class='stat-label'>数据容量</p></div>", unsafe_allow_html=True)
-with c3: st.markdown("<div class='stat-box'><p class='stat-val'>08 +</p><p class='stat-label'>报表美化</p></div>", unsafe_allow_html=True)
-with c4: st.markdown("<div class='stat-box'><p class='stat-val'>08 +</p><p class='stat-label'>智能分析</p></div>", unsafe_allow_html=True)
-
-# 处理下载逻辑
-if uploaded_file and 'final_df' in locals():
-    # 这里放置你之前写的 Excel 导出逻辑... (由于篇幅略，逻辑同前)
-    st.download_button("📥 获取美化报表", data=b"...", file_name="result.xlsx")
+# 底部展示位
+st.markdown("""
+    <div class='stat-container'>
+        <div class='stat-box'><p class='stat-val'>Earn More</p><p class='stat-label'>快速处理</p></div>
+        <div class='stat-box'><p class='stat-val'>10M +</p><p class='stat-label'>数据容量</p></div>
+        <div class='stat-box'><p class='stat-val'>08 +</p><p class='stat-label'>报表美化</p></div>
+        <div class='stat-box'><p class='stat-val'>08 +</p><p class='stat-label'>智能分析</p></div>
+    </div>
+    """, unsafe_allow_html=True)
