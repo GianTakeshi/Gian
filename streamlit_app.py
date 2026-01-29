@@ -83,14 +83,22 @@ st.markdown(f"""
     }}
     div.stButton > button:hover {{ background: rgba(56, 189, 248, 0.2) !important; transform: translateY(-8px) !important; box-shadow: 0 15px 35px rgba(56, 189, 248, 0.3) !important; }}
 
-    /* 上传框固定 */
-    [data-testid="stFileUploader"] {{
+       /* 建议：为上传框增加微弱的蓝色呼吸描边，使其更符合中枢主题 */
+    [data-testid="stFileUploader"] {
         position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 400px; z-index: 9999;
-        background: rgba(255, 255, 255, 0.12) !important; border: 1px solid rgba(255, 255, 255, 0.2) !important;
-        border-radius: 50px !important; padding: 10px 30px !important; backdrop-filter: blur(25px);
-    }}
-    [data-testid="stFileUploader"] label, [data-testid="stFileUploader"] small {{ display: none !important; }}
-    </style>
+        background: rgba(255, 255, 255, 0.08) !important; 
+        border: 1px solid rgba(56, 189, 248, 0.2) !important; /* 改为淡淡的蓝色边框 */
+        border-radius: 50px !important; padding: 10px 30px !important; 
+        backdrop-filter: blur(25px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(56, 189, 248, 0.1); /* 增加深影和微光 */
+        transition: all 0.3s ease;
+    }
+    
+    [data-testid="stFileUploader"]:hover {
+        border-color: rgba(56, 189, 248, 0.5) !important;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.2);
+    }
+
 
     <div class="user-profile">
         <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
