@@ -18,14 +18,26 @@ st.markdown(f"""
     }}
     header {{visibility: hidden;}}
 
-    /* 🛡️ 用户面板 */
+    /* 🛡️ 用户面板 & 头像呼吸光效 */
+    @keyframes avatarPulse {{
+        0% {{ box-shadow: 0 0 5px rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.3); }}
+        50% {{ box-shadow: 0 0 15px rgba(56, 189, 248, 0.6); border-color: rgba(56, 189, 248, 0.8); }}
+        100% {{ box-shadow: 0 0 5px rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.3); }}
+    }}
+
     .user-profile {{
         position: fixed; top: 25px; left: 25px; display: flex; align-items: center; gap: 12px; z-index: 1000000; 
         background: rgba(255, 255, 255, 0.05); padding: 8px 18px 8px 8px; border-radius: 50px;
         border: 1px solid rgba(56, 189, 248, 0.2); backdrop-filter: blur(15px);
-        transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); cursor: pointer;
+        transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
     }}
-    .avatar {{ width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; }}
+    .user-profile:hover {{ transform: scale(1.05); background: rgba(56, 189, 248, 0.05); }}
+
+    .avatar {{ 
+        width: 40px; height: 40px; border-radius: 50%; 
+        border: 2px solid #38bdf8; object-fit: cover; 
+        animation: avatarPulse 2.5s infinite ease-in-out; 
+    }}
     
     .hero-container {{ text-align: center; width: 100%; padding: 40px 0 20px 0; }}
     .grand-title {{
@@ -54,7 +66,7 @@ st.markdown(f"""
         box-shadow: 0 25px 50px rgba(0,0,0,0.6), 0 0 45px rgba(245, 158, 11, 0.35);
     }}
 
-    /* 💊 微型药丸 Tabs 与 内容切换动画 */
+    /* 💊 微型药丸 Tabs */
     .stTabs [data-baseweb="tab-highlight"] {{ display: none !important; }}
     .stTabs [data-baseweb="tab-list"] {{ gap: 12px; background-color: transparent !important; border-bottom: none !important; }}
     .stTabs [data-baseweb="tab"] {{
@@ -72,14 +84,12 @@ st.markdown(f"""
         border: 1px solid #f59e0b !important; box-shadow: 0 0 15px rgba(245, 158, 11, 0.25);
     }}
 
-    /* 🌪️ 内容淡入平移动效 */
     @keyframes slideIn {{
         from {{ opacity: 0; transform: translateX(15px); filter: blur(4px); }}
         to {{ opacity: 1; transform: translateX(0); filter: blur(0); }}
     }}
     [data-baseweb="tab-panel"] {{ animation: slideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1); }}
 
-    /* SN 码样式 */
     .sn-pill {{
         padding: 5px 15px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; 
         transition: 0.3s ease; text-decoration: none !important; display: inline-block;
@@ -89,7 +99,6 @@ st.markdown(f"""
     .error-sn {{ background: rgba(245, 158, 11, 0.1); color: #f59e0b !important; border: 1px solid rgba(245, 158, 11, 0.3); }}
     .error-sn:hover {{ background: #f59e0b !important; color: #000 !important; box-shadow: 0 0 15px #f59e0b; transform: translateY(-2px); }}
 
-    /* 重制按钮与底部上传 */
     div.stButton > button {{
         background: rgba(255, 255, 255, 0.03) !important; color: #38bdf8 !important;
         border: 1px solid rgba(56, 189, 248, 0.3) !important; border-radius: 50px !important;
@@ -132,7 +141,7 @@ def process_sku_logic(uploaded_file):
         g_text, i_val, sn = str(row[cols[6]]), str(row[cols[8]]), str(row[cols[0]])
         i_qty = int(re.findall(r'\d+', i_val)[0]) if re.findall(r'\d+', i_val) else 0
         if ';' in c_raw or '；' in c_raw:
-            all_error_rows.append({'SN': sn, 'Line': index+2, 'Reason': "多个商品", 'Content': g_text})
+            all_error_rows.append({'SN': sn, 'Line': index+2, 'Reason': "品类冲突", 'Content': g_text})
             continue
         chunks = [c.strip() for c in re.split(r'[;；]', g_text) if c.strip()]
         data_pairs = []
@@ -157,14 +166,13 @@ if uploaded_file:
     v_df, e_df = process_sku_logic(uploaded_file)
     upload_zone.empty() 
     
-    t1, t2 = st.tabs(["汇总数据流", "异常拦截"])
+    t1, t2 = st.tabs(["💎 汇总数据流", "📡 异常拦截"])
     
     with t1:
         if not v_df.empty:
             for cat in sorted(v_df['Category'].unique()):
                 cat_group = v_df[v_df['Category'] == cat]
                 
-                # 构建属性列表 HTML
                 attr_html = ""
                 for clr in sorted(cat_group['Color'].unique()):
                     clr_group = cat_group[cat_group['Color'] == clr]
