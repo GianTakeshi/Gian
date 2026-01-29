@@ -52,11 +52,11 @@ st.markdown(f"""
     .error-card {{ border-left: 5px solid #f59e0b; background: rgba(245, 158, 11, 0.02); }}
 
     /* 属性显示区域 */
-    .attr-cluster {{ display: flex; align-items: center; min-width: 350px; flex-shrink: 0; }}
-    .cat-label {{ color: #38bdf8; font-weight: 900; font-size: 1rem; width: 80px; }}
+    .attr-cluster {{ display: flex; align-items: center; min-width: 380px; flex-shrink: 0; }}
+    .cat-label {{ color: #38bdf8; font-weight: 900; font-size: 1rem; width: 85px; }}
     .clr-label {{ color: #ffffff; font-weight: 700; font-size: 0.95rem; min-width: 60px; margin-right: 15px; border-right: 1px solid rgba(255,255,255,0.1); padding-right: 15px; }}
     
-    /* 尺码徽章样式（恢复原样） */
+    /* 尺码徽章样式 */
     .size-badge {{ background: rgba(56, 189, 248, 0.1); padding: 2px 8px; border-radius: 6px; color: #eee; font-size: 0.8rem; border: 1px solid rgba(56, 189, 248, 0.2); margin-right: 5px; }}
     .size-badge b {{ color: #38bdf8; margin-left: 3px; }}
 
@@ -76,7 +76,7 @@ st.markdown(f"""
         <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
         <div class="user-info">
             <div class="user-name">{GITHUB_USERNAME}</div>
-            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● CLASSIC MODE + SN</div>
+            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● FREE SIZE FIXED</div>
         </div>
     </div>
 
@@ -85,7 +85,7 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-# --- 2. 逻辑层 ---
+# --- 2. 逻辑层 (修复 Size 取值) ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -110,8 +110,11 @@ def process_sku_logic(uploaded_file):
             c_m, s_m = re.search(COLOR_REG, chunk), re.search(SIZE_REG, chunk)
             if c_m:
                 clr_v = c_m.group(1).strip().upper()
-                raw_s = s_m.group(1).strip().upper() if s_m else ""
+                # 【修复核心】如果尺码正则没匹配到，或者匹配到的是空的，设为 FREE
+                raw_s = s_m.group(1).strip().upper() if s_m else "FREE"
+                if not raw_s: raw_s = "FREE"
                 data_pairs.append((clr_v, SIZE_MAP.get(raw_s, raw_s)))
+        
         if len(data_pairs) == i_qty and i_qty > 0:
             for c_val, s_val in data_pairs:
                 all_normal_data.append({'Category': cat, 'Color': c_val, 'Size': s_val, 'SN': sn})
@@ -124,7 +127,7 @@ upload_placeholder = st.empty()
 uploaded_file = upload_placeholder.file_uploader("Upload", type=["xlsx"])
 
 if uploaded_file:
-    with st.spinner('SYNCING...'):
+    with st.spinner('FIXING FREE SIZE...'):
         v_df, e_df = process_sku_logic(uploaded_file)
     upload_placeholder.empty()
     
@@ -132,12 +135,10 @@ if uploaded_file:
     
     with t1:
         if not v_df.empty:
-            # 按 Category 和 Color 分组
             for (cat, clr), group in v_df.groupby(['Category', 'Color']):
-                # 汇总尺码
                 size_counts = group['Size'].value_counts().sort_index()
-                size_html = "".join([f'<span class="size-badge">{s if s else "FREE"}<b>×{q}</b></span>' for s, q in size_counts.items()])
-                # 提取所有 SN (去重排序)
+                # 再次确保渲染时如果尺码是空或NaN，显示为 FREE
+                size_html = "".join([f'<span class="size-badge">{s if (pd.notna(s) and s != "") else "FREE"}<b>×{q}</b></span>' for s, q in size_counts.items()])
                 sns = sorted(list(set(group['SN'].tolist())))
                 sn_pills = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill">{sn}</a>' for sn in sns])
                 
