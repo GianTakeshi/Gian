@@ -30,22 +30,7 @@ st.markdown(f"""
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }}
 
-    /* 【核心修改】药丸形 Tab 切换器 */
-    .stTabs {{ max-width: 600px; margin: 0 auto 30px auto !important; }}
-    .stTabs [data-baseweb="tab-list"] {{
-        display: flex; background: rgba(255, 255, 255, 0.05);
-        border-radius: 50px; padding: 4px; border: 1px solid rgba(255, 255, 255, 0.1); gap: 0px;
-    }}
-    .stTabs [data-baseweb="tab"] {{
-        flex: 1; text-align: center; border-radius: 40px; height: 45px; border: none !important;
-        transition: all 0.3s ease; color: rgba(255, 255, 255, 0.5);
-    }}
-    .stTabs [data-baseweb="tab-highlight"] {{ display: none; }}
-    .stTabs [aria-selected="true"] {{
-        background: rgba(56, 189, 248, 0.2) !important; color: #38bdf8 !important; font-weight: 700;
-    }}
-
-    /* 看板格子样式 */
+    /* 看板格子样式：保留毛玻璃、圆角和悬浮效果 */
     .cat-card-inner {{
         height: 420px; background: rgba(255, 255, 255, 0.04) !important;
         border: 1px solid rgba(255, 255, 255, 0.1) !important; border-radius: 20px !important;
@@ -65,7 +50,7 @@ st.markdown(f"""
         <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
         <div class="user-info">
             <div class="user-name">{GITHUB_USERNAME}</div>
-            <div style="font-size: 0.65rem; color: #10b981; font-weight: bold;">● STREAMLINE MODE</div>
+            <div style="font-size: 0.65rem; color: #10b981; font-weight: bold;">● MATRIX ACTIVE</div>
         </div>
     </div>
 
@@ -104,24 +89,24 @@ def process_sku_logic(uploaded_file):
         if len(data_pairs) == i_qty and i_qty > 0:
             for c_val, s_val in data_pairs: all_normal_data.append({'Category': cat, 'Color': c_val, 'Size': s_val})
         else:
-            all_error_rows.append({'行号': index + 2, '订单编号': row[col_a], '原因': f"数量不符({len(data_pairs)}/{i_qty})", '原始属性': g_text})
+            all_error_rows.append({'行号': index + 2, '订单编号': row[col_a], '原因': f"校验不匹配({len(data_pairs)}/{i_qty})", '原始属性': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 3. 渲染看板格子的函数 (重点修改：流式显示 + 隐藏FREE) ---
+# --- 3. 渲染看板格子的函数 ---
 def render_matrix_card(cat, group):
     color_groups = group.groupby('Color')
     body_html = ""
     for clr, clr_data in color_groups:
         size_stats = clr_data['Size'].value_counts().sort_index()
-        # 处理尺寸显示逻辑：如果是空或FREE则不显示字母，只显示数量
+        # 尺寸优化显示逻辑
         size_badges = "".join([
             f'<span style="background:rgba(56,189,248,0.1); padding:2px 6px; border-radius:5px; margin:1px; color:#eee; font-size:10px;">'
-            f'{s if s not in ["", "FREE", "NAN"] else ""}' # 尺寸判空
+            f'{s if s not in ["", "FREE", "NAN", "nan"] else ""}' 
             f'<b style="color:#38bdf8; margin-left:2px;">×{q}</b></span>' 
             for s, q in size_stats.items()
         ])
         
-        # 将 Color 和 Size 放在同一个 Flex 容器内，不换行
+        # Color 与 Size 同行流式排版
         body_html += f'''
             <div style="display:flex; align-items:center; background:rgba(255,255,255,0.03); margin-bottom:6px; padding:6px 10px; border-radius:10px; border:1px solid rgba(255,255,255,0.05); flex-wrap:nowrap; overflow:hidden;">
                 <span style="color:#38bdf8; font-weight:800; font-size:11px; margin-right:8px; white-space:nowrap; border-right:1px solid rgba(255,255,255,0.1); padding-right:8px; min-width:50px;">{html.escape(str(clr))}</span>
@@ -144,8 +129,8 @@ if uploaded_file:
     with st.spinner('SYSTEM ANALYZING...'):
         final_df, error_df = process_sku_logic(uploaded_file)
     
-    # 药丸 Tab 切换
-    tab1, tab2 = st.tabs(["✅ 结构化看板", "❌ 异常拦截"])
+    # 恢复原生 Tab 样式
+    tab1, tab2 = st.tabs(["💎 结构化看板", "📡 异常捕获"])
 
     with tab1:
         if not final_df.empty:
@@ -168,3 +153,7 @@ if uploaded_file:
                     <div><span style="color:#f59e0b; font-weight:bold; font-size:0.8rem;">LINE: {err['行号']}</span><span style="color:#ffffff; margin-left:15px;">{err['原因']}</span><br><small style="color:#64748b;">{err['原始属性']}</small></div>
                     <a href="{BASE_URL}{sn_v}" target="_blank" class="sn-button">SN: {sn_v}</a>
                 </div>''', unsafe_allow_html=True)
+        else:
+            st.success("所有数据均通过校验。")
+
+st.markdown("<div style='height:100px;'></div>", unsafe_allow_html=True)
