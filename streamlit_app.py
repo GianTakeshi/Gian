@@ -5,25 +5,35 @@ import io
 from openpyxl.styles import PatternFill, Alignment, Border, Side
 
 # --- 1. 页面配置与极简深色 CSS ---
-st.set_page_config(page_title="Smart Tools | SKU汇总", layout="centered") # 改为 centered 更聚拢
+st.set_page_config(page_title="王哥专属工具", page_icon="🚀", layout="centered")
 
 st.markdown("""
     <style>
-    /* 全局背景：深色径向渐变，更有深度感 */
+    /* 全局背景：深色径向渐变 */
     .stApp {
         background: radial-gradient(circle at 50% 50%, #1e293b, #020617);
         color: #ffffff;
     }
     header {visibility: hidden;}
     
+    /* 顶部导航标题 */
+    .top-nav {
+        text-align: center; 
+        padding: 20px; 
+        color: #38bdf8; 
+        font-weight: 800;
+        font-size: 1.2rem;
+        letter-spacing: 2px;
+    }
+
     /* 标题居中设计 */
     .hero-section {
         text-align: center;
-        padding-top: 80px;
+        padding-top: 60px;
         margin-bottom: 40px;
     }
     .hero-title {
-        font-size: 3.8rem !important;
+        font-size: 4rem !important;
         font-weight: 800;
         letter-spacing: -1px;
         background: linear-gradient(to bottom, #ffffff, #94a3b8);
@@ -31,7 +41,7 @@ st.markdown("""
         -webkit-text-fill-color: transparent;
     }
     .hero-subtitle {
-        font-size: 2.2rem !important;
+        font-size: 2.5rem !important;
         font-weight: 700;
         color: #38bdf8;
         margin-top: -10px;
@@ -51,17 +61,13 @@ st.markdown("""
         background: rgba(255, 255, 255, 0.08) !important;
     }
 
-    /* 底部统计栏 */
-    .stat-container {
-        display: flex;
-        justify-content: space-around;
-        margin-top: 80px;
-        border-top: 1px solid rgba(255,255,255,0.1);
-        padding-top: 40px;
+    /* 底部版权信息 */
+    .footer {
+        text-align: center;
+        margin-top: 100px;
+        color: #475569;
+        font-size: 0.8rem;
     }
-    .stat-box { text-align: center; }
-    .stat-val { font-size: 1.6rem; font-weight: bold; color: #fff; }
-    .stat-label { color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; margin-top: 5px; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -99,14 +105,14 @@ def process_sku_data(uploaded_file):
     return pd.DataFrame(all_normal_data)
 
 # --- 3. 页面布局 ---
-# 顶部导航
-st.markdown("<div style='text-align:center; padding: 20px; color: #94a3b8; font-weight: 500;'>✨ SMART TOOLS GLOBAL</div>", unsafe_allow_html=True)
+# 顶部导航 - 已修改为王哥专属
+st.markdown("<div class='top-nav'>✨ 王哥专属工具</div>", unsafe_allow_html=True)
 
 # 主体内容
 st.markdown("<div class='hero-section'>", unsafe_allow_html=True)
 st.markdown("<h1 class='hero-title'>智能商品</h1>", unsafe_allow_html=True)
 st.markdown("<h1 class='hero-subtitle'>属性汇总大师 🚀</h1>", unsafe_allow_html=True)
-st.markdown("<p style='color: #64748b; font-size: 1.1rem;'>Professional SKU Data Processor for Global Business</p>", unsafe_allow_html=True)
+st.markdown("<p style='color: #64748b; font-size: 1.1rem;'>快速解析 SKU 属性，生成专业汇总报表</p>", unsafe_allow_html=True)
 st.markdown("</div>", unsafe_allow_html=True)
 
 # 上传组件
@@ -123,10 +129,11 @@ if uploaded_file:
                 final_df.to_excel(writer, index=False, sheet_name='SKU汇总')
             
             # 下载按钮居中处理
+            st.markdown("<br>", unsafe_allow_html=True)
             col_bt1, col_bt2, col_bt3 = st.columns([1, 2, 1])
             with col_bt2:
                 st.download_button(
-                    label="📥 立即获取美化报表",
+                    label="📥 立即获取汇总报表",
                     data=output.getvalue(),
                     file_name=f"汇总_{uploaded_file.name}",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -135,12 +142,5 @@ if uploaded_file:
         else:
             st.error("无法识别有效 SKU 数据，请检查 G 列格式。")
 
-# 底部指标
-st.markdown("""
-    <div class='stat-container'>
-        <div class='stat-box'><p class='stat-val'>Earn More</p><p class='stat-label'>快速处理</p></div>
-        <div class='stat-box'><p class='stat-val'>10M +</p><p class='stat-label'>数据容量</p></div>
-        <div class='stat-box'><p class='stat-val'>08 +</p><p class='stat-label'>报表美化</p></div>
-        <div class='stat-box'><p class='stat-val'>08 +</p><p class='stat-label'>智能分析</p></div>
-    </div>
-    """, unsafe_allow_html=True)
+# 底部版权 - 替换了原来的四个指标
+st.markdown("<div class='footer'>© 2024 王哥专属版本 | 高效办公工具</div>", unsafe_allow_html=True)
