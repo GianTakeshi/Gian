@@ -36,17 +36,14 @@ st.markdown("""
         margin-top: -10px;
     }
 
-    /* --- 核心修复：强制汉化并高亮上传区域 --- */
+    /* --- 核心修复：彻底汉化上传区域 --- */
     
-    /* 隐藏原本的英文文字 */
-    [data-testid="stFileUploadDropzone"] div div {
-        font-size: 0 !important;
-    }
-    [data-testid="stFileUploadDropzone"] div small {
-        font-size: 0 !important;
-    }
+    /* 1. 隐藏原本的英文提示和按钮文字 */
+    [data-testid="stFileUploadDropzone"] div div { font-size: 0 !important; }
+    [data-testid="stFileUploadDropzone"] div small { font-size: 0 !important; }
+    [data-testid="stFileUploadDropzone"] button { color: transparent !important; position: relative; }
 
-    /* 注入中文提示 - 主文字 */
+    /* 2. 注入中文主提示 */
     [data-testid="stFileUploadDropzone"] div div::before {
         content: "请将 Excel 文件拖拽至此处";
         font-size: 1.2rem !important;
@@ -56,7 +53,7 @@ st.markdown("""
         margin-bottom: 10px;
     }
 
-    /* 注入中文提示 - 副文字 */
+    /* 3. 注入中文副提示 */
     [data-testid="stFileUploadDropzone"] div div::after {
         content: "支持 XLSX 格式 | 最大 200MB";
         font-size: 0.9rem !important;
@@ -65,18 +62,24 @@ st.markdown("""
         display: block;
     }
 
-    /* 修改按钮文字（通过覆盖内部按钮样式） */
+    /* 4. 彻底改写 Browse files 按钮 */
+    [data-testid="stFileUploadDropzone"] button::after {
+        content: "选择文件";
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        color: #ffffff !important;
+        visibility: visible !important;
+        white-space: nowrap;
+        font-size: 1rem;
+    }
+
+    /* 按钮外框样式 */
     [data-testid="stFileUploadDropzone"] button {
         border: 1px solid #38bdf8 !important;
         background-color: rgba(56, 189, 248, 0.2) !important;
-        color: #ffffff !important;
-    }
-    [data-testid="stFileUploadDropzone"] button span::before {
-        content: "选择文件";
-        font-size: 1rem;
-    }
-    [data-testid="stFileUploadDropzone"] button span {
-        font-size: 0 !important;
+        padding: 0.5rem 2rem !important;
     }
 
     /* 上传框整体效果 */
@@ -112,14 +115,17 @@ def process_sku_data(uploaded_file):
     all_normal_data = []
     
     for _, row in df.iterrows():
+        # 品名列 (Index 2)
         c_raw = str(row[df.columns[2]]).strip()
         if not c_raw or c_raw == 'nan': continue
         cat = c_raw.split(' ')[0].upper()
         if cat.startswith('WZ'): cat = 'WZ'
         
+        # 数量列 (Index 8)
         qty_match = re.findall(r'\d+', str(row[df.columns[8]]))
         qty = int(qty_match[0]) if qty_match else 0
         
+        # 属性列 (Index 6)
         chunks = re.split(r'[;；,，\n]', str(row[df.columns[6]]))
         pairs = []
         for chunk in chunks:
