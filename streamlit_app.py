@@ -4,31 +4,27 @@ import re
 import io
 from openpyxl.styles import PatternFill, Alignment, Border, Side
 
-# --- 1. 页面配置与极简深色 CSS ---
+# --- 1. 页面配置与高亮 CSS ---
 st.set_page_config(page_title="SKU汇总工具", page_icon="🚀", layout="centered")
 
 st.markdown("""
     <style>
-    /* 全局背景：深色径向渐变 */
+    /* 全局背景 */
     .stApp {
         background: radial-gradient(circle at 50% 50%, #1e293b, #020617);
         color: #ffffff;
     }
-    /* 隐藏 Streamlit 默认的所有头部组件 */
     header {visibility: hidden;}
-    .stDeployButton {display:none;}
-    #MainMenu {visibility: hidden;}
     
-    /* 标题居中设计 */
+    /* 标题部分 */
     .hero-section {
         text-align: center;
-        padding-top: 100px; /* 增加顶部留白，替代文字位置 */
+        padding-top: 100px;
         margin-bottom: 40px;
     }
     .hero-title {
         font-size: 4rem !important;
         font-weight: 800;
-        letter-spacing: -1px;
         background: linear-gradient(to bottom, #ffffff, #94a3b8);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -39,28 +35,34 @@ st.markdown("""
         color: #38bdf8;
         margin-top: -10px;
     }
-    
-    /* 磨砂玻璃上传卡片 */
+
+    /* --- 上传区域文字高亮修复 --- */
+    /* 1. 修改 "Drag and drop file here" 和 "Limit 200MB" 的颜色 */
+    .stFileUploader label, .stFileUploader p, .stFileUploader small {
+        color: #e2e8f0 !important; /* 浅灰色/白色 */
+        font-weight: 500 !important;
+    }
+    /* 2. 修改上传框内部的说明文字 */
+    div[data-testid="stFileUploadDropzone"] div {
+        color: #38bdf8 !important; /* 天蓝色 */
+    }
+    /* 3. 上传框背景和边框 */
     .stFileUploader section {
-        background: rgba(255, 255, 255, 0.05) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        backdrop-filter: blur(12px);
+        background: rgba(255, 255, 255, 0.08) !important;
+        border: 2px dashed #38bdf8 !important;
         border-radius: 24px !important;
         padding: 40px !important;
-        transition: all 0.4s ease;
     }
-    .stFileUploader section:hover {
-        border-color: #38bdf8 !important;
-        background: rgba(255, 255, 255, 0.08) !important;
+    /* 4. 修改已上传文件的文件名颜色 */
+    .stFileUploader [data-testid="stFileUploadFileName"] {
+        color: #ffffff !important;
     }
 
-    /* 底部版权信息 - 极淡处理 */
     .footer {
         text-align: center;
         margin-top: 120px;
         color: rgba(71, 85, 105, 0.5);
         font-size: 0.75rem;
-        letter-spacing: 1px;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -99,16 +101,14 @@ def process_sku_data(uploaded_file):
     return pd.DataFrame(all_normal_data)
 
 # --- 3. 页面布局 ---
-
-# 主体内容 - 顶部已清空，直接进入主题
 st.markdown("<div class='hero-section'>", unsafe_allow_html=True)
 st.markdown("<h1 class='hero-title'>智能商品</h1>", unsafe_allow_html=True)
 st.markdown("<h1 class='hero-subtitle'>属性汇总大师 🚀</h1>", unsafe_allow_html=True)
-st.markdown("<p style='color: #64748b; font-size: 1.1rem;'>Professional SKU Data Processor</p>", unsafe_allow_html=True)
+st.markdown("<p style='color: #94a3b8; font-size: 1.1rem;'>Professional SKU Data Processor</p>", unsafe_allow_html=True)
 st.markdown("</div>", unsafe_allow_html=True)
 
-# 上传组件
-uploaded_file = st.file_uploader("", type=["xlsx"])
+# 上传组件 - 现在的提示文字会非常清晰
+uploaded_file = st.file_uploader("请上传您的 Excel 文件", type=["xlsx"])
 
 if uploaded_file:
     with st.spinner('⚡ 正在深度解析数据...'):
@@ -133,5 +133,4 @@ if uploaded_file:
         else:
             st.error("无法识别有效 SKU 数据，请检查 G 列格式。")
 
-# 底部极淡版权
 st.markdown("<div class='footer'>EFFICIENT WORKFLOW | POWERED BY STREAMLIT</div>", unsafe_allow_html=True)
