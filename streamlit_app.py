@@ -36,26 +36,38 @@ st.markdown("""
         margin-top: -10px;
     }
 
-    /* --- 上传区域文字高亮修复 --- */
-    /* 1. 修改 "Drag and drop file here" 和 "Limit 200MB" 的颜色 */
-    .stFileUploader label, .stFileUploader p, .stFileUploader small {
-        color: #e2e8f0 !important; /* 浅灰色/白色 */
-        font-weight: 500 !important;
-    }
-    /* 2. 修改上传框内部的说明文字 */
-    div[data-testid="stFileUploadDropzone"] div {
-        color: #38bdf8 !important; /* 天蓝色 */
-    }
-    /* 3. 上传框背景和边框 */
-    .stFileUploader section {
-        background: rgba(255, 255, 255, 0.08) !important;
-        border: 2px dashed #38bdf8 !important;
-        border-radius: 24px !important;
-        padding: 40px !important;
-    }
-    /* 4. 修改已上传文件的文件名颜色 */
-    .stFileUploader [data-testid="stFileUploadFileName"] {
+    /* --- 核心修复：上传区域文字全高亮 --- */
+    
+    /* 1. 针对 "Drag and drop file here" */
+    [data-testid="stFileUploadDropzone"] div div {
         color: #ffffff !important;
+        font-size: 1.1rem !important;
+    }
+
+    /* 2. 针对 "Limit 200MB per file • XLSX" */
+    [data-testid="stFileUploadDropzone"] div small {
+        color: #94a3b8 !important; /* 浅灰蓝色，更清晰 */
+        font-size: 0.9rem !important;
+    }
+
+    /* 3. 针对上传框内部的按钮（Browse files） */
+    [data-testid="stFileUploadDropzone"] button {
+        border: 1px solid #38bdf8 !important;
+        background-color: rgba(56, 189, 248, 0.1) !important;
+        color: #38bdf8 !important;
+    }
+
+    /* 4. 上传框整体美化 */
+    .stFileUploader section {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 2px dashed rgba(56, 189, 248, 0.5) !important;
+        border-radius: 24px !important;
+        padding: 50px 20px !important;
+    }
+    
+    /* 5. 已上传文件名的颜色 */
+    [data-testid="stFileUploadFileName"] {
+        color: #38bdf8 !important;
     }
 
     .footer {
@@ -107,8 +119,8 @@ st.markdown("<h1 class='hero-subtitle'>属性汇总大师 🚀</h1>", unsafe_all
 st.markdown("<p style='color: #94a3b8; font-size: 1.1rem;'>Professional SKU Data Processor</p>", unsafe_allow_html=True)
 st.markdown("</div>", unsafe_allow_html=True)
 
-# 上传组件 - 现在的提示文字会非常清晰
-uploaded_file = st.file_uploader("请上传您的 Excel 文件", type=["xlsx"])
+# 上传组件 - 标签设为空，CSS 会处理内部文字
+uploaded_file = st.file_uploader("", type=["xlsx"])
 
 if uploaded_file:
     with st.spinner('⚡ 正在深度解析数据...'):
