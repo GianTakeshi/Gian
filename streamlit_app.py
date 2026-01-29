@@ -67,7 +67,7 @@ st.markdown(f"""
     </div>
 
     <div class="hero-container">
-        <h1 class="grand-title">属性看板中枢</h1>
+        <h1 class="grand-title">王哥</h1>
     </div>
 """, unsafe_allow_html=True)
 
