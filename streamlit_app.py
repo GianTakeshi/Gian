@@ -7,8 +7,9 @@ from openpyxl.styles import PatternFill, Alignment, Border, Side
 # --- 1. 页面配置 ---
 st.set_page_config(page_title="SKU汇总工具", page_icon="🚀", layout="centered")
 
-## ----------------- GitHub 用户名设置 ----------------- ##
-GITHUB_USERNAME = "gian-code" # <-- 宝宝，这里填入你的 GitHub 用户名
+## ----------------- 请确认这里的用户名 ----------------- ##
+# 比如你的主页是 https://github.com/gian-code，那这里就填 gian-code
+GITHUB_USERNAME = "gian-code" 
 ## --------------------------------------------------- ##
 
 st.markdown(f"""
@@ -20,32 +21,49 @@ st.markdown(f"""
     }}
     header {{visibility: hidden;}}
 
-    /* --- 左上角头像样式 --- */
+    /* --- 精修左上角个人资料 --- */
     .user-profile {{
         position: fixed;
-        top: 20px;
-        left: 20px;
+        top: 25px;
+        left: 25px;
         display: flex;
         align-items: center;
-        gap: 12px;
-        z-index: 999;
-        background: rgba(255, 255, 255, 0.05);
-        padding: 8px 15px;
-        border-radius: 50px;
-        border: 1px solid rgba(56, 189, 248, 0.2);
-        backdrop-filter: blur(10px);
+        gap: 15px;
+        z-index: 9999;
+        background: rgba(255, 255, 255, 0.03);
+        padding: 6px 18px 6px 6px;
+        border-radius: 60px;
+        border: 1px solid rgba(56, 189, 248, 0.3);
+        backdrop-filter: blur(15px);
+        transition: all 0.3s ease;
+    }}
+    .user-profile:hover {{
+        background: rgba(255, 255, 255, 0.08);
+        border-color: #38bdf8;
+        box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
     }}
     .avatar {{
-        width: 35px;
-        height: 35px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
+        object-fit: cover;
         border: 2px solid #38bdf8;
-        box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        background-color: #0f172a; /* 防止加载前白边 */
+    }}
+    .user-info {{
+        display: flex;
+        flex-direction: column;
     }}
     .user-name {{
-        font-weight: 600;
-        font-size: 0.9rem;
-        color: #e2e8f0;
+        font-weight: 700;
+        font-size: 0.85rem;
+        color: #ffffff;
+        letter-spacing: 0.5px;
+    }}
+    .user-status {{
+        font-size: 0.65rem;
+        color: #38bdf8;
+        text-transform: uppercase;
     }}
 
     /* 标题部分 */
@@ -68,15 +86,14 @@ st.markdown(f"""
         margin-top: -10px;
     }}
 
-    /* --- 终极汉化方案 --- */
+    /* --- 上传区域汉化 --- */
     [data-testid="stFileUploadDropzone"] > div {{ color: transparent !important; }}
     [data-testid="stFileUploadDropzone"] button {{
         color: transparent !important;
         background-color: #38bdf8 !important;
         border: none !important;
         position: relative;
-        width: 140px;
-        height: 45px;
+        width: 140px; height: 45px;
     }}
     [data-testid="stFileUploadDropzone"]::before {{
         content: "请将 Excel 文件拖拽至此处";
@@ -98,25 +115,20 @@ st.markdown(f"""
         background: rgba(255, 255, 255, 0.05) !important;
         border: 2px dashed #38bdf8 !important;
         border-radius: 24px !important;
-        min-height: 250px;
-        display: flex; justify-content: center; align-items: center;
-    }}
-
-    .footer {{
-        text-align: center;
-        margin-top: 100px;
-        color: rgba(71, 85, 105, 0.6);
-        font-size: 0.8rem;
+        min-height: 250px; display: flex; justify-content: center; align-items: center;
     }}
     </style>
     
     <div class="user-profile">
-        <img src="https://github.com/{GITHUB_USERNAME}.png" class="avatar" alt="Avatar">
-        <span class="user-name">{GITHUB_USERNAME}</span>
+        <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar" alt="Avatar">
+        <div class="user-info">
+            <span class="user-name">{GITHUB_USERNAME}</span>
+            <span class="user-status">已连接</span>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
-# --- 2. 逻辑函数 ---
+# --- 后续逻辑处理与之前一致 ---
 def process_sku_data(uploaded_file):
     COLOR_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)'
     SIZE_REG = r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,，;；]))'
@@ -144,7 +156,6 @@ def process_sku_data(uploaded_file):
                 all_normal_data.append({'Category': cat, 'Color': cv, 'Size': sv})
     return pd.DataFrame(all_normal_data)
 
-# --- 3. 布局 ---
 st.markdown("<div class='hero-section'>", unsafe_allow_html=True)
 st.markdown("<h1 class='hero-title'>智能商品</h1>", unsafe_allow_html=True)
 st.markdown("<h1 class='hero-subtitle'>属性汇总大师 🚀</h1>", unsafe_allow_html=True)
@@ -161,7 +172,6 @@ if uploaded_file:
             output = io.BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
                 final_df.to_excel(writer, index=False, sheet_name='汇总')
-            
             st.markdown("<br>", unsafe_allow_html=True)
             col1, col2, col3 = st.columns([1, 2, 1])
             with col2:
@@ -169,4 +179,4 @@ if uploaded_file:
         else:
             st.error("未识别到 SKU 数据")
 
-st.markdown("<div class='footer'>高效工作流 | 纯净中文版</div>", unsafe_allow_html=True)
+st.markdown("<div style='text-align: center; margin-top: 100px; color: rgba(71, 85, 105, 0.6); font-size: 0.8rem;'>高效工作流 | 纯净中文版</div>", unsafe_allow_html=True)
