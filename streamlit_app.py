@@ -2,8 +2,8 @@ import streamlit as st
 import pandas as pd
 import re
 
-# --- 1. 顶部 UI 增强 ---
-st.set_page_config(page_title="GianTakeshi | Matrix", page_icon="💎", layout="wide")
+# --- 1. UI 配置与样式 ---
+st.set_page_config(page_title="GianTakeshi | Category Matrix", page_icon="📦", layout="wide")
 
 GITHUB_USERNAME = "GianTakeshi"
 
@@ -19,169 +19,159 @@ st.markdown(f"""
         border: 1px solid rgba(56, 189, 248, 0.3); backdrop-filter: blur(15px);
     }}
     .avatar {{ width: 35px; height: 35px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; }}
-    .user-name {{ font-weight: 700; font-size: 0.85rem; color: #ffffff; }}
 
-    /* 每个属性框的独立样式 */
-    .attr-box {{
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 14px;
-        margin-bottom: 15px;
-        height: 140px;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* --- 品类大框容器 --- */
+    .category-container {{
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 20px;
+        margin-bottom: 30px;
     }}
     
-    .attr-box:hover {{
-        border-color: #38bdf8;
-        background: rgba(56, 189, 248, 0.08);
-        transform: translateY(-4px);
-        box-shadow: 0 10px 20px -10px rgba(56, 189, 248, 0.3);
-    }}
-
-    .box-header {{
-        background: rgba(56, 189, 248, 0.15);
-        color: #38bdf8;
-        font-size: 0.75rem;
+    .category-title {{
+        font-size: 1.5rem;
         font-weight: 900;
-        padding: 6px;
-        text-align: center;
-        letter-spacing: 1px;
-        border-bottom: 1px solid rgba(56, 189, 248, 0.1);
+        color: #38bdf8;
+        margin-bottom: 20px;
+        padding-left: 10px;
+        border-left: 5px solid #38bdf8;
+        letter-spacing: 2px;
     }}
 
-    .box-content {{
-        flex-grow: 1;
+    /* --- 内部 Color 九宫格布局 --- */
+    .color-grid {{
         display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 10px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }}
+
+    .color-card {{
+        flex: 0 0 calc(16.66% - 12px); /* 默认一行6个 */
+        min-width: 150px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 12px;
         text-align: center;
+        transition: all 0.2s;
     }}
     
-    .box-color {{
-        font-size: 1rem;
+    .color-card:hover {{
+        border-color: #38bdf8;
+        background: rgba(56, 189, 248, 0.1);
+        transform: translateY(-3px);
+    }}
+
+    .color-name {{
+        font-size: 0.95rem;
         font-weight: 800;
         color: #ffffff;
-        line-height: 1.2;
+        margin-bottom: 10px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        padding-bottom: 5px;
     }}
 
-    .box-footer {{
-        background: rgba(0, 0, 0, 0.2);
-        padding: 6px;
+    .size-row {{
         display: flex;
         flex-wrap: wrap;
         gap: 4px;
         justify-content: center;
-        min-height: 32px;
     }}
     
-    .size-badge {{
-        font-size: 0.65rem;
+    .size-mini {{
+        font-size: 0.7rem;
         color: #94a3b8;
-        background: rgba(255,255,255,0.08);
+        background: rgba(0,0,0,0.3);
         padding: 1px 6px;
         border-radius: 4px;
-        border: 1px solid rgba(255,255,255,0.05);
     }}
-    .size-badge b {{ color: #38bdf8; font-weight: 900; }}
+    .size-mini b {{ color: #38bdf8; }}
     </style>
 
     <div class="user-profile">
         <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
-        <div class="user-name">{GITHUB_USERNAME}</div>
+        <div class="user-info">
+            <div style="font-weight:700; font-size:0.85rem;">{GITHUB_USERNAME}</div>
+        </div>
     </div>
 """, unsafe_allow_html=True)
 
-# --- 2. 逻辑层：过滤错误并聚合 ---
-def process_data(uploaded_file):
+# --- 2. 逻辑处理 ---
+def process_logic(uploaded_file):
     COLOR_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)'
     SIZE_REG = r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
     
     df = pd.read_excel(uploaded_file, engine='openpyxl')
-    cols = df.columns
-    
-    valid_list = []
-    error_list = []
+    valid_data = []
+    error_rows = []
     
     for idx, row in df.iterrows():
-        # 获取基础信息
-        item_name = str(row[cols[2]]).strip()
-        attr_text = str(row[cols[6]])
-        qty_val = str(row[cols[8]])
-        order_sn = str(row[cols[0]])
-
-        # 1. 过滤复合品类
-        if ';' in item_name or '；' in item_name:
-            error_list.append({'行号': idx+2, '订单号': order_sn, '原因': '复合品类阻断'})
-            continue
-
-        # 2. 解析属性
-        target_qty = int(re.findall(r'\d+', qty_val)[0]) if re.findall(r'\d+', qty_val) else 0
-        chunks = [c.strip() for c in re.split(r'[;；]', attr_text) if c.strip()]
+        c_raw = str(row[df.columns[2]]).strip()
+        g_text = str(row[df.columns[6]])
+        i_qty = int(re.findall(r'\d+', str(row[df.columns[8]]))[0]) if re.findall(r'\d+', str(row[df.columns[8]] else "0")) else 0
         
-        parsed_items = []
+        # 品类清洗
+        if ';' in c_raw or '；' in c_raw:
+            error_rows.append({'行号': idx+2, '原因': '复合品类阻断'})
+            continue
+            
+        cat = c_raw.split(' ')[0].upper()
+        if cat.startswith('WZ'): cat = 'WZ'
+        
+        # 属性解析
+        chunks = [c.strip() for c in re.split(r'[;；]', g_text) if c.strip()]
+        temp_items = []
         for chunk in chunks:
             c_m = re.search(COLOR_REG, chunk)
             s_m = re.search(SIZE_REG, chunk)
             if c_m:
                 clr = c_m.group(1).strip().upper()
                 sze = s_m.group(1).strip().upper() if s_m else "FREE"
-                parsed_items.append({'Color': clr, 'Size': SIZE_MAP.get(sze, sze)})
+                temp_items.append({'Category': cat, 'Color': clr, 'Size': SIZE_MAP.get(sze, sze)})
         
-        # 3. 校验数量
-        if len(parsed_items) == target_qty and target_qty > 0:
-            cat = item_name.split(' ')[0].upper()
-            if cat.startswith('WZ'): cat = 'WZ'
-            for item in parsed_items:
-                item['Category'] = cat
-                valid_list.append(item)
+        if len(temp_items) == i_qty:
+            valid_data.extend(temp_items)
         else:
-            error_list.append({'行号': idx+2, '订单号': order_sn, '原因': f'数量不符({len(parsed_items)}/{target_qty})'})
+            error_rows.append({'行号': idx+2, '原因': f'数量不符({len(temp_items)}/{i_qty})'})
+            
+    return pd.DataFrame(valid_data), pd.DataFrame(error_rows)
 
-    return pd.DataFrame(valid_list), pd.DataFrame(error_list)
-
-# --- 3. 渲染层 ---
-st.markdown("<h2 style='text-align:center; padding-top:40px;'>💎 属性矩阵看板</h2>", unsafe_allow_html=True)
+# --- 3. 渲染 ---
+st.markdown("<h1 style='text-align:center; padding-top:60px;'>📦 品类聚合阵列</h1>", unsafe_allow_html=True)
 file = st.file_uploader("", type=["xlsx"])
 
 if file:
-    v_df, e_df = process_data(file)
-    t1, t2 = st.tabs(["✅ 正确汇总", "❌ 异常拦截"])
+    v_df, e_df = process_logic(file)
+    t1, t2 = st.tabs(["💎 聚合汇总", "📡 异常报告"])
 
     with t1:
         if not v_df.empty:
-            # 排序并分组：确保每个属性组合只占一个框
-            v_df = v_df.sort_values(['Category', 'Color'])
-            groups = list(v_df.groupby(['Category', 'Color']))
-            
-            # 核心：每行 6 个框排开
-            row_size = 6
-            for i in range(0, len(groups), row_size):
-                batch = groups[i : i + row_size]
-                cols = st.columns(row_size)
-                for j, ((cat, clr), data) in enumerate(batch):
-                    sizes = data['Size'].value_counts()
-                    size_html = "".join([f'<div class="size-badge">{s} <b>×{q}</b></div>' for s, q in sizes.items()])
+            # 按品类分大组
+            for cat, cat_group in v_df.groupby('Category'):
+                # 每一个 Category 开启一个大框
+                st.markdown(f'<div class="category-container"><div class="category-title">📂 CATEGORY: {cat}</div>', unsafe_allow_html=True)
+                
+                # 在大框内部，按 Color 分小组
+                color_groups = cat_group.groupby('Color')
+                
+                # 使用自定义 HTML 拼接 Color 九宫格
+                color_grid_html = '<div class="color-grid">'
+                for clr, clr_group in color_groups:
+                    size_counts = clr_group['Size'].value_counts()
+                    size_html = "".join([f'<div class="size-mini">{s} <b>×{q}</b></div>' for s, q in size_counts.items()])
                     
-                    cols[j].markdown(f"""
-                        <div class="attr-box">
-                            <div class="box-header">{cat}</div>
-                            <div class="box-content"><div class="box-color">{clr}</div></div>
-                            <div class="box-footer">{size_html}</div>
+                    color_grid_html += f"""
+                        <div class="color-card">
+                            <div class="color-name">{clr}</div>
+                            <div class="size-row">{size_html}</div>
                         </div>
-                    """, unsafe_allow_html=True)
+                    """
+                color_grid_html += '</div></div>'
+                st.markdown(color_grid_html, unsafe_allow_html=True)
         else:
-            st.info("没有可显示的属性数据")
+            st.info("暂无数据")
 
     with t2:
-        if not e_df.empty:
-            st.dataframe(e_df, use_container_width=True)
-        else:
-            st.success("全部数据解析正确！")
-
-    if st.button("清空并重新上传"):
-        st.rerun()
+        st.dataframe(e_df, use_container_width=True)
