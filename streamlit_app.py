@@ -22,7 +22,7 @@ st.markdown(f"""
     }}
     .avatar {{ width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; }}
 
-    /* 大气标题 */
+    /* 标题 */
     .hero-container {{ text-align: center; padding: 50px 0 20px 0; }}
     .grand-title {{
         font-family: 'Inter', sans-serif; font-size: 3.2rem !important; font-weight: 900; letter-spacing: 8px;
@@ -30,9 +30,9 @@ st.markdown(f"""
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }}
 
-    /* 【核心修改】看板格子样式：强制高度一致 + 内部滚动 */
+    /* 正常汇总格子：固定高度 + 统一对齐 */
     .cat-card-inner {{
-        height: 280px; /* 强制所有框高度一致 */
+        height: 280px;
         background: rgba(255, 255, 255, 0.04) !important;
         border: 1px solid rgba(255, 255, 255, 0.1) !important; 
         border-radius: 16px !important;
@@ -42,27 +42,27 @@ st.markdown(f"""
         display: flex;
         flex-direction: column;
     }}
-    .cat-card-inner:hover {{ 
-        transform: translateY(-3px); 
-        border: 1px solid rgba(56, 189, 248, 0.4) !important; 
-    }}
+    .cat-card-inner:hover {{ transform: translateY(-3px); border: 1px solid rgba(56, 189, 248, 0.4) !important; }}
     
-    .scroll-area {{
-        flex: 1;
-        overflow-y: auto;
-        padding: 10px;
-    }}
+    .scroll-area {{ flex: 1; overflow-y: auto; padding: 10px; }}
     .scroll-area::-webkit-scrollbar {{ width: 3px; }}
     .scroll-area::-webkit-scrollbar-thumb {{ background: rgba(56, 189, 248, 0.2); border-radius: 10px; }}
 
-    .sn-link {{ color: #38bdf8 !important; text-decoration: none; font-weight: bold; font-size: 10px; border-bottom: 1px dashed #38bdf8; }}
+    /* 异常卡片按钮样式 */
+    .sn-button {{
+        display: inline-block; padding: 4px 14px; background: rgba(56, 189, 248, 0.15);
+        color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.4);
+        border-radius: 20px; text-decoration: none !important; font-size: 0.8rem; font-weight: 600;
+        transition: all 0.2s ease;
+    }}
+    .sn-button:hover {{ background: #38bdf8; color: #000; transform: scale(1.05); }}
     </style>
     
     <div class="user-profile">
         <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
         <div class="user-info">
             <div class="user-name">{GITHUB_USERNAME}</div>
-            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● UNIFIED MATRIX V1.0</div>
+            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● HYBRID LAYOUT ACTIVE</div>
         </div>
     </div>
 
@@ -82,7 +82,7 @@ def process_sku_logic(uploaded_file):
         c_raw = str(row[col_c]).strip()
         if not c_raw or c_raw == 'nan': continue
         if ';' in c_raw or '；' in c_raw:
-            all_error_rows.append({'Category': 'ERR-复合', '行号': index + 2, '订单编号': row[col_a], '原因': "品名带分号", '原始属性': str(row[col_g])})
+            all_error_rows.append({'行号': index + 2, '订单编号': row[col_a], '品名': c_raw, '原因': "复合品类阻断", '原始属性': str(row[col_g])})
             continue
         cat = c_raw.split(' ')[0].upper()
         if cat.startswith('WZ'): cat = 'WZ'
@@ -101,39 +101,24 @@ def process_sku_logic(uploaded_file):
         if len(data_pairs) == i_qty and i_qty > 0:
             for c_val, s_val in data_pairs: all_normal_data.append({'Category': cat, 'Color': c_val, 'Size': s_val})
         else:
-            all_error_rows.append({'Category': cat, '行号': index + 2, '订单编号': row[col_a], '原因': f"校验失败({len(data_pairs)}/{i_qty})", '原始属性': g_text})
+            all_error_rows.append({'行号': index + 2, '订单编号': row[col_a], '品名': cat, '原因': f"数量不符({len(data_pairs)}/{i_qty})", '原始属性': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 3. 统一渲染函数 ---
-def render_unified_card(cat, group, is_error=False):
-    header_color = "rgba(239, 68, 68, 0.2)" if is_error else "rgba(56, 189, 248, 0.2)"
-    text_color = "#f87171" if is_error else "#38bdf8"
-    
+# --- 3. 正常数据渲染函数 (矩阵) ---
+def render_normal_card(cat, group):
     body_html = ""
-    if is_error:
-        for _, r in group.iterrows():
-            url = f"{BASE_URL}{r['订单编号']}"
-            body_html += f'''
-                <div style="background:rgba(239,68,68,0.05); margin-bottom:6px; padding:6px; border-radius:8px; border:1px solid rgba(239,68,68,0.1);">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
-                        <span style="font-size:10px; color:#f87171; font-weight:bold;">L:{r['行号']}</span>
-                        <a href="{url}" target="_blank" class="sn-link">{r['订单编号']}</a>
-                    </div>
-                    <div style="font-size:9px; color:#94a3b8; line-height:1.2;">{r['原因']}</div>
-                </div>'''
-    else:
-        for clr, clr_data in group.groupby('Color'):
-            size_stats = clr_data['Size'].value_counts().sort_index()
-            size_badges = "".join([f'<span style="background:rgba(56,189,248,0.1); padding:1px 5px; border-radius:4px; margin:1px; color:#eee; font-size:10px;">{s if s not in ["", "FREE", "NAN", "nan"] else ""}<b style="color:#38bdf8; margin-left:2px;">×{q}</b></span>' for s, q in size_stats.items()])
-            body_html += f'''
-                <div style="display:flex; align-items:center; background:rgba(255,255,255,0.02); margin-bottom:4px; padding:4px 8px; border-radius:8px; border:1px solid rgba(255,255,255,0.03);">
-                    <span style="color:#38bdf8; font-weight:700; font-size:10px; margin-right:6px; border-right:1px solid rgba(255,255,255,0.05); padding-right:6px; min-width:35px; white-space:nowrap;">{html.escape(str(clr))}</span>
-                    <div style="display:flex; flex-wrap:wrap; gap:1px;">{size_badges}</div>
-                </div>'''
-
+    for clr, clr_data in group.groupby('Color'):
+        size_stats = clr_data['Size'].value_counts().sort_index()
+        size_badges = "".join([f'<span style="background:rgba(56,189,248,0.1); padding:1px 5px; border-radius:4px; margin:1px; color:#eee; font-size:10px;">{s if s not in ["", "FREE", "NAN", "nan"] else ""}<b style="color:#38bdf8; margin-left:2px;">×{q}</b></span>' for s, q in size_stats.items()])
+        body_html += f'''
+            <div style="display:flex; align-items:center; background:rgba(255,255,255,0.02); margin-bottom:4px; padding:4px 8px; border-radius:8px; border:1px solid rgba(255,255,255,0.03);">
+                <span style="color:#38bdf8; font-weight:700; font-size:10px; margin-right:6px; border-right:1px solid rgba(255,255,255,0.05); padding-right:6px; min-width:35px; white-space:nowrap;">{html.escape(str(clr))}</span>
+                <div style="display:flex; flex-wrap:wrap; gap:1px;">{size_badges}</div>
+            </div>'''
+    
     st.markdown(f'''
         <div class="cat-card-inner">
-            <div style="background:{header_color}; padding:8px; text-align:center; color:{text_color}; font-weight:800; font-size:0.9rem; border-bottom:1px solid rgba(255,255,255,0.05); border-radius: 16px 16px 0 0;">{cat}</div>
+            <div style="background:rgba(56,189,248,0.2); padding:8px; text-align:center; color:#38bdf8; font-weight:800; font-size:0.9rem; border-bottom:1px solid rgba(255,255,255,0.05); border-radius: 16px 16px 0 0;">{cat}</div>
             <div class="scroll-area">{body_html}</div>
         </div>
     ''', unsafe_allow_html=True)
@@ -144,28 +129,35 @@ uploaded_file = upload_placeholder.file_uploader("", type=["xlsx"])
 
 if uploaded_file:
     upload_placeholder.empty()
-    with st.spinner('SYSTEM ANALYZING...'):
+    with st.spinner('ANALYZING...'):
         v_df, e_df = process_sku_logic(uploaded_file)
     
-    t1, t2 = st.tabs(["✅ 正常汇总", "❌ 异常拦截"])
-    cols_per_row = 6 
+    t1, t2 = st.tabs(["💎 结构化看板", "📡 实时异常捕获"])
 
     with t1:
         if not v_df.empty:
             cat_list = list(v_df.sort_values(['Category']).groupby('Category'))
+            cols_per_row = 6 
             for i in range(0, len(cat_list), cols_per_row):
                 batch, cols = cat_list[i : i + cols_per_row], st.columns(cols_per_row)
                 for col, (cat, g) in zip(cols, batch):
-                    with col: render_unified_card(cat, g, is_error=False)
-        else: st.info("无有效数据")
+                    with col: render_normal_card(cat, g)
+        else: st.info("暂无数据")
 
     with t2:
         if not e_df.empty:
-            cat_list = list(e_df.sort_values(['Category']).groupby('Category'))
-            for i in range(0, len(cat_list), cols_per_row):
-                batch, cols = cat_list[i : i + cols_per_row], st.columns(cols_per_row)
-                for col, (cat, g) in zip(cols, batch):
-                    with col: render_unified_card(cat, g, is_error=True)
-        else: st.success("校验全通过")
+            for _, err in e_df.iterrows():
+                sn_v = str(err['订单编号'])
+                st.markdown(f"""
+                <div style="background:rgba(245,158,11,0.03); border:1px solid rgba(245,158,11,0.2); border-radius:12px; padding:15px; margin-bottom:10px; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="flex: 1;">
+                        <span style="color:#f59e0b; font-weight:bold; font-size:0.8rem;">LINE: {err['行号']}</span>
+                        <span style="color:#ffffff; margin-left:15px; font-weight:600;">{err['原因']}</span>
+                        <div style="margin-top:6px; font-size:0.8rem; color:#64748b;"><b>原始属性:</b> {err['原始属性']}</div>
+                    </div>
+                    <a href="{BASE_URL}{sn_v}" target="_blank" class="sn-button">查看详情 SN: {sn_v}</a>
+                </div>
+                """, unsafe_allow_html=True)
+        else: st.success("所有数据均通过校验。")
 
 st.markdown("<div style='height:100px;'></div>", unsafe_allow_html=True)
