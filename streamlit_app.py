@@ -25,7 +25,6 @@ st.markdown(f"""
         border: 1px solid rgba(56, 189, 248, 0.2); backdrop-filter: blur(15px);
         transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); cursor: pointer;
     }}
-    .user-profile:hover {{ transform: scale(1.05); box-shadow: 0 0 20px rgba(56, 189, 248, 0.4); }}
     .avatar {{ width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; }}
     
     .hero-container {{ text-align: center; width: 100%; padding: 40px 0 20px 0; }}
@@ -64,12 +63,10 @@ st.markdown(f"""
         color: rgba(255, 255, 255, 0.4) !important; transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1) !important;
         font-size: 0.85rem !important; font-weight: 600 !important;
     }}
-    /* 药丸激活：蓝色 */
     .stTabs [data-baseweb="tab"]:nth-child(1)[aria-selected="true"] {{
         color: #38bdf8 !important; background: rgba(56, 189, 248, 0.1) !important;
         border: 1px solid #38bdf8 !important; box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
     }}
-    /* 药丸激活：橙色 */
     .stTabs [data-baseweb="tab"]:nth-child(2)[aria-selected="true"] {{
         color: #f59e0b !important; background: rgba(245, 158, 11, 0.1) !important;
         border: 1px solid #f59e0b !important; box-shadow: 0 0 15px rgba(245, 158, 11, 0.25);
@@ -80,9 +77,7 @@ st.markdown(f"""
         from {{ opacity: 0; transform: translateX(15px); filter: blur(4px); }}
         to {{ opacity: 1; transform: translateX(0); filter: blur(0); }}
     }}
-    [data-baseweb="tab-panel"] {{
-        animation: slideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-    }}
+    [data-baseweb="tab-panel"] {{ animation: slideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1); }}
 
     /* SN 码样式 */
     .sn-pill {{
@@ -168,21 +163,47 @@ if uploaded_file:
         if not v_df.empty:
             for cat in sorted(v_df['Category'].unique()):
                 cat_group = v_df[v_df['Category'] == cat]
-                attr_html = "".join([
-                    f'<div style="display:flex; align-items:center; gap:20px; padding:8px 0;">'
-                    f'<div style="color:#38bdf8; font-weight:700; font-size:1rem; min-width:100px;">{clr}</div>'
-                    f'{"".join([f"<div style=\'display:inline-flex; align-items:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:3px 12px; margin-right:8px;\'><span style=\'color:#fff; font-size:0.8rem; font-weight:600;\'>{(s if s!=\'FREE\' else \'\')}</span><span style=\'color:#38bdf8; font-weight:800; margin-left:5px;\'>{( \'×\' if s!=\'FREE\' else \'\')}{q}</span></div>" for s, q in cat_group[cat_group["Color"]==clr]["Size"].value_counts().sort_index().items()])}</div>'
-                    for clr in sorted(cat_group['Color'].unique())
-                ])
-                sn_html = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill normal-sn">{sn}</a>' for sn in sorted(list(set(cat_group['SN'].tolist())))])
                 
-                st.markdown(f'<div class="wide-card normal-card"><div style="flex:1;"><div style="color:#38bdf8; font-weight:900; font-size:1.6rem; margin-bottom:12px; letter-spacing:1px;">{cat}</div>{attr_html}</div><div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;">{sn_html}</div></div>', unsafe_allow_html=True)
+                # 构建属性列表 HTML
+                attr_html = ""
+                for clr in sorted(cat_group['Color'].unique()):
+                    clr_group = cat_group[cat_group['Color'] == clr]
+                    size_counts = clr_group['Size'].value_counts().sort_index()
+                    
+                    sizes_html = ""
+                    for s, q in size_counts.items():
+                        s_lab = s if s != 'FREE' else ''
+                        x_m = '×' if s != 'FREE' else ''
+                        sizes_html += f"<div style='display:inline-flex; align-items:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:3px 12px; margin-right:8px;'><span style='color:#fff; font-size:0.8rem; font-weight:600;'>{s_lab}</span><span style='color:#38bdf8; font-weight:800; margin-left:5px;'>{x_m}{q}</span></div>"
+                    
+                    attr_html += f"<div style='display:flex; align-items:center; gap:20px; padding:8px 0;'><div style='color:#38bdf8; font-weight:700; font-size:1rem; min-width:100px;'>{clr}</div><div>{sizes_html}</div></div>"
+                
+                sns = sorted(list(set(cat_group['SN'].tolist())))
+                sn_html = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill normal-sn">{sn}</a>' for sn in sns])
+                
+                st.markdown(f'''
+                    <div class="wide-card normal-card">
+                        <div style="flex:1;">
+                            <div style="color:#38bdf8; font-weight:900; font-size:1.6rem; margin-bottom:12px; letter-spacing:1px;">{cat}</div>
+                            {attr_html}
+                        </div>
+                        <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;">{sn_html}</div>
+                    </div>
+                ''', unsafe_allow_html=True)
             if st.button("↺ 重制系统"): st.rerun()
 
     with t2:
         if not e_df.empty:
             for _, err in e_df.iterrows():
-                sn_html = f'<a href="{BASE_URL}{err["SN"]}" target="_blank" class="sn-pill error-sn">{err["SN"]}</a>'
-                st.markdown(f'<div class="wide-card error-card"><div style="flex:1;"><div style="color:#f59e0b; font-weight:900; font-size:1.1rem;">LINE {err["Line"]} | {err["Reason"]}</div><div style="font-size:0.85rem; color:#cbd5e1; margin-top:8px; line-height:1.5;">{err["Content"]}</div></div><div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;">{sn_html}</div></div>', unsafe_allow_html=True)
+                sn_link = f'<a href="{BASE_URL}{err["SN"]}" target="_blank" class="sn-pill error-sn">{err["SN"]}</a>'
+                st.markdown(f'''
+                    <div class="wide-card error-card">
+                        <div style="flex:1;">
+                            <div style="color:#f59e0b; font-weight:900; font-size:1.1rem;">LINE {err["Line"]} | {err["Reason"]}</div>
+                            <div style="font-size:0.85rem; color:#cbd5e1; margin-top:8px; line-height:1.5;">{err["Content"]}</div>
+                        </div>
+                        <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;">{sn_link}</div>
+                    </div>
+                ''', unsafe_allow_html=True)
         else:
             st.success("数据校验完成，系统逻辑闭环。")
