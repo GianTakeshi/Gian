@@ -4,3 +4,4 @@ openpyxl
 altair<5
 requests
 streamlit-lottie
+plotly
