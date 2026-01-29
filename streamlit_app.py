@@ -3,7 +3,7 @@ import pandas as pd
 import re
 import time
 
-# --- 1. UI 与文字内容重塑 ---
+# --- 1. UI 重塑：保留大气标题 + 回归亲切头像栏 ---
 st.set_page_config(page_title="GianTakeshi | Data System", page_icon="🚀", layout="wide")
 
 GITHUB_USERNAME = "GianTakeshi" 
@@ -13,7 +13,17 @@ st.markdown(f"""
     .stApp {{ background: radial-gradient(circle at 50% 50%, #1e293b, #010409); color: #ffffff; }}
     header {{visibility: hidden;}}
 
-    /* 顶级大气标题 */
+    /* --- 回归：个人名字面板 --- */
+    .user-profile {{
+        position: fixed; top: 25px; left: 25px; display: flex; align-items: center; gap: 12px; z-index: 9999;
+        background: rgba(255, 255, 255, 0.05); padding: 6px 16px 6px 6px; border-radius: 50px;
+        border: 1px solid rgba(56, 189, 248, 0.3); backdrop-filter: blur(10px);
+    }}
+    .avatar {{ width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; }}
+    .user-name {{ font-weight: 700; font-size: 0.9rem; color: #ffffff; }}
+    .user-status {{ font-size: 0.65rem; color: #10b981; font-weight: bold; }}
+
+    /* 大气标题 */
     .hero-container {{ text-align: center; padding: 60px 0 40px 0; }}
     .grand-title {{
         font-family: 'Inter', 'Segoe UI', sans-serif;
@@ -27,57 +37,28 @@ st.markdown(f"""
         filter: drop-shadow(0 10px 20px rgba(56, 189, 248, 0.3));
         text-transform: uppercase;
     }}
-    .grand-subtitle {{
-        font-size: 1.1rem;
-        letter-spacing: 6px;
-        color: rgba(148, 163, 184, 0.7);
-        margin-top: -5px;
-        font-weight: 400;
-    }}
+    .grand-subtitle {{ font-size: 1.1rem; letter-spacing: 6px; color: rgba(148, 163, 184, 0.7); margin-top: -5px; }}
 
-    /* 上传区域文字重写 */
-    [data-testid="stFileUploadDropzone"]::before {{
-        content: "部署数据源文件"; /* 改为更专业的措辞 */
-        position: absolute; top: 40%; color: #ffffff; font-size: 1.5rem; font-weight: 800; letter-spacing: 2px;
-    }}
-    [data-testid="stFileUploadDropzone"]::after {{
-        content: "仅限 XLSX 高级报表格式"; 
-        position: absolute; top: 55%; color: #64748b; font-size: 0.9rem;
-    }}
-
-    /* 左上角头像面板 */
-    .user-profile {{
-        position: fixed; top: 25px; left: 25px; display: flex; align-items: center; gap: 12px; z-index: 9999;
-        background: rgba(255, 255, 255, 0.05); padding: 8px 18px 8px 8px; border-radius: 50px;
-        border: 1px solid rgba(56, 189, 248, 0.3); backdrop-filter: blur(10px);
-    }}
-    .avatar {{ width: 42px; height: 42px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; }}
-    .version-tag {{ font-size: 0.7rem; color: #38bdf8; font-weight: bold; letter-spacing: 1px; }}
-
-    /* 选项卡样式优化 */
-    .stTabs [data-baseweb="tab-list"] {{ gap: 24px; }}
-    .stTabs [data-baseweb="tab"] {{
-        height: 50px; background-color: transparent !important;
-        border: none !important; color: #64748b !important;
-        font-weight: 700; font-size: 1.1rem; letter-spacing: 1px;
-    }}
-    .stTabs [aria-selected="true"] {{ color: #38bdf8 !important; border-bottom: 3px solid #38bdf8 !important; }}
+    /* 上传区域汉化 */
+    [data-testid="stFileUploadDropzone"]::before {{ content: "部署数据源文件"; position: absolute; top: 40%; color: #ffffff; font-size: 1.5rem; font-weight: 800; }}
+    [data-testid="stFileUploadDropzone"]::after {{ content: "仅限 XLSX 高级报表格式"; position: absolute; top: 55%; color: #64748b; font-size: 0.9rem; }}
     </style>
     
     <div class="user-profile">
         <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
-        <div style="display: flex; flex-direction: column;">
-            <span style="font-weight:800; font-size:1rem; color: #ffffff;">{GITHUB_USERNAME}</span>
-            <span class="version-tag">● 测试版 V0.3</span>
+        <div class="user-info">
+            <div class="user-name">{GITHUB_USERNAME}</div>
+            <div class="user-status">● 测试版 V0.3</div>
         </div>
     </div>
 
     <div class="hero-container">
-        <h1 class="grand-title">属性解析中枢</h1> <p class="grand-subtitle">CORE PROPERTY PARSING HUB</p>
+        <h1 class="grand-title">属性解析中枢</h1>
+        <p class="grand-subtitle">CORE PROPERTY PARSING HUB</p>
     </div>
     """, unsafe_allow_html=True)
 
-# --- 2. 核心逻辑 ---
+# --- 2. 核心逻辑 (保持不变) ---
 def process_sku_logic(uploaded_file):
     COLOR_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)'
     SIZE_REG = r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
@@ -111,7 +92,7 @@ def process_sku_logic(uploaded_file):
             all_error_rows.append({'行号': index + 2, '订单编号': row[col_a], '品名': cat, '原因': f"校验不匹配({len(data_pairs)}/{i_qty})", '原始属性': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 3. 页面渲染 ---
+# --- 3. 渲染 ---
 uploaded_file = st.file_uploader("", type=["xlsx"])
 
 if uploaded_file:
@@ -129,14 +110,13 @@ if uploaded_file:
                 color_groups = cat_data.groupby('Color')
                 for clr, group in color_groups:
                     size_counts = group['Size'].value_counts()
-                    tags = " ".join([f'<span style="background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.2); color:#ffffff; padding:4px 12px; border-radius:4px; margin-right:8px; font-size:0.9rem;">{s if s!="" else "FREE"} <b style="color:#38bdf8;">× {q}</b></span>' for s, q in size_counts.items()])
-                    st.markdown(f"<div style='margin-bottom:15px; background:rgba(255,255,255,0.02); padding:10px; border-radius:8px;'><span style='color:#94a3b8; margin-right:20px; font-family:monospace;'>COLOR_{clr}</span> {tags}</div>", unsafe_allow_html=True)
+                    tags = " ".join([f'<span style="background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.2); color:#ffffff; padding:4px 12px; border-radius:4px; margin-right:8px;">{s if s!="" else "FREE"} <b style="color:#38bdf8;">× {q}</b></span>' for s, q in size_counts.items()])
+                    st.markdown(f"<div style='margin-bottom:12px; background:rgba(255,255,255,0.02); padding:10px; border-radius:8px;'><span style='color:#94a3b8; margin-right:20px; font-family:monospace;'>COLOR_{clr}</span> {tags}</div>", unsafe_allow_html=True)
         else:
             st.info("数据链路空载。")
 
     with tab2:
         if not error_df.empty:
-            st.markdown(f"<p style='color:rgba(245,158,11,0.8); letter-spacing:1px;'>捕获到 {len(error_df)} 处非标数据单元：</p>", unsafe_allow_html=True)
             for _, err in error_df.iterrows():
                 st.markdown(f"""
                 <div style="background:rgba(245,158,11,0.03); border:1px solid rgba(245,158,11,0.2); border-radius:10px; padding:15px; margin-bottom:10px;">
