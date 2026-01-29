@@ -3,45 +3,53 @@ import pandas as pd
 import re
 import html
 
-# --- 1. UI 视觉配置 (精准移除底部 Gian，保留光雾与渐变) ---
+# --- 1. UI 视觉配置 (重点：圆角矩形 + 悬浮动效) ---
 st.set_page_config(page_title="GianTakeshi | Matrix Hub", page_icon="💎", layout="wide")
 
 st.markdown(f"""
     <style>
-    /* 注入聚光灯背景：中心蓝，四周黑 */
+    /* 背景保持：聚光灯渐变 */
     .stApp {{ 
         background: radial-gradient(circle at center, #001d3d 0%, #000814 70%, #000000 100%) !important;
         color: #ffffff; 
     }}
     header {{ visibility: hidden; }}
     
-    /* 注入右侧流动雾气 */
+    /* 右侧流动雾气 */
     .mist-light {{
         position: fixed;
-        top: 0;
-        right: 0;
-        width: 70%;
-        height: 100%;
+        top: 0; right: 0; width: 70%; height: 100%;
         background: radial-gradient(circle at 100% 50%, rgba(56, 189, 248, 0.12) 0%, transparent 70%);
-        filter: blur(100px);
-        animation: flow 10s ease-in-out infinite alternate;
-        z-index: -1;
+        filter: blur(100px); animation: flow 10s ease-in-out infinite alternate; z-index: -1;
     }}
-    @keyframes flow {{
-        from {{ transform: translateX(15%); opacity: 0.4; }}
-        to {{ transform: translateX(-5%); opacity: 0.7; }}
-    }}
+    @keyframes flow {{ from {{ transform: translateX(15%); opacity: 0.4; }} to {{ transform: translateX(-5%); opacity: 0.7; }} }}
     
-    /* 保留原有的容器样式 */
+    /* 【核心修改】大的属性框：圆角矩形 + 悬浮效果 */
     div[data-testid="stVerticalBlockBorderWrapper"] {{
         height: 380px !important; 
         overflow-y: auto !important;
-        background: rgba(255, 255, 255, 0.02);
-        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.03) !important;
+        border-radius: 24px !important; /* 大圆角 */
         border: 1px solid rgba(255, 255, 255, 0.1) !important;
         backdrop-filter: blur(20px);
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); /* 平滑过渡 */
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }}
     
+    /* 鼠标悬停动效 */
+    div[data-testid="stVerticalBlockBorderWrapper"]:hover {{
+        transform: translateY(-8px); /* 向上浮动 */
+        background: rgba(255, 255, 255, 0.06) !important;
+        border: 1px solid rgba(56, 189, 248, 0.4) !important; /* 边框亮起 */
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(56, 189, 248, 0.1); /* 增加投影 */
+    }}
+    
+    /* 滚动条美化 */
+    div[data-testid="stVerticalBlockBorderWrapper"]::-webkit-scrollbar {{ width: 4px; }}
+    div[data-testid="stVerticalBlockBorderWrapper"]::-webkit-scrollbar-thumb {{
+        background: rgba(56, 189, 248, 0.3); border-radius: 10px;
+    }}
+
     .user-profile {{
         position: fixed; top: 20px; left: 20px; display: flex; align-items: center; gap: 12px; z-index: 99999; 
         background: rgba(255, 255, 255, 0.05); padding: 5px 15px 5px 5px; border-radius: 50px;
@@ -51,26 +59,21 @@ st.markdown(f"""
     </style>
 
     <div class="mist-light"></div>
-
     <div class="user-profile">
         <img src="https://avatars.githubusercontent.com/GianTakeshi" style="width:35px;height:35px;border-radius:50%;">
         <div style="font-weight:700; font-size:0.85rem; color:white;">GianTakeshi</div>
     </div>
 """, unsafe_allow_html=True)
 
-# --- 2. 逻辑层 (完全保留) ---
+# --- 2. 逻辑层 (保持不变) ---
 def process_data(uploaded_file):
-    COLOR_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)'
-    SIZE_REG = r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
+    COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
     df = pd.read_excel(uploaded_file, engine='openpyxl')
     valid, error = [], []
     for idx, row in df.iterrows():
         try:
-            sn = str(row.iloc[1]).strip()
-            name = str(row.iloc[2]).strip()
-            attr = str(row.iloc[6]).strip()
-            qty_raw = str(row.iloc[8]).strip()
+            sn, name, attr, qty_raw = str(row.iloc[1]).strip(), str(row.iloc[2]).strip(), str(row.iloc[6]).strip(), str(row.iloc[8]).strip()
             cat = name.split(' ')[0].upper()
             if cat.startswith('WZ'): cat = 'WZ'
             if ';' in name or '；' in name:
@@ -81,8 +84,7 @@ def process_data(uploaded_file):
             chunks = [c.strip() for c in re.split(r'[;；]', attr) if c.strip()]
             parsed = []
             for chunk in chunks:
-                c_m = re.search(COLOR_REG, chunk)
-                s_m = re.search(SIZE_REG, chunk)
+                c_m, s_m = re.search(COLOR_REG, chunk), re.search(SIZE_REG, chunk)
                 if c_m:
                     clr = c_m.group(1).strip().upper()
                     sze = s_m.group(1).strip().upper() if s_m else "FREE"
@@ -97,7 +99,7 @@ def process_data(uploaded_file):
             error.append({'Category': 'ERROR', 'SN': 'N/A', 'Reason': str(e)})
     return pd.DataFrame(valid), pd.DataFrame(error)
 
-# --- 3. 渲染组件 (完全保留) ---
+# --- 3. 渲染组件 (保持不变) ---
 def render_matrix(data_df, is_error=False):
     if data_df.empty:
         st.info("暂无数据")
@@ -112,17 +114,17 @@ def render_matrix(data_df, is_error=False):
             with cols[idx].container(border=True):
                 head_bg = "rgba(239, 68, 68, 0.2)" if is_error else "rgba(56, 189, 248, 0.2)"
                 head_clr = "#f87171" if is_error else "#38bdf8"
-                st.markdown(f'<div style="background:{head_bg}; margin:-1rem -1rem 10px -1rem; padding:10px; text-align:center; color:{head_clr}; font-weight:900; font-size:1.1rem; border-bottom:1px solid rgba(255,255,255,0.1); position:sticky; top:-1rem; z-index:10;">{cat}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div style="background:{head_bg}; margin:-1rem -1rem 10px -1rem; padding:10px; text-align:center; color:{head_clr}; font-weight:900; font-size:1.1rem; border-bottom:1px solid rgba(255,255,255,0.1); position:sticky; top:-1rem; z-index:10; border-radius: 20px 20px 0 0;">{cat}</div>', unsafe_allow_html=True)
                 if is_error:
                     for _, row in group.iterrows():
                         url = f"https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id={row['SN']}" 
-                        st.markdown(f'<div style="background:rgba(239,68,68,0.05); margin-bottom:6px; padding:8px; border-radius:6px; font-size:11px; border:1px solid rgba(239,68,68,0.1);"><div style="margin-bottom:4px;">SN: <a class="sn-link" href="{url}" target="_blank">{row["SN"]}</a></div><div style="color:#94a3b8;">{row["Reason"]}</div></div>', unsafe_allow_html=True)
+                        st.markdown(f'<div style="background:rgba(239,68,68,0.05); margin-bottom:6px; padding:8px; border-radius:12px; font-size:11px; border:1px solid rgba(239,68,68,0.1);"><div style="margin-bottom:4px;">SN: <a class="sn-link" href="{url}" target="_blank">{row["SN"]}</a></div><div style="color:#94a3b8;">{row["Reason"]}</div></div>', unsafe_allow_html=True)
                 else:
                     color_groups = group.groupby('Color')
                     for clr, clr_data in color_groups:
                         size_stats = clr_data['Size'].value_counts().sort_index()
-                        size_html = "".join([f'<span style="background:rgba(56,189,248,0.1); padding:2px 6px; border-radius:4px; margin-left:4px; color:#fff;">{"×"+str(q) if s=="FREE" else s+"<b style=\'color:#38bdf8; margin-left:2px;\'>×"+str(q)+"</b>"}</span>' for s, q in size_stats.items()])
-                        st.markdown(f'<div style="display:flex; align-items:center; background:rgba(255,255,255,0.05); margin-bottom:6px; padding:6px 10px; border-radius:6px; font-size:11px; border:1px solid rgba(255,255,255,0.05); flex-wrap:wrap;"><span style="color:#38bdf8; font-weight:bold; border-right:1px solid rgba(255,255,255,0.1); padding-right:8px; min-width:45px;">{html.escape(str(clr))}</span><div style="display:flex; flex-wrap:wrap; gap:4px;">{size_html}</div></div>', unsafe_allow_html=True)
+                        size_html = "".join([f'<span style="background:rgba(56,189,248,0.1); padding:2px 6px; border-radius:6px; margin-left:4px; color:#fff;">{"×"+str(q) if s=="FREE" else s+"<b style=\'color:#38bdf8; margin-left:2px;\'>×"+str(q)+"</b>"}</span>' for s, q in size_stats.items()])
+                        st.markdown(f'<div style="display:flex; align-items:center; background:rgba(255,255,255,0.05); margin-bottom:6px; padding:6px 10px; border-radius:10px; font-size:11px; border:1px solid rgba(255,255,255,0.05); flex-wrap:wrap;"><span style="color:#38bdf8; font-weight:bold; border-right:1px solid rgba(255,255,255,0.1); padding-right:8px; min-width:45px;">{html.escape(str(clr))}</span><div style="display:flex; flex-wrap:wrap; gap:4px;">{size_html}</div></div>', unsafe_allow_html=True)
 
 # --- 4. 主程序 ---
 st.markdown("<h2 style='text-align:center; padding-top:50px;'>📊 智能属性全矩阵</h2>", unsafe_allow_html=True)
