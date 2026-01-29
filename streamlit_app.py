@@ -23,64 +23,65 @@ st.markdown(f"""
     .user-name {{ font-weight: 700; font-size: 0.95rem; color: #ffffff; }}
     .user-status {{ font-size: 0.65rem; color: #10b981; font-weight: bold; }}
 
-    /* 大气标题 */
+    /* 标题区域 */
     .hero-container {{ text-align: center; padding: 100px 0 40px 0; }}
     .grand-title {{
-        font-family: 'Inter', sans-serif; font-size: 5rem !important; font-weight: 900; letter-spacing: 12px;
+        font-family: 'Inter', sans-serif; font-size: 4.5rem !important; font-weight: 900; letter-spacing: 10px;
         background: linear-gradient(to bottom, #ffffff 40%, #38bdf8 100%);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }}
     
-    /* --- 毛玻璃卡片网格 --- */
+    /* --- 核心：6列网格矩阵布局 --- */
     .grid-container {{
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-        gap: 25px;
+        /* 这里是关键：锁定最大6列，每列等宽 */
+        grid-template-columns: repeat(6, 1fr); 
+        gap: 15px;
         padding: 20px 0;
     }}
     
+    /* 响应式适配：如果是小屏幕，自动降级列数 */
+    @media (max-width: 1400px) {{ .grid-container {{ grid-template-columns: repeat(4, 1fr); }} }}
+    @media (max-width: 1000px) {{ .grid-container {{ grid-template-columns: repeat(2, 1fr); }} }}
+
     .glass-card {{
         position: relative;
         background: rgba(255, 255, 255, 0.03);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 24px;
-        padding: 0; /* 改为0，内部单独控制间距 */
+        border-radius: 20px;
+        padding: 0;
         overflow: hidden;
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         display: flex;
         flex-direction: column;
-        min-height: 180px;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        min-height: 160px;
     }}
     
     .glass-card:hover {{
-        border-color: rgba(56, 189, 248, 0.6);
-        background: rgba(255, 255, 255, 0.07);
-        transform: translateY(-8px);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+        border-color: rgba(56, 189, 248, 0.8);
+        background: rgba(255, 255, 255, 0.08);
+        transform: scale(1.05); /* 悬浮时轻微放大 */
+        z-index: 10;
     }}
 
-    /* --- 加大显眼的类目顶部条 --- */
     .card-header {{
-        background: rgba(56, 189, 248, 0.15);
-        padding: 8px 15px;
+        background: rgba(56, 189, 248, 0.2);
+        padding: 6px 10px;
         text-align: center;
         border-bottom: 1px solid rgba(56, 189, 248, 0.2);
     }}
     .card-cat {{
-        font-size: 0.9rem; /* 字体加大 */
+        font-size: 0.8rem;
         font-weight: 900;
         color: #38bdf8;
         text-transform: uppercase;
-        letter-spacing: 3px; /* 字间距拉开，更显眼 */
-        text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        letter-spacing: 2px;
     }}
 
-    /* 中间内容区 */
     .card-body {{
-        padding: 20px;
+        padding: 15px;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -89,27 +90,28 @@ st.markdown(f"""
     }}
 
     .card-color {{
-        font-size: 1.4rem;
+        font-size: 1.1rem;
         font-weight: 800;
         color: #ffffff;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
         text-align: center;
+        word-break: break-all;
     }}
 
     .card-sizes {{
         display: flex;
         flex-wrap: wrap;
-        gap: 8px;
+        gap: 5px;
         justify-content: center;
     }}
     
     .size-pill {{
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 4px 12px;
-        border-radius: 10px;
-        font-size: 0.85rem;
-        color: #f1f5f9;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        white-space: nowrap;
     }}
 
     .sn-button {{
@@ -172,13 +174,14 @@ uploaded_file = upload_container.file_uploader("", type=["xlsx"])
 
 if uploaded_file:
     upload_container.empty()
-    with st.spinner('同步矩阵架构...'):
+    with st.spinner('生成矩阵方阵...'):
         final_df, error_df = process_sku_logic(uploaded_file)
     
     tab1, tab2 = st.tabs(["💎 结构化属性汇总", "📡 实时异常捕获"])
 
     with tab1:
         if not final_df.empty:
+            # 开启矩阵网格
             st.markdown('<div class="grid-container">', unsafe_allow_html=True)
             
             final_df = final_df.sort_values(by=['Category', 'Color'])
