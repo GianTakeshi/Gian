@@ -34,25 +34,26 @@ st.markdown(f"""
     }}
     .error-label {{ color: #f59e0b; font-weight: bold; font-size: 0.8rem; text-transform: uppercase; }}
 
-    /* 头像面板 */
+    /* 左上角头像面板 - 已更新版本文字 */
     .user-profile {{
         position: fixed; top: 25px; left: 25px; display: flex; align-items: center; gap: 12px; z-index: 9999;
         background: rgba(255, 255, 255, 0.05); padding: 6px 16px 6px 6px; border-radius: 50px;
         border: 1px solid rgba(56, 189, 248, 0.3); backdrop-filter: blur(10px);
     }}
     .avatar {{ width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; }}
+    .version-tag {{ font-size: 0.65rem; color: #38bdf8; font-weight: bold; letter-spacing: 0.5px; }}
     </style>
     
     <div class="user-profile">
         <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
         <div style="display: flex; flex-direction: column;">
-            <span style="font-weight:700; font-size:0.9rem;">{GITHUB_USERNAME}</span>
-            <span style="font-size:0.65rem; color:#10b981;">● 深度解析模式</span>
+            <span style="font-weight:700; font-size:0.9rem; color: #ffffff;">{GITHUB_USERNAME}</span>
+            <span class="version-tag">● 测试版 V0.3</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-# --- 2. 核心逻辑 (完全同步你的源代码) ---
+# --- 2. 核心逻辑 (与源代码严格对齐) ---
 def process_sku_logic(uploaded_file):
     COLOR_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)'
     SIZE_REG = r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
@@ -66,7 +67,6 @@ def process_sku_logic(uploaded_file):
         c_raw = str(row[col_c]).strip()
         if not c_raw or c_raw == 'nan': continue
         
-        # 异常拦截：多个商品
         if ';' in c_raw or '；' in c_raw:
             all_error_rows.append({'行号': index + 2, '订单编号': row[col_a], '品名': c_raw, '原因': "多个商品", '原始属性': str(row[col_g])})
             continue
@@ -109,10 +109,9 @@ st.markdown("<div style='text-align:center; padding-top:30px;'><h1 style='color:
 uploaded_file = st.file_uploader("", type=["xlsx"])
 
 if uploaded_file:
-    with st.spinner('正在同步你的源代码逻辑进行解析...'):
+    with st.spinner('正在使用 V0.3 引擎解析数据...'):
         final_df, error_df = process_sku_logic(uploaded_file)
     
-    # 创建选项卡
     tab1, tab2 = st.tabs(["✨ 汇总预览", "🚩 异常工作台"])
 
     with tab1:
@@ -121,8 +120,6 @@ if uploaded_file:
             for cat in categories:
                 st.markdown(f'<div class="category-title">{cat}</div>', unsafe_allow_html=True)
                 cat_data = final_df[final_df['Category'] == cat]
-                
-                # 颜色统计展示
                 color_groups = cat_data.groupby('Color')
                 for clr, group in color_groups:
                     size_counts = group['Size'].value_counts()
@@ -150,6 +147,6 @@ if uploaded_file:
                 </div>
                 """, unsafe_allow_html=True)
         else:
-            st.success("太棒了！本次解析未发现任何异常数据。")
+            st.success("太棒了！测试版 V0.3 未发现任何解析异常。")
 
-st.markdown("<div style='text-align:center; margin-top:50px; color:rgba(148,163,184,0.3);'>GianTakeshi LIVE VIEW v4.1</div>", unsafe_allow_html=True)
+st.markdown("<div style='text-align:center; margin-top:50px; color:rgba(148,163,184,0.3);'>GianTakeshi LIVE VIEW | TEST VERSION 0.3</div>", unsafe_allow_html=True)
