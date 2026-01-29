@@ -8,6 +8,7 @@ st.set_page_config(page_title="GianTakeshi | Hub", page_icon="🚀", layout="wid
 GITHUB_USERNAME = "GianTakeshi" 
 BASE_URL = "https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id="
 
+# 注入 CSS 样式
 st.markdown(f"""
     <style>
     .stApp {{ background: radial-gradient(circle at 50% 50%, #1e293b, #010409); color: #ffffff; }}
@@ -20,7 +21,10 @@ st.markdown(f"""
         border: 1px solid rgba(56, 189, 248, 0.3); backdrop-filter: blur(10px);
     }}
     .avatar {{ width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; }}
-    .user-name {{ font-size: 0.95rem; font-weight: 700; color: #fff; letter-spacing: 1.0px; }}
+    .user-info {{ line-height: 1.1; }}
+    
+    /* ✨ 名字粗细改为 600 ✨ */
+    .user-name {{ font-size: 0.95rem; font-weight: 600; color: #fff; letter-spacing: 1.2px; }}
     
     .hero-container {{ text-align: center; width: 100%; padding: 60px 0 20px 0; }}
     .grand-title {{
@@ -30,7 +34,6 @@ st.markdown(f"""
         margin-bottom: 30px;
     }}
 
-    /* 卡片通用布局 */
     .wide-card {{
         background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 14px; padding: 18px 25px; margin-bottom: 12px;
@@ -40,7 +43,9 @@ st.markdown(f"""
     .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.6); }}
     .error-card {{ border-left: 5px solid rgba(245, 158, 11, 0.6); background: rgba(245, 158, 11, 0.02); }}
 
-    /* Size 框 */
+    .cat-label {{ color: #38bdf8; font-weight: 900; font-size: 1.05rem; width: 85px; }}
+    .color-text {{ color: #38bdf8; font-weight: 700; font-size: 0.95rem; min-width: 60px; }}
+    
     .size-box {{
         display: inline-flex; align-items: center;
         background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15);
@@ -49,29 +54,26 @@ st.markdown(f"""
     .size-text {{ color: #ffffff; font-weight: 600; font-size: 0.85rem; }}
     .qty-text {{ color: #38bdf8; font-weight: 800; font-size: 0.85rem; margin-left: 5px; }}
 
-    /* SN 按钮 */
     .sn-pill {{
         display: inline-block; padding: 3px 14px; background: rgba(255, 255, 255, 0.03);
         color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 20px; 
         text-decoration: none !important; font-size: 0.75rem; font-weight: 600;
     }}
 
-    /* ✨ 重新部署按钮：极致层级 ✨ */
-    .stButton > button {{
-        position: relative !important; z-index: 1000001 !important;
-        background: rgba(56, 189, 248, 0.15) !important; color: #38bdf8 !important;
-        border: 2px solid #38bdf8 !important; border-radius: 50px !important;
-        padding: 10px 45px !important; margin: 40px auto !important; display: block !important;
+    /* 重新部署按钮样式保持 */
+    div.stButton > button {{
+        background: rgba(56, 189, 248, 0.1) !important; color: #38bdf8 !important;
+        border: 2px solid rgba(56, 189, 248, 0.4) !important; border-radius: 50px !important;
+        padding: 12px 45px !important; font-weight: 900 !important;
+        display: block !important; margin: 40px auto !important;
     }}
 
-    /* ✨ 上传框：60px 悬浮 + 强光效 ✨ */
+    /* ✨ 上传框：固定底部 60px + 蓝色光效 ✨ */
     [data-testid="stFileUploader"] {{
-        position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%); width: 400px; z-index: 100000;
-        background: rgba(255, 255, 255, 0.12) !important; 
-        border: 1px solid rgba(56, 189, 248, 0.4) !important;
-        border-radius: 50px !important; padding: 10px 30px !important; 
-        backdrop-filter: blur(25px);
-        box-shadow: 0 0 25px rgba(56, 189, 248, 0.3);
+        position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%); width: 400px; z-index: 9999;
+        background: rgba(255, 255, 255, 0.12) !important; border: 1px solid rgba(56, 189, 248, 0.3) !important;
+        border-radius: 50px !important; padding: 10px 30px !important; backdrop-filter: blur(25px);
+        box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
     }}
     [data-testid="stFileUploader"] label, [data-testid="stFileUploader"] small {{ display: none !important; }}
     </style>
@@ -80,7 +82,7 @@ st.markdown(f"""
         <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
         <div class="user-info">
             <div class="user-name">{GITHUB_USERNAME}</div>
-            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● KERNEL ONLINE</div>
+            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● FULL VERSION ACTIVE</div>
         </div>
     </div>
 
@@ -89,7 +91,7 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-# --- 2. 核心逻辑层 ---
+# --- 2. 逻辑层（完全没动） ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -124,19 +126,10 @@ def process_sku_logic(uploaded_file):
             all_error_rows.append({'SN': sn, '行号': index + 2, '原因': f"数量不符({len(data_pairs)}/{i_qty})", '内容': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 3. 渲染与状态控制 ---
-if 'page_id' not in st.session_state:
-    st.session_state.page_id = 0
-
-# 如果点击了重新部署，直接增加 page_id，这会强制让所有带 key 的组件重置
-reset_clicked = st.button("↺ 重新部署系统", key=f"btn_{st.session_state.page_id}")
-if reset_clicked:
-    st.session_state.page_id += 1
-    st.rerun()
-
-# 只有当 reset 未点击时才渲染上传和结果
-uploader_key = f"uploader_{st.session_state.page_id}"
-uploaded_file = st.file_uploader("Upload", type=["xlsx"], key=uploader_key)
+# --- 3. 渲染层（微调按钮位置以生效） ---
+# 使用 st.empty() 容器来包裹上传框，方便重置
+upload_placeholder = st.empty()
+uploaded_file = upload_placeholder.file_uploader("Upload", type=["xlsx"], key="main_uploader")
 
 if uploaded_file:
     v_df, e_df = process_sku_logic(uploaded_file)
@@ -149,8 +142,12 @@ if uploaded_file:
                 attr_display = "".join([f'<div class="size-box"><span class="size-text">{("" if s=="FREE" else s)}</span><span class="qty-text">×{q}</span></div>' for s, q in size_counts.items()])
                 sns = sorted(list(set(group['SN'].tolist())))
                 sn_pills = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill">{sn}</a>' for sn in sns])
-                st.markdown(f'''<div class="wide-card normal-card"><div style="display:flex;align-items:center;gap:15px;"><div class="cat-label">{cat}</div><div style="color:#38bdf8;font-weight:700;width:60px;">{clr}</div>{attr_display}</div><div style="margin-left:auto;display:flex;gap:8px;">{sn_pills}</div></div>''', unsafe_allow_html=True)
-    
+                st.markdown(f'''<div class="wide-card normal-card"><div style="display:flex;align-items:center;gap:15px;"><div class="cat-label">{cat}</div><div class="color-text" style="width:60px;">{clr}</div>{attr_display}</div><div style="margin-left:auto;display:flex;gap:8px;">{sn_pills}</div></div>''', unsafe_allow_html=True)
+
+            # ✨ 核心修复：按钮点击后强制清除 query_params 或刷新 ✨
+            if st.button("↺ 重新部署系统"):
+                st.rerun()
+
     with t2:
         if not e_df.empty:
             for _, err in e_df.iterrows():
