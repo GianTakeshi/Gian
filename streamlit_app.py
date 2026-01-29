@@ -14,80 +14,85 @@ st.markdown(f"""
     .stApp {{ background: radial-gradient(circle at 50% 50%, #1e293b, #010409); color: #ffffff; }}
     header {{visibility: hidden;}}
 
-    /* 头像悬浮面板 */
+    /* 头像面板 */
     .user-profile {{
         position: fixed; top: 25px; left: 25px; display: flex; align-items: center; gap: 12px; z-index: 1000000; 
         background: rgba(255, 255, 255, 0.05); padding: 6px 16px 6px 6px; border-radius: 50px;
         border: 1px solid rgba(56, 189, 248, 0.3); backdrop-filter: blur(10px);
+        transition: all 0.3s;
     }}
+    .user-profile:hover {{ border-color: #38bdf8; box-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }}
     .avatar {{ width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; }}
 
-    /* 标题 */
-    .hero-container {{ text-align: center; padding: 60px 0 20px 0; }}
+    /* 标题光效 */
     .grand-title {{
         font-family: 'Inter', sans-serif; font-size: 3.2rem !important; font-weight: 900; letter-spacing: 8px;
         background: linear-gradient(to bottom, #ffffff 30%, #38bdf8 100%);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.2));
     }}
 
-    /* 【核心修改】白色磨砂玻璃药丸上传框 */
+    /* 白色磨砂药丸上传框 */
     [data-testid="stFileUploader"] {{
-        position: fixed;
-        bottom: 120px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 480px;
-        z-index: 9999;
-        /* 白色磨砂核心参数 */
+        position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); width: 480px; z-index: 9999;
         background: rgba(255, 255, 255, 0.12) !important;
         border: 1px solid rgba(255, 255, 255, 0.3) !important;
-        border-radius: 50px !important;
-        padding: 8px 25px !important;
+        border-radius: 50px !important; padding: 8px 25px !important;
         backdrop-filter: blur(25px) saturate(180%);
-        box-shadow: 0 15px 35px rgba(0,0,0,0.3), inset 0 0 10px rgba(255,255,255,0.1);
-        transition: all 0.3s ease;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }}
-    
-    /* 悬浮微光效果 */
     [data-testid="stFileUploader"]:hover {{
-        background: rgba(255, 255, 255, 0.18) !important;
-        border: 1px solid rgba(255, 255, 255, 0.5) !important;
-        box-shadow: 0 20px 45px rgba(56, 189, 248, 0.2);
+        background: rgba(255, 255, 255, 0.2) !important;
+        border: 1px solid rgba(56, 189, 248, 0.6) !important;
+        box-shadow: 0 0 30px rgba(56, 189, 248, 0.3);
+        transform: translateX(-50%) translateY(-5px);
     }}
 
-    [data-testid="stFileUploader"] section {{ padding: 0 !important; min-height: 60px !important; }}
-    [data-testid="stFileUploader"] label, [data-testid="stFileUploader"] small {{ display: none !important; }}
-    /* 修改上传框内的“Browse files”文字颜色以适应亮色背景 */
-    [data-testid="stFileUploader"] button {{ color: #ffffff !important; background-color: rgba(56, 189, 248, 0.4) !important; border-radius: 20px !important; border: none !important; }}
-    
-    /* 看板格子样式 */
+    /* 【光效增强】看板格子 */
     .cat-card-inner {{
         height: 280px; background: rgba(255, 255, 255, 0.04) !important;
         border: 1px solid rgba(255, 255, 255, 0.1) !important; border-radius: 16px !important;
         margin-bottom: 15px; backdrop-filter: blur(20px); display: flex; flex-direction: column;
+        transition: all 0.4s ease;
     }}
-    .scroll-area {{ flex: 1; overflow-y: auto; padding: 10px; }}
-    .scroll-area::-webkit-scrollbar {{ width: 3px; }}
-    .scroll-area::-webkit-scrollbar-thumb {{ background: rgba(56, 189, 248, 0.2); border-radius: 10px; }}
+    .cat-card-inner:hover {{ 
+        background: rgba(255, 255, 255, 0.08) !important;
+        border: 1px solid rgba(56, 189, 248, 0.5) !important;
+        box-shadow: 0 10px 25px rgba(56, 189, 248, 0.15);
+        transform: translateY(-5px);
+    }}
+    
+    /* 【光效增强】异常列表条目 */
+    .error-item {{
+        background: rgba(245, 158, 11, 0.03); border: 1px solid rgba(245, 158, 11, 0.2);
+        border-radius: 12px; padding: 15px; margin-bottom: 10px; 
+        display: flex; justify-content: space-between; align-items: center;
+        transition: all 0.3s ease;
+    }}
+    .error-item:hover {{
+        background: rgba(245, 158, 11, 0.08);
+        border: 1px solid rgba(245, 158, 11, 0.6);
+        box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
+    }}
 
+    /* 【光效增强】SN 按钮 */
     .sn-button {{
-        display: inline-block; padding: 4px 14px; background: rgba(56, 189, 248, 0.15);
+        display: inline-block; padding: 4px 14px; background: rgba(56, 189, 248, 0.1);
         color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 20px; 
         text-decoration: none !important; font-size: 0.8rem; font-weight: 600;
+        transition: all 0.3s;
     }}
-    </style>
-    
-    <div class="user-profile">
-        <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
-        <div class="user-info">
-            <div class="user-name">{GITHUB_USERNAME}</div>
-            <div style="font-size: 0.6rem; color: #10b981; font-weight: bold;">● WHITE GLASS MODE</div>
-        </div>
-    </div>
+    .sn-button:hover {{
+        background: rgba(56, 189, 248, 0.3);
+        box-shadow: 0 0 10px #38bdf8;
+        transform: scale(1.05);
+    }}
 
-    <div class="hero-container">
-        <h1 class="grand-title">属性看板中枢</h1>
-    </div>
+    .scroll-area {{ flex: 1; overflow-y: auto; padding: 10px; }}
+    [data-testid="stFileUploader"] section {{ padding: 0 !important; min-height: 60px !important; }}
+    [data-testid="stFileUploader"] label, [data-testid="stFileUploader"] small {{ display: none !important; }}
+    </style>
 """, unsafe_allow_html=True)
 
 # --- 2. 逻辑层 ---
@@ -120,10 +125,10 @@ def process_sku_logic(uploaded_file):
         if len(data_pairs) == i_qty and i_qty > 0:
             for c_val, s_val in data_pairs: all_normal_data.append({'Category': cat, 'Color': c_val, 'Size': s_val})
         else:
-            all_error_rows.append({'行号': index + 2, '订单编号': row[col_a], '原因': f"数量不符({len(data_pairs)}/{i_qty})", '原始属性': g_text})
+            all_error_rows.append({'行号': index + 2, '订单编号': row[col_a], '原因': f"校验失败({len(data_pairs)}/{i_qty})", '原始属性': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 3. 正常数据渲染函数 ---
+# --- 3. 正常汇总渲染 ---
 def render_normal_card(cat, group):
     body_html = ""
     for clr, clr_data in group.groupby('Color'):
@@ -142,6 +147,8 @@ def render_normal_card(cat, group):
     ''', unsafe_allow_html=True)
 
 # --- 4. 主程序流程 ---
+st.markdown('<div class="hero-container"><h1 class="grand-title">属性看板中枢</h1></div>', unsafe_allow_html=True)
+
 upload_box = st.empty()
 uploaded_file = upload_box.file_uploader("Upload", type=["xlsx"])
 
@@ -149,7 +156,7 @@ if uploaded_file:
     with st.spinner('SYSTEM ANALYZING...'):
         v_df, e_df = process_sku_logic(uploaded_file)
     
-    upload_box.empty() # 解析完立即隐藏
+    upload_box.empty()
     
     t1, t2 = st.tabs(["💎 结构化看板", "📡 实时异常捕获"])
 
@@ -161,17 +168,15 @@ if uploaded_file:
                 batch, cols = cat_list[i : i + cols_per_row], st.columns(cols_per_row)
                 for col, (cat, g) in zip(cols, batch):
                     with col: render_normal_card(cat, g)
-            st.markdown("<br>", unsafe_allow_html=True)
-            if st.button("↺ 重新部署数据源"):
-                st.rerun()
-        else: st.info("数据源解析为空")
+            if st.button("↺ 重置系统"): st.rerun()
+        else: st.info("数据解析为空")
 
     with t2:
         if not e_df.empty:
             for _, err in e_df.iterrows():
                 sn_v = str(err['订单编号'])
                 st.markdown(f"""
-                <div style="background:rgba(245,158,11,0.03); border:1px solid rgba(245,158,11,0.2); border-radius:12px; padding:15px; margin-bottom:10px; display: flex; justify-content: space-between; align-items: center;">
+                <div class="error-item">
                     <div style="flex: 1;">
                         <span style="color:#f59e0b; font-weight:bold; font-size:0.8rem;">LINE: {err['行号']}</span>
                         <span style="color:#ffffff; margin-left:15px; font-weight:600;">{err['原因']}</span>
@@ -181,5 +186,3 @@ if uploaded_file:
                 </div>
                 """, unsafe_allow_html=True)
         else: st.success("校验全通过")
-
-st.markdown("<div style='height:50px;'></div>", unsafe_allow_html=True)
