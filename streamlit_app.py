@@ -18,28 +18,17 @@ st.markdown(f"""
         border: 1px solid rgba(56, 189, 248, 0.3); backdrop-filter: blur(10px);
     }}
 
-    /* 响应式容器：利用 Flex 布局替代死板的列 */
-    .flex-grid {{
-        display: flex;
-        flex-wrap: wrap;
-        gap: 16px;
-        justify-content: flex-start;
-    }}
-
-    /* 大格子外框：自适应宽度 */
-    .cat-card {{
-        flex: 1 1 300px; /* 最小300px，自动伸展 */
-        max-width: 450px; /* 防止在超宽屏上拉得太离谱 */
+    /* 内部格子样式：固定高度+内部滚动 */
+    .cat-card-inner {{
         height: 380px;
         background: rgba(255, 255, 255, 0.02);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 12px;
         overflow-y: auto;
-        position: relative;
+        margin-bottom: 20px;
     }}
-
-    .cat-card::-webkit-scrollbar {{ width: 4px; }}
-    .cat-card::-webkit-scrollbar-thumb {{ background: rgba(56, 189, 248, 0.3); border-radius: 10px; }}
+    .cat-card-inner::-webkit-scrollbar {{ width: 4px; }}
+    .cat-card-inner::-webkit-scrollbar-thumb {{ background: rgba(56, 189, 248, 0.3); border-radius: 10px; }}
 
     .err-link {{ color: #38bdf8 !important; text-decoration: none; font-weight: bold; border-bottom: 1px dashed #38bdf8; }}
     </style>
@@ -78,8 +67,8 @@ def process_data(uploaded_file):
         except: continue
     return pd.DataFrame(valid), pd.DataFrame(error)
 
-# --- 3. 渲染逻辑 (改为单盒子独立渲染) ---
-def render_box(cat, group, is_error):
+# --- 3. 渲染函数 ---
+def render_item_box(cat, group, is_error):
     head_bg = "rgba(239, 68, 68, 0.2)" if is_error else "rgba(56, 189, 248, 0.2)"
     head_clr = "#f87171" if is_error else "#38bdf8"
     
@@ -103,37 +92,37 @@ def render_box(cat, group, is_error):
                     <div style="display:flex; flex-wrap:wrap; gap:4px;">{size_badges}</div>
                 </div>'''
     
-    # 每一个大格子都是一次独立的 markdown 调用，避开乱码风险
+    # 封装进内部滚动的 div
     st.markdown(f'''
-        <div class="cat-card">
+        <div class="cat-card-inner">
             <div style="background:{head_bg}; padding:10px; text-align:center; color:{head_clr}; font-weight:900; font-size:1.1rem; border-bottom:1px solid rgba(255,255,255,0.1); position:sticky; top:0; z-index:10;">{cat}</div>
             <div style="padding:10px;">{body_html}</div>
         </div>
     ''', unsafe_allow_html=True)
 
 # --- 4. 主程序 ---
-st.markdown("<h2 style='text-align:center; padding-top:50px;'>📊 智能响应式矩阵</h2>", unsafe_allow_html=True)
+st.markdown("<h2 style='text-align:center; padding-top:50px;'>📊 智能横向平铺看板</h2>", unsafe_allow_html=True)
 file = st.file_uploader("", type=["xlsx"])
 
 if file:
     v_df, e_df = process_data(file)
     t1, t2 = st.tabs(["✅ 正常汇总", "❌ 异常拦截"])
     
-    with t1:
-        if not v_df.empty:
-            # 使用原生容器包裹 Flex 布局
-            st.markdown('<div class="flex-grid">', unsafe_allow_html=True)
-            cols = st.columns(1) # 技巧：用一个 column 来撑开 flex 空间
-            with cols[0]:
-                c1, c2, c3, c4, c5, c6 = st.columns(6) # 实际上这里我们换个思路，直接循环渲染
-                # 为了解决乱码，我们直接利用 Streamlit 的原生列，不写大 HTML
-                cat_list = list(v_df.groupby('Category'))
-                # 智能分配到 1-6 列（根据屏幕宽度动态调整的最稳妥办法）
-                for i, (cat, g) in enumerate(cat_list):
-                    render_box(cat, g, False)
-            st.markdown('</div>', unsafe_allow_html=True)
-    
-    with t2:
-        if not e_df.empty:
-            for cat, g in e_df.groupby('Category'):
-                render_box(cat, g, True)
+    # 定义每行显示几个格子（根据屏幕大小可调）
+    cols_per_row = 6 
+
+    for tab, df, is_err in zip([t1, t2], [v_df, e_df], [False, True]):
+        with tab:
+            if not df.empty:
+                df = df.sort_values(['Category'])
+                cat_list = list(df.groupby('Category'))
+                
+                # --- 关键：使用分行 columns 实现横向平铺 ---
+                for i in range(0, len(cat_list), cols_per_row):
+                    batch = cat_list[i : i + cols_per_row]
+                    cols = st.columns(cols_per_row) # 开启一行中的列
+                    for col, (cat, g) in zip(cols, batch):
+                        with col:
+                            render_item_box(cat, g, is_err)
+            else:
+                st.info("暂无数据")
