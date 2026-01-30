@@ -80,12 +80,12 @@ st.markdown(f"""
 
     /* 📥 上传文件界面 */
     [data-testid="stFileUploader"] {{
-        position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%); 
+        position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); 
         width: 520px; z-index: 9999;
         background: rgba(12, 30, 61, 0.65) !important; 
         border-radius: 24px !important; 
         padding: 20px !important; 
-        backdrop-filter: blur(25px) !important;
+        backdrop-filter: blur(30px) !important;
         border: 1.5px solid rgba(56, 189, 248, 0.3) !important;
         animation: uploader-glow 4s infinite ease-in-out;
         box-shadow: 0 15px 45px rgba(0,0,0,0.7);
@@ -99,7 +99,7 @@ st.markdown(f"""
         <img src="{AVATAR_URL}" class="avatar">
         <div class="user-name">{GITHUB_USERNAME}</div>
     </div>
-    <div style="text-align:center; margin-bottom:50px;"><h1 class="grand-title">12345678</h1></div>
+    <div style="text-align:center; margin-bottom:50px;"><h1 class="grand-title">祝王哥天天爆单</h1></div>
 """, unsafe_allow_html=True)
 
 # --- 3. 核心逻辑 (维持原样) ---
