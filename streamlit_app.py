@@ -26,11 +26,6 @@ st.markdown(f"""
         to {{ opacity: 1; transform: translateY(0); filter: blur(0); }}
     }}
 
-    @keyframes avatarPulse {{
-        0%, 100% {{ box-shadow: 0 0 10px rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.4); }}
-        50% {{ box-shadow: 0 0 25px rgba(56, 189, 248, 0.6); border-color: rgba(56, 189, 248, 1); }}
-    }}
-
     /* 🛡️ 用户面板 */
     .user-profile {{
         position: fixed; top: 35px; left: 35px; display: flex; align-items: center; gap: 12px; z-index: 1000000; 
@@ -38,80 +33,61 @@ st.markdown(f"""
         border: 1.5px solid rgba(56, 189, 248, 0.2); backdrop-filter: blur(15px);
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer;
     }}
-    .user-profile:hover {{ transform: translateY(-4px); border-color: #38bdf8; box-shadow: 0 0 20px rgba(56, 189, 248, 0.3); }}
-    .user-profile:active {{ transform: translateY(-1px) scale(0.97); }}
-    .avatar {{ width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; background: #0c1e3d; object-fit: cover; animation: avatarPulse 3s infinite ease-in-out; }}
+    .avatar {{ width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; background: #0c1e3d; object-fit: cover; }}
     .user-name {{ font-size: 0.95rem; font-weight: 900; color: #fff; letter-spacing: 0.5px; }}
 
-    /* 🧊 卡片逻辑：巨量内散射效果 */
+    /* 🧊 卡片基础样式 */
     .wide-card {{
         background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 16px; padding: 20px 25px; margin-bottom: 25px;
         display: flex; flex-direction: row; align-items: center; justify-content: space-between;
         backdrop-filter: blur(15px); 
-        transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
         animation: fadeIn 0.4s ease-out;
         cursor: pointer;
+        position: relative;
     }}
     
-    .wide-card:active {{
-        transform: translateY(-2px) scale(0.985);
-        filter: brightness(1.2);
-    }}
-
-    /* 汇总卡片：蓝光由边缘向内巨量散射 */
-    .normal-card {{ border-left: 4px solid rgba(56, 189, 248, 0.4); }}
+    /* 1. 悬停效果 (Hover) */
     .normal-card:hover {{
         transform: translateY(-8px);
         border-color: #38bdf8;
-        background: rgba(56, 189, 248, 0.03); /* 背景轻微染蓝 */
-        box-shadow: 
-            0 15px 35px rgba(0,0,0,0.5), 
-            0 0 25px rgba(56, 189, 248, 0.2),
-            inset 0 0 80px rgba(56, 189, 248, 0.25), /* 大范围散射 */
-            inset 0 0 15px rgba(56, 189, 248, 0.4);  /* 边缘散射增强 */
+        background: rgba(56, 189, 248, 0.03);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 80px rgba(56, 189, 248, 0.25), inset 0 0 15px rgba(56, 189, 248, 0.4);
     }}
-
-    /* 异常卡片：橙光由边缘向内巨量散射 */
-    .error-card {{ border-left: 4px solid rgba(245, 158, 11, 0.4); }}
     .error-card:hover {{
         transform: translateY(-8px);
         border-color: #f59e0b;
-        background: rgba(245, 158, 11, 0.03); /* 背景轻微染橙 */
-        box-shadow: 
-            0 15px 35px rgba(0,0,0,0.5), 
-            0 0 25px rgba(245, 158, 11, 0.2),
-            inset 0 0 80px rgba(245, 158, 11, 0.25), /* 大范围散射 */
-            inset 0 0 15px rgba(245, 158, 11, 0.4);  /* 边缘散射增强 */
+        background: rgba(245, 158, 11, 0.03);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 80px rgba(245, 158, 11, 0.25), inset 0 0 15px rgba(245, 158, 11, 0.4);
     }}
 
-    /* 其余样式完全不改动 */
-    .hero-container {{ margin-top: 10px; margin-bottom: 40px; text-align: center; }}
-    .grand-title {{
-        display: inline-block; font-size: 3rem !important; font-weight: 900; letter-spacing: 8px;
-        background: linear-gradient(to bottom, #ffffff 40%, #38bdf8 100%);
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    /* 2. 点击动画 (Active) - 必须放在 Hover 后面 */
+    .wide-card:active {{
+        transform: translateY(-2px) scale(0.97) !important; /* 强制缩回并缩小 */
+        box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5) !important; /* 点击时散射光熄灭，产生压感 */
+        transition: all 0.1s !important; /* 点击反馈要快 */
+        filter: brightness(0.8);
     }}
+
+    .normal-card {{ border-left: 4px solid rgba(56, 189, 248, 0.4); }}
+    .error-card {{ border-left: 4px solid rgba(245, 158, 11, 0.4); }}
+
+    /* 其余样式保持原样 */
+    .grand-title {{ display: inline-block; font-size: 3rem !important; font-weight: 900; letter-spacing: 8px; background: linear-gradient(to bottom, #ffffff 40%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
     .stTabs [data-baseweb="tab-list"] {{ gap: 12px; background: transparent !important; padding-top: 15px !important; margin-bottom: 20px; }}
-    .stTabs [data-baseweb="tab"] {{ height: 32px !important; padding: 0 18px !important; font-size: 0.85rem !important; border-radius: 40px !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; background: rgba(255, 255, 255, 0.02) !important; color: rgba(255, 255, 255, 0.4) !important; transition: all 0.3s ease !important; }}
-    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{ color: #38bdf8 !important; border-color: #38bdf8 !important; background: rgba(56, 189, 248, 0.1) !important; box-shadow: 0 0 15px rgba(56, 189, 248, 0.3); }}
-    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(2) {{ color: #f59e0b !important; border-color: #f59e0b !important; background: rgba(245, 158, 11, 0.1) !important; box-shadow: 0 0 15px rgba(245, 158, 11, 0.3); }}
-
-    div.stButton > button {{ background: rgba(56, 189, 248, 0.05) !important; color: #38bdf8 !important; border: 1.5px solid rgba(56, 189, 248, 0.4) !important; border-radius: 40px !important; padding: 6px 30px !important; font-size: 0.8rem !important; transition: all 0.3s ease !important; margin: 30px auto !important; display: block !important; }}
-    div.stButton > button:hover {{ transform: translateY(-3px) !important; box-shadow: 0 0 20px rgba(56, 189, 248, 0.4) !important; }}
-
+    .stTabs [data-baseweb="tab"] {{ height: 32px !important; border-radius: 40px !important; transition: all 0.3s ease !important; }}
     .sn-pill {{ padding: 4px 12px; border-radius: 40px; font-size: 0.7rem; font-weight: 600; text-decoration: none !important; transition: all 0.2s ease; }}
     .normal-sn {{ background: rgba(56, 189, 248, 0.08); color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.15); }}
     .error-sn-pill {{ background: rgba(245, 158, 11, 0.08); color: #f59e0b !important; border: 1px solid rgba(245, 158, 11, 0.2); }}
-
-    [data-testid="stFileUploader"] {{ position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 380px; z-index: 9999; background: rgba(255, 255, 255, 0.1) !important; border: 1px solid rgba(56, 189, 248, 0.3) !important; border-radius: 40px !important; padding: 10px 25px !important; backdrop-filter: blur(20px) !important; }}
+    [data-testid="stFileUploader"] {{ position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 380px; z-index: 9999; background: rgba(255, 255, 255, 0.1) !important; border-radius: 40px !important; padding: 10px 25px !important; backdrop-filter: blur(20px) !important; }}
     </style>
 
     <div class="user-profile">
         <img src="{AVATAR_URL}" class="avatar">
         <div class="user-name">{GITHUB_USERNAME}</div>
     </div>
-    <div class="hero-container"><h1 class="grand-title">SKU 属性解析中枢</h1></div>
+    <div style="text-align:center; margin-bottom:40px;"><h1 class="grand-title">SKU 属性解析中枢</h1></div>
 """, unsafe_allow_html=True)
 
 # --- 3. 核心逻辑 (完全维持) ---
