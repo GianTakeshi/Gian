@@ -152,7 +152,7 @@ def process_sku_logic(uploaded_file):
         g_text, i_val, sn = str(row[cols[6]]), str(row[cols[8]]), str(row[cols[0]])
         i_qty = int(re.findall(r'\d+', i_val)[0]) if re.findall(r'\d+', i_val) else 0
         if ';' in c_raw or '；' in c_raw:
-            all_error_rows.append({'SN': sn, 'Line': index+2, 'Reason': "品类冲突", 'Content': g_text})
+            all_error_rows.append({'SN': sn, 'Line': index+2, 'Reason': "多个商品", 'Content': g_text})
             continue
         chunks = [c.strip() for c in re.split(r'[;；]', g_text) if c.strip()]
         data_pairs = []
@@ -171,7 +171,7 @@ uploaded_file = upload_zone.file_uploader("Upload", type=["xlsx"])
 if uploaded_file:
     v_df, e_df = process_sku_logic(uploaded_file)
     upload_zone.empty() 
-    t1, t2 = st.tabs(["汇总数据流", "异常拦截"])
+    t1, t2 = st.tabs(["汇总数据", "异常拦截"])
     
     with t1:
         if not v_df.empty:
