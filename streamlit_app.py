@@ -7,6 +7,8 @@ st.set_page_config(page_title="SKU 属性解析中枢", page_icon="🚀", layout
 
 GITHUB_USERNAME = "GianTakeshi" 
 BASE_URL = "https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id="
+# 修复后的稳定头像直链
+AVATAR_URL = f"https://github.com/{GITHUB_USERNAME}.png"
 
 # --- 2. 注入深度定制 CSS ---
 st.markdown(f"""
@@ -29,7 +31,6 @@ st.markdown(f"""
         position: fixed; top: 25px; left: 25px; display: flex; align-items: center; gap: 12px; z-index: 1000000; 
         background: rgba(255, 255, 255, 0.05); padding: 8px 18px 8px 8px; border-radius: 50px;
         border: 1px solid rgba(56, 189, 248, 0.2); backdrop-filter: blur(15px);
-        transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
     }}
     .avatar {{ 
         width: 40px; height: 40px; border-radius: 50%; 
@@ -45,7 +46,7 @@ st.markdown(f"""
         filter: drop-shadow(0 0 15px rgba(56, 189, 248, 0.3));
     }}
 
-    /* 🧊 毛玻璃卡片系统 */
+    /* 🧊 毛玻璃卡片系统 & 浮动霓虹效果 */
     .wide-card {{
         background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 20px; padding: 25px 30px; margin-bottom: 25px;
@@ -73,7 +74,6 @@ st.markdown(f"""
         color: rgba(255, 255, 255, 0.4) !important; transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1) !important;
         font-size: 0.85rem !important; font-weight: 600 !important;
     }}
-    /* 药丸激活状态 */
     .stTabs [data-baseweb="tab"]:nth-child(1)[aria-selected="true"] {{
         color: #38bdf8 !important; background: rgba(56, 189, 248, 0.1) !important;
         border: 1px solid #38bdf8 !important; box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
@@ -107,7 +107,6 @@ st.markdown(f"""
         padding: 10px 50px !important; font-weight: 800 !important; backdrop-filter: blur(10px) !important;
         transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important; margin: 30px auto !important; display: block !important;
     }}
-    div.stButton > button:hover {{ background: #38bdf8 !important; color: #000 !important; box-shadow: 0 0 30px rgba(56, 189, 248, 0.5); transform: translateY(-5px); }}
 
     [data-testid="stFileUploader"] {{
         position: fixed; bottom: 35px; left: 50%; transform: translateX(-50%); width: 450px; z-index: 9999;
@@ -119,7 +118,7 @@ st.markdown(f"""
     </style>
 
     <div class="user-profile">
-        < img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
+        <img src="{AVATAR_URL}" class="avatar">
         <div class="user-info">
             <div style="font-size: 0.9rem; font-weight: 900; color: #fff;">{GITHUB_USERNAME}</div>
             <div style="font-size: 0.6rem; color: #38bdf8; font-weight: bold;">● QUANTUM ANALYZER</div>
@@ -128,7 +127,7 @@ st.markdown(f"""
     <div class="hero-container"><h1 class="grand-title">SKU 属性解析中枢</h1></div>
 """, unsafe_allow_html=True)
 
-# --- 3. 核心逻辑 ---
+# --- 3. 核心逻辑 (保持原样) ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -167,54 +166,25 @@ uploaded_file = upload_zone.file_uploader("Upload", type=["xlsx"])
 if uploaded_file:
     v_df, e_df = process_sku_logic(uploaded_file)
     upload_zone.empty() 
-    
     t1, t2 = st.tabs(["💎 汇总数据流", "📡 异常拦截"])
     
     with t1:
         if not v_df.empty:
             for cat in sorted(v_df['Category'].unique()):
                 cat_group = v_df[v_df['Category'] == cat]
-                
-                # 构建属性组 HTML
                 attr_html = ""
                 for clr in sorted(cat_group['Color'].unique()):
                     clr_group = cat_group[cat_group['Color'] == clr]
                     size_counts = clr_group['Size'].value_counts().sort_index()
-                    
-                    sizes_html = ""
-                    for s, q in size_counts.items():
-                        s_lab = s if s != 'FREE' else ''
-                        x_m = '×' if s != 'FREE' else ''
-                        sizes_html += f"<div style='display:inline-flex; align-items:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:3px 12px; margin-right:8px;'><span style='color:#fff; font-size:0.8rem; font-weight:600;'>{s_lab}</span><span style='color:#38bdf8; font-weight:800; margin-left:5px;'>{x_m}{q}</span></div>"
-                    
+                    sizes_html = "".join([f"<div style='display:inline-flex; align-items:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:3px 12px; margin-right:8px;'><span style='color:#fff; font-size:0.8rem; font-weight:600;'>{(s if s!='FREE' else '')}</span><span style='color:#38bdf8; font-weight:800; margin-left:5px;'>{('×' if s!='FREE' else '')}{q}</span></div>" for s, q in size_counts.items()])
                     attr_html += f"<div style='display:flex; align-items:center; gap:20px; padding:8px 0;'><div style='color:#38bdf8; font-weight:700; font-size:1rem; min-width:100px;'>{clr}</div><div>{sizes_html}</div></div>"
-                
                 sns = sorted(list(set(cat_group['SN'].tolist())))
-                sn_html = "".join([f'<a href=" " target="_blank" class="sn-pill normal-sn">{sn}</a >' for sn in sns])
-                
-                st.markdown(f'''
-                    <div class="wide-card normal-card">
-                        <div style="flex:1;">
-                            <div style="color:#38bdf8; font-weight:900; font-size:1.6rem; margin-bottom:12px; letter-spacing:1px;">{cat}</div>
-                            {attr_html}
-                        </div>
-                        <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;">{sn_html}</div>
-                    </div>
-                ''', unsafe_allow_html=True)
+                sn_html = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill normal-sn">{sn}</a>' for sn in sns])
+                st.markdown(f'''<div class="wide-card normal-card"><div style="flex:1;"><div style="color:#38bdf8; font-weight:900; font-size:1.6rem; margin-bottom:12px; letter-spacing:1px;">{cat}</div>{attr_html}</div><div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;">{sn_html}</div></div>''', unsafe_allow_html=True)
             if st.button("↺ 重制系统"): st.rerun()
 
     with t2:
         if not e_df.empty:
             for _, err in e_df.iterrows():
-                sn_link = f'<a href="{BASE_URL}{err["SN"]}" target="_blank" class="sn-pill error-sn">{err["SN"]}</a >'
-                st.markdown(f'''
-                    <div class="wide-card error-card">
-                        <div style="flex:1;">
-                            <div style="color:#f59e0b; font-weight:900; font-size:1.1rem;">LINE {err["Line"]} | {err["Reason"]}</div>
-                            <div style="font-size:0.85rem; color:#cbd5e1; margin-top:8px; line-height:1.5;">{err["Content"]}</div>
-                        </div>
-                        <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;">{sn_link}</div>
-                    </div>
-                ''', unsafe_allow_html=True)
-        else:
-            st.success("数据校验完成，未发现逻辑阻塞。")
+                sn_link = f'<a href="{BASE_URL}{err["SN"]}" target="_blank" class="sn-pill error-sn">{err["SN"]}</a>'
+                st.markdown(f'''<div class="wide-card error-card"><div style="flex:1;"><div style="color:#f59e0b; font-weight:900; font-size:1.1rem;">LINE {err["Line"]} | {err["Reason"]}</div><div style="font-size:0.85rem; color:#cbd5e1; margin-top:8px; line-height:1.5;">{err["Content"]}</div></div><div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;">{sn_link}</div></div>''', unsafe_allow_html=True)
