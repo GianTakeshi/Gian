@@ -10,41 +10,53 @@ GITHUB_USERNAME = "GianTakeshi"
 BASE_URL = "https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id="
 AVATAR_URL = f"https://avatars.githubusercontent.com/{GITHUB_USERNAME}"
 
-# --- 2. 注入 CSS (动态极光 HDR 背景整合版) ---
+# --- 2. 注入 CSS (动态极光流体 + HDR 呼吸感) ---
 st.markdown(f"""
     <style>
-    /* 🎨 [整合版] 动态背景逻辑 */
+    /* 🎨 根容器：纯黑底色 */
     .stApp {{ 
-        /* 叠加两个不同位置的 P3 径向渐变气泡 */
-        background: 
-            radial-gradient(circle at 20% 30%, color(display-p3 0.05 0.2 0.4 / 0.6) 0%, transparent 50%),
-            radial-gradient(circle at 80% 70%, color(display-p3 0.1 0.1 0.3 / 0.6) 0%, #000000 100%) !important;
-        
-        background-size: 200% 200% !important;
-        animation: aurora-flow 20s ease infinite alternate !important;
+        background-color: #000000 !important;
         color: #ffffff; 
         padding-top: 80px !important; 
     }}
     header {{visibility: hidden;}}
 
-    /* 🕺 背景流动动画曲线 */
-    @keyframes aurora-flow {{
-        0% {{ background-position: 0% 0%; }}
-        50% {{ background-position: 50% 100%; }}
-        100% {{ background-position: 100% 50%; }}
+    /* 🌊 动态极光层：利用伪元素强制置底并开启 GPU 加速 */
+    .stApp::before {{
+        content: "";
+        position: fixed;
+        top: -50%; left: -50%; width: 200%; height: 200%;
+        z-index: -1;
+        background: 
+            radial-gradient(circle at 30% 30%, color(display-p3 0.05 0.2 0.4 / 0.7) 0%, transparent 50%),
+            radial-gradient(circle at 70% 70%, color(display-p3 0.1 0.15 0.3 / 0.7) 0%, #000000 100%);
+        background-size: 50% 50%;
+        animation: aurora-fluid 25s ease-in-out infinite alternate;
+        pointer-events: none;
+        filter: blur(80px);
     }}
 
-    /* ✨ 上传框呼吸：HDR 提亮 */
+    /* 🕺 极光流体路径：位移 + 缩放 + 极小幅度旋转 */
+    @keyframes aurora-fluid {{
+        0% {{ transform: translate(0, 0) scale(1) rotate(0deg); }}
+        50% {{ transform: translate(10%, 5%) scale(1.1) rotate(2deg); }}
+        100% {{ transform: translate(-5%, 15%) scale(0.9) rotate(-2deg); }}
+    }}
+
+    /* ✨ 上传框呼吸：HDR 极限亮度 */
     @keyframes uploader-glow {{
         0% {{ border-color: rgba(56, 189, 248, 0.2); box-shadow: 0 0 10px rgba(56, 189, 248, 0.1); }}
-        50% {{ border-color: color(display-p3 0.22 0.74 0.97); box-shadow: 0 0 25px color(display-p3 0.22 0.74 0.97 / 0.5); }}
+        50% {{ 
+            border-color: color(display-p3 0.4 0.85 1); 
+            box-shadow: 0 0 20px #fff, 0 0 40px color(display-p3 0.22 0.74 0.97 / 0.6); 
+        }}
         100% {{ border-color: rgba(56, 189, 248, 0.2); box-shadow: 0 0 10px rgba(56, 189, 248, 0.1); }}
     }}
 
     /* ✨ 头像呼吸 */
     @keyframes avatar-breathing {{
         0% {{ box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); transform: scale(1); }}
-        50% {{ box-shadow: 0 0 20px 4px color(display-p3 0.22 0.74 0.97 / 0.8); transform: scale(1.05); }}
+        50% {{ box-shadow: 0 0 25px 5px color(display-p3 0.22 0.74 0.97 / 0.9); transform: scale(1.05); }}
         100% {{ box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); transform: scale(1); }}
     }}
 
@@ -66,22 +78,26 @@ st.markdown(f"""
     .normal-card:hover {{ 
         transform: translateY(-8px); 
         border-color: color(display-p3 0.22 0.74 0.97); 
-        box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 80px color(display-p3 0.22 0.74 0.97 / 0.25); 
+        box-shadow: 0 20px 50px rgba(0,0,0,0.6), inset 0 0 40px color(display-p3 0.22 0.74 0.97 / 0.3); 
     }}
 
     .sn-pill {{ padding: 6px 14px; border-radius: 40px; font-size: 0.8rem; font-weight: 800; text-decoration: none !important; transition: all 0.3s ease; border: 1px solid transparent; }}
     .normal-sn {{ background: rgba(56, 189, 248, 0.08); color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.3); }}
-    .normal-sn:hover {{ background: color(display-p3 0.22 0.74 0.97) !important; color: #000000 !important; box-shadow: 0 0 20px color(display-p3 0.22 0.74 0.97 / 0.6); transform: scale(1.05); }}
+    .normal-sn:hover {{ background: color(display-p3 0.22 0.74 0.97) !important; color: #000000 !important; box-shadow: 0 0 20px color(display-p3 0.22 0.74 0.97); transform: scale(1.05); }}
 
-    .stTabs [data-baseweb="tab-list"] {{ gap: 20px; background: transparent !important; padding: 30px 10px !important; }}
+    .stTabs [data-baseweb="tab-list"] {{ gap: 20px; background: transparent !important; padding: 20px 10px !important; }}
     .stTabs [data-baseweb="tab"] {{ height: 42px !important; border-radius: 40px !important; border: 1.5px solid rgba(255, 255, 255, 0.1) !important; color: rgba(255, 255, 255, 0.5) !important; }}
-    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{ color: color(display-p3 0.22 0.74 0.97) !important; border-color: color(display-p3 0.22 0.74 0.97) !important; box-shadow: 0 0 35px 8px color(display-p3 0.22 0.74 0.97 / 0.5) !important; }}
+    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{ 
+        color: #fff !important; border-color: color(display-p3 0.4 0.85 1) !important; 
+        background: rgba(56, 189, 248, 0.15) !important; 
+        box-shadow: 0 0 15px #fff, 0 0 30px color(display-p3 0.22 0.74 0.97) !important; 
+    }}
     .stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] {{ display: none !important; }}
 
     [data-testid="stFileUploader"] {{
         position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); 
         width: 520px; z-index: 9999;
-        background: rgba(12, 30, 61, 0.65) !important; 
+        background: rgba(12, 30, 61, 0.7) !important; 
         border-radius: 24px !important; padding: 20px !important; 
         backdrop-filter: blur(30px) !important;
         border: 1.5px solid rgba(56, 189, 248, 0.3) !important;
@@ -97,7 +113,7 @@ st.markdown(f"""
     <div style="text-align:center; margin-bottom:100px;"><h1 class="grand-title">祝王哥天天爆单</h1></div>
 """, unsafe_allow_html=True)
 
-# --- 3. 核心提取逻辑 (保持不变) ---
+# --- 3. 核心提取逻辑 ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -129,10 +145,9 @@ def process_sku_logic(uploaded_file):
             all_error_rows.append({'SN': sn, 'Line': index+2, 'Reason': f"数量异常({len(data_pairs)}/{i_qty})", 'Content': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 4. UI 渲染 (保持不变) ---
+# --- 4. UI 渲染 ---
 upload_zone = st.empty()
 uploaded_file = upload_zone.file_uploader("DROP FILE TO PARSE", type=["xlsx"])
-
 if uploaded_file:
     v_df, e_df = process_sku_logic(uploaded_file)
     upload_zone.empty()
