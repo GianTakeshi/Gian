@@ -19,24 +19,19 @@ st.markdown(f"""
     }}
     header {{visibility: hidden;}}
 
-    /* ✨ 定义入场动画 (移除 forwards 以避免锁定状态) */
+    /* ✨ 定义入场动画 */
     @keyframes fadeIn {{
         from {{ opacity: 0; transform: translateY(20px); filter: blur(5px); }}
         to {{ opacity: 1; transform: translateY(0); filter: blur(0); }}
     }}
 
     /* 🛡️ 用户面板 */
-    @keyframes avatarPulse {{
-        0%, 100% {{ box-shadow: 0 0 5px rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.3); }}
-        50% {{ box-shadow: 0 0 20px rgba(56, 189, 248, 0.6); border-color: rgba(56, 189, 248, 0.8); }}
-    }}
-
     .user-profile {{
         position: fixed; top: 25px; left: 25px; display: flex; align-items: center; gap: 12px; z-index: 1000000; 
         background: rgba(255, 255, 255, 0.05); padding: 8px 18px 8px 8px; border-radius: 50px;
         border: 1px solid rgba(56, 189, 248, 0.2); backdrop-filter: blur(15px);
     }}
-    .avatar {{ width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; animation: avatarPulse 2.5s infinite ease-in-out; }}
+    .avatar {{ width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; }}
     
     .grand-title {{
         text-align: center; font-size: 3.5rem !important; font-weight: 900; letter-spacing: 10px;
@@ -44,45 +39,67 @@ st.markdown(f"""
         -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 40px 0;
     }}
 
-    /* 🧊 毛玻璃卡片系统核心 - 修复版 */
+    /* 🧊 卡片基础样式 */
     .wide-card {{
         background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 20px; padding: 25px 30px; margin-bottom: 25px;
+        border-radius: 20px; padding: 25px 30px; margin-bottom: 35px;
         display: flex; flex-direction: row; align-items: center; justify-content: space-between;
         backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-        
-        /* 入场动画 - 仅执行一次，不锁定属性 */
         animation: fadeIn 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-        
-        /* 混合过渡 - 显式包含 transform 确保浮动灵敏 */
-        transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), 
-                    background 0.4s ease, 
-                    box-shadow 0.4s ease, 
-                    border-color 0.4s ease;
+        transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
     }}
 
-    /* 🔵 正常卡片：悬停时科技蓝氛围影 */
+    /* 🔵 正常卡片：超重霓虹蓝 (扩散至 60px) */
     .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.5); }}
     .normal-card:hover {{
-        background: rgba(56, 189, 248, 0.08); 
-        transform: translateY(-10px) scale(1.01); 
+        background: rgba(56, 189, 248, 0.1); 
+        transform: translateY(-12px) scale(1.015); 
         border-color: #38bdf8;
-        /* 增强的霓虹投影：一层深色外阴影 + 一层核心亮色阴影 */
-        box-shadow: 0 20px 40px rgba(0,0,0,0.6), 
-                    0 0 25px rgba(56, 189, 248, 0.3);
+        /* 三层阴影：深度影 + 核心光 + 大范围扩散晕 */
+        box-shadow: 0 30px 60px rgba(0,0,0,0.8), 
+                    0 0 30px rgba(56, 189, 248, 0.5),
+                    0 0 70px rgba(56, 189, 248, 0.2);
     }}
 
-    /* 🟠 异常卡片：悬停时警告橙氛围影 */
+    /* 🟠 异常卡片：超重警告橙 (扩散至 60px) */
     .error-card {{ border-left: 5px solid rgba(245, 158, 11, 0.5); }}
     .error-card:hover {{
-        background: rgba(245, 158, 11, 0.08); 
-        transform: translateY(-10px) scale(1.01); 
+        background: rgba(245, 158, 11, 0.1); 
+        transform: translateY(-12px) scale(1.015); 
         border-color: #f59e0b;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.6), 
-                    0 0 25px rgba(245, 158, 11, 0.3);
+        box-shadow: 0 30px 60px rgba(0,0,0,0.8), 
+                    0 0 30px rgba(245, 158, 11, 0.5),
+                    0 0 70px rgba(245, 158, 11, 0.2);
     }}
 
-    /* 💊 Tabs (无红线定稿版) */
+    /* 🔄 重制系统按钮：发光核心效果 */
+    div.stButton > button {{
+        background: rgba(56, 189, 248, 0.05) !important;
+        color: #38bdf8 !important;
+        border: 2px solid rgba(56, 189, 248, 0.4) !important;
+        border-radius: 50px !important;
+        padding: 12px 60px !important;
+        font-weight: 900 !important;
+        letter-spacing: 2px !important;
+        text-transform: uppercase;
+        backdrop-filter: blur(10px) !important;
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1) !important;
+        margin: 50px auto !important;
+        display: block !important;
+        /* 默认微光 */
+        box-shadow: 0 0 15px rgba(56, 189, 248, 0.1);
+    }}
+    div.stButton > button:hover {{
+        background: rgba(56, 189, 248, 0.2) !important;
+        border-color: #38bdf8 !important;
+        transform: translateY(-5px) scale(1.05) !important;
+        /* 按钮重霓虹 */
+        box-shadow: 0 0 30px rgba(56, 189, 248, 0.6), 
+                    0 0 60px rgba(56, 189, 248, 0.3) !important;
+        color: #ffffff !important;
+    }}
+
+    /* 💊 Tabs 相关 */
     .stTabs [data-baseweb="tab-highlight"] {{ display: none !important; }}
     .stTabs [data-baseweb="tab-list"] {{ gap: 12px; background: transparent !important; }}
     .stTabs [data-baseweb="tab"] {{
@@ -92,19 +109,18 @@ st.markdown(f"""
     }}
     .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{
         color: #38bdf8 !important; border-color: #38bdf8 !important; background: rgba(56, 189, 248, 0.1) !important;
-    }}
-    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(2) {{
-        color: #f59e0b !important; border-color: #f59e0b !important; background: rgba(245, 158, 11, 0.1) !important;
+        box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
     }}
 
     .sn-pill {{ padding: 5px 15px; border-radius: 50px !important; font-size: 0.75rem; font-weight: 600; text-decoration: none !important; transition: 0.2s; }}
     .normal-sn {{ background: rgba(56, 189, 248, 0.1); color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.2); }}
-    .normal-sn:hover {{ background: #38bdf8 !important; color: #000 !important; box-shadow: 0 0 10px #38bdf8; }}
+    .normal-sn:hover {{ background: #38bdf8 !important; color: #000 !important; box-shadow: 0 0 15px #38bdf8; }}
 
     [data-testid="stFileUploader"] {{
         position: fixed; bottom: 35px; left: 50%; transform: translateX(-50%); width: 450px; z-index: 9999;
-        background: rgba(255, 255, 255, 0.08) !important; border: 1px solid rgba(56, 189, 248, 0.3) !important;
+        background: rgba(255, 255, 255, 0.1) !important; border: 1px solid rgba(56, 189, 248, 0.4) !important;
         border-radius: 50px !important; padding: 15px 35px !important; backdrop-filter: blur(25px) !important;
+        box-shadow: 0 0 30px rgba(0,0,0,0.5);
     }}
     [data-testid="stFileUploader"] label, [data-testid="stFileUploader"] small {{ display: none !important; }}
     </style>
@@ -164,8 +180,6 @@ if uploaded_file:
         if not v_df.empty:
             for cat in sorted(v_df['Category'].unique()):
                 cat_group = v_df[v_df['Category'] == cat]
-                
-                # 安全的 HTML 构建逻辑
                 attr_html_list = []
                 for clr in sorted(cat_group['Color'].unique()):
                     clr_group = cat_group[cat_group['Color'] == clr]
@@ -175,7 +189,10 @@ if uploaded_file:
                 
                 sn_html = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill normal-sn">{sn}</a>' for sn in sorted(list(set(cat_group['SN'].tolist())))])
                 st.markdown(f'<div class="wide-card normal-card"><div style="flex:1;"><div style="color:#38bdf8; font-weight:900; font-size:1.6rem; margin-bottom:12px;">{cat}</div>{"".join(attr_html_list)}</div><div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;">{sn_html}</div></div>', unsafe_allow_html=True)
-            if st.button("↺ 重制系统"): st.rerun()
+            
+            # --- 重制按钮在这里 ---
+            if st.button("↺ 重制系统并重新上传"): 
+                st.rerun()
 
     with t2:
         if not e_df.empty:
