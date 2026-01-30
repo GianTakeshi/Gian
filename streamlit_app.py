@@ -7,23 +7,20 @@ st.set_page_config(page_title="SKU 属性解析中枢", page_icon="🚀", layout
 
 GITHUB_USERNAME = "GianTakeshi" 
 BASE_URL = "https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id="
+# 使用最稳定的头像直链
 AVATAR_URL = f"https://github.com/{GITHUB_USERNAME}.png"
 
 # --- 2. 注入深度定制 CSS ---
 st.markdown(f"""
     <style>
+    /* 🎭 背景 */
     .stApp {{ 
         background: radial-gradient(circle at 50% 50%, #0c1e3d 0%, #020617 60%, #000000 100%) !important; 
         color: #ffffff; 
     }}
     header {{visibility: hidden;}}
 
-    /* 入场动画 */
-    @keyframes fadeIn {{
-        from {{ opacity: 0; transform: translateY(20px); filter: blur(5px); }}
-        to {{ opacity: 1; transform: translateY(0); filter: blur(0); }}
-    }}
-
+    /* 🛡️ 用户面板 & 头像呼吸光效 */
     @keyframes avatarPulse {{
         0%, 100% {{ box-shadow: 0 0 5px rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.3); }}
         50% {{ box-shadow: 0 0 20px rgba(56, 189, 248, 0.6); border-color: rgba(56, 189, 248, 0.8); }}
@@ -33,20 +30,25 @@ st.markdown(f"""
         background: rgba(255, 255, 255, 0.05); padding: 8px 18px 8px 8px; border-radius: 50px;
         border: 1px solid rgba(56, 189, 248, 0.2); backdrop-filter: blur(15px);
     }}
-    .avatar {{ width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; animation: avatarPulse 2.5s infinite ease-in-out; }}
+    .avatar {{ 
+        width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; 
+        object-fit: cover; animation: avatarPulse 2.5s infinite ease-in-out; 
+    }}
     
+    .hero-container {{ text-align: center; width: 100%; padding: 40px 0 20px 0; }}
     .grand-title {{
-        text-align: center; font-size: 3.5rem !important; font-weight: 900; letter-spacing: 10px;
+        display: block; font-family: 'Inter', sans-serif; font-size: 3.5rem !important; font-weight: 900; letter-spacing: 10px;
         background: linear-gradient(to bottom, #ffffff 40%, #38bdf8 100%);
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 40px 0;
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 40px;
+        filter: drop-shadow(0 0 15px rgba(56, 189, 248, 0.3));
     }}
 
+    /* 🧊 毛玻璃卡片系统 */
     .wide-card {{
         background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 20px; padding: 25px 30px; margin-bottom: 25px;
         display: flex; flex-direction: row; align-items: center; justify-content: space-between;
         backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-        animation: fadeIn 0.5s ease-out forwards;
         transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1);
     }}
     .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.5); }}
@@ -60,6 +62,7 @@ st.markdown(f"""
         box-shadow: 0 15px 40px rgba(0,0,0,0.5), 0 0 30px rgba(245, 158, 11, 0.2);
     }}
 
+    /* 💊 精致药丸 Tabs */
     .stTabs [data-baseweb="tab-highlight"] {{ display: none !important; }}
     .stTabs [data-baseweb="tab-list"] {{ gap: 12px; background: transparent !important; }}
     .stTabs [data-baseweb="tab"] {{
@@ -74,6 +77,7 @@ st.markdown(f"""
         color: #f59e0b !important; border-color: #f59e0b !important; background: rgba(245, 158, 11, 0.1) !important;
     }}
 
+    /* SN 药丸 */
     .sn-pill {{ padding: 5px 15px; border-radius: 50px !important; font-size: 0.75rem; font-weight: 600; text-decoration: none !important; transition: 0.2s; }}
     .normal-sn {{ background: rgba(56, 189, 248, 0.1); color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.2); }}
     .normal-sn:hover {{ background: #38bdf8 !important; color: #000 !important; }}
@@ -92,10 +96,10 @@ st.markdown(f"""
             <div style="font-size: 0.6rem; color: #38bdf8; font-weight: bold;">● QUANTUM ANALYZER</div>
         </div>
     </div>
-    <div style="text-align:center;"><h1 class="grand-title">SKU 属性解析中枢</h1></div>
+    <div class="hero-container"><h1 class="grand-title">SKU 属性解析中枢</h1></div>
 """, unsafe_allow_html=True)
 
-# --- 3. 核心逻辑 ---
+# --- 3. 核心逻辑 (保持原样) ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -138,31 +142,13 @@ if uploaded_file:
         if not v_df.empty:
             for cat in sorted(v_df['Category'].unique()):
                 cat_group = v_df[v_df['Category'] == cat]
-                
-                attr_html_list = []
-                for clr in sorted(cat_group['Color'].unique()):
-                    clr_group = cat_group[cat_group['Color'] == clr]
-                    size_counts = clr_group['Size'].value_counts().sort_index()
-                    
-                    size_badges = []
-                    for s, q in size_counts.items():
-                        s_label = s if s != "FREE" else ""
-                        x_mark = "×" if s != "FREE" else ""
-                        badge = f'<div style="display:inline-flex; align-items:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:3px 12px; margin-right:8px;"><span style="color:#fff; font-size:0.8rem;">{s_label}</span><span style="color:#38bdf8; font-weight:800; margin-left:5px;">{x_mark}{q}</span></div>'
-                        size_badges.append(badge)
-                    
-                    row_html = f'<div style="display:flex; align-items:center; gap:20px; padding:8px 0;"><div style="color:#38bdf8; font-weight:700; min-width:100px;">{clr}</div><div>{"".join(size_badges)}</div></div>'
-                    attr_html_list.append(row_html)
-                
-                attr_html = "".join(attr_html_list)
-                sns = sorted(list(set(cat_group['SN'].tolist())))
-                sn_html = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill normal-sn">{sn}</a>' for sn in sns])
-                
-                st.markdown(f'<div class="wide-card normal-card"><div style="flex:1;"><div style="color:#38bdf8; font-weight:900; font-size:1.6rem; margin-bottom:12px;">{cat}</div>{attr_html}</div><div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;">{sn_html}</div></div>', unsafe_allow_html=True)
+                attr_html = "".join([f"<div style='display:flex; align-items:center; gap:20px; padding:8px 0;'><div style='color:#38bdf8; font-weight:700; min-width:100px;'>{clr}</div><div>{''.join([f'<div style=\"display:inline-flex; align-items:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:3px 12px; margin-right:8px;\"><span style=\"color:#fff; font-size:0.8rem;\">{(s if s!=\"FREE\" else \"\")}</span><span style=\"color:#38bdf8; font-weight:800; margin-left:5px;\">{(\"×\" if s!=\"FREE\" else \"\")}{q}</span></div>' for s, q in cat_group[cat_group['Color']==clr]['Size'].value_counts().sort_index().items()])}</div></div>" for clr in sorted(cat_group['Color'].unique())])
+                sn_html = "".join([f'<a href=\"{BASE_URL}{sn}\" target=\"_blank\" class=\"sn-pill normal-sn\">{sn}</a>' for sn in sorted(list(set(cat_group['SN'].tolist())))])
+                st.markdown(f'<div class=\"wide-card normal-card\"><div style=\"flex:1;\"><div style=\"color:#38bdf8; font-weight:900; font-size:1.6rem; margin-bottom:12px;\">{cat}</div>{attr_html}</div><div style=\"display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;\">{sn_html}</div></div>', unsafe_allow_html=True)
             if st.button("↺ 重制系统"): st.rerun()
 
     with t2:
         if not e_df.empty:
             for _, err in e_df.iterrows():
-                sn_link = f'<a href="{BASE_URL}{err["SN"]}" target="_blank" class="sn-pill normal-sn" style="color:#f59e0b !important; border-color:#f59e0b !important;">{err["SN"]}</a>'
-                st.markdown(f'<div class="wide-card error-card"><div style="flex:1;"><div style="color:#f59e0b; font-weight:900;">LINE {err["Line"]} | {err["Reason"]}</div><div style="font-size:0.85rem; color:#cbd5e1; margin-top:8px;">{err["Content"]}</div></div><div>{sn_link}</div></div>', unsafe_allow_html=True)
+                sn_link = f'<a href=\"{BASE_URL}{err[\"SN\"]}\" target=\"_blank\" class=\"sn-pill normal-sn\" style=\"color:#f59e0b !important; border-color:#f59e0b !important;\">{err[\"SN\"]}</a>'
+                st.markdown(f'<div class=\"wide-card error-card\"><div style=\"flex:1;\"><div style=\"color:#f59e0b; font-weight:900;\">LINE {err[\"Line\"]} | {err[\"Reason\"]}</div><div style=\"font-size:0.85rem; color:#cbd5e1; margin-top:8px;\">{err[\"Content\"]}</div></div><div>{sn_link}</div></div>', unsafe_allow_html=True)
