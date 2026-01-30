@@ -12,7 +12,7 @@ AVATAR_URL = f"https://avatars.githubusercontent.com/{GITHUB_USERNAME}"
 # --- 2. 注入极致定制 CSS ---
 st.markdown(f"""
     <style>
-    /* 🎭 整体布局 */
+    /* 🎭 整体背景 */
     .stApp {{ 
         background: radial-gradient(circle at 50% 50%, #0c1e3d 0%, #020617 60%, #000000 100%) !important; 
         color: #ffffff; 
@@ -27,7 +27,7 @@ st.markdown(f"""
         100% {{ transform: scale(1); box-shadow: 0 0 5px rgba(56, 189, 248, 0.4); }}
     }}
 
-    /* 🛡️ 用户面板：白色高亮毛玻璃胶囊 */
+    /* 🛡️ 用户面板：白色高亮毛玻璃 */
     .user-profile {{
         position: fixed; top: 35px; left: 35px; display: flex; align-items: center; gap: 12px; z-index: 10000; 
         background: rgba(255, 255, 255, 0.18) !important; padding: 8px 24px 8px 8px; border-radius: 60px;
@@ -38,53 +38,58 @@ st.markdown(f"""
         animation: avatar-pulse 3s infinite ease-in-out; 
     }}
 
-    /* 🚫 Tabs 选定态辉光还原 */
+    /* 🚫 Tabs 选定态辉光 */
     .stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] {{ display: none !important; }}
-    .stTabs [data-baseweb="tab-list"] {{ overflow: visible !important; gap: 15px; }}
     .stTabs [data-baseweb="tab"] {{ 
         height: 42px !important; padding: 0 35px !important; border-radius: 40px !important; 
         border: 1px solid rgba(255, 255, 255, 0.1) !important; 
         background: rgba(255, 255, 255, 0.02) !important; color: rgba(255, 255, 255, 0.4) !important; 
-        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1) !important; 
+        transition: all 0.4s ease !important; 
     }}
-    /* 汇总 Tab 激活 */
     .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{ 
         color: #38bdf8 !important; border-color: #38bdf8 !important; 
-        background: rgba(56, 189, 248, 0.15) !important; 
-        box-shadow: 0 0 25px rgba(56, 189, 248, 0.5), inset 0 0 10px rgba(56, 189, 248, 0.3) !important;
+        background: rgba(56, 189, 248, 0.15) !important; box-shadow: 0 0 30px rgba(56, 189, 248, 0.6) !important;
         transform: scale(1.05);
     }}
-    /* 异常 Tab 激活 */
     .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(2) {{ 
         color: #f59e0b !important; border-color: #f59e0b !important; 
-        background: rgba(245, 158, 11, 0.15) !important; 
-        box-shadow: 0 0 25px rgba(245, 158, 11, 0.5), inset 0 0 10px rgba(245, 158, 11, 0.3) !important;
+        background: rgba(245, 158, 11, 0.15) !important; box-shadow: 0 0 30px rgba(245, 158, 11, 0.6) !important;
         transform: scale(1.05);
     }}
 
-    /* 🧊 卡片：强制层级 + 向内扩散光效 (核心回归) */
+    /* 🧊 核心：卡片向内扩散光效 */
     .wide-card {{ 
         background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); 
         border-radius: 20px; padding: 30px; margin-bottom: 25px; 
         display: flex; flex-direction: row; align-items: center; justify-content: space-between; 
-        backdrop-filter: blur(25px); transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); 
+        backdrop-filter: blur(25px); transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1); 
         position: relative; z-index: 10;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     }}
-    .wide-card:hover {{ 
-        transform: scale(1.02); z-index: 9999 !important; 
-        border-color: rgba(255,255,255,0.4);
-    }}
-
-    /* 汇总卡片悬浮：向内扩散蓝光 */
+    
+    /* 汇总卡片（蓝光内向扩散） */
     .normal-card:hover {{ 
-        box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 30px rgba(56, 189, 248, 0.2), inset 0 0 60px rgba(56, 189, 248, 0.15) !important; 
-    }}
-    /* 异常卡片悬浮：向内扩散橙光 */
-    .error-card:hover {{ 
-        box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 30px rgba(245, 158, 11, 0.2), inset 0 0 60px rgba(245, 158, 11, 0.15) !important; 
+        transform: scale(1.02);
+        z-index: 9999 !important;
+        border-color: #38bdf8 !important;
+        box-shadow: 
+            0 20px 40px rgba(0,0,0,0.5), 
+            0 0 20px rgba(56, 189, 248, 0.4), 
+            inset 0 0 50px rgba(56, 189, 248, 0.25) !important; /* Inset 向内扩散 */
     }}
 
-    /* 🏷️ SN 气泡：还原霓虹感，取消放大 */
+    /* 异常卡片（橙光内向扩散） */
+    .error-card:hover {{ 
+        transform: scale(1.02);
+        z-index: 9999 !important;
+        border-color: #f59e0b !important;
+        box-shadow: 
+            0 20px 40px rgba(0,0,0,0.5), 
+            0 0 20px rgba(245, 158, 11, 0.4), 
+            inset 0 0 50px rgba(245, 158, 11, 0.25) !important; /* Inset 向内扩散 */
+    }}
+
+    /* 🏷️ SN 气泡：彻底去放大，保留霓虹光 */
     .sn-pill {{ 
         padding: 6px 16px; border-radius: 40px; font-size: 0.75rem; font-weight: 700; 
         border: 1px solid transparent; margin: 3px; display: inline-block;
@@ -93,21 +98,13 @@ st.markdown(f"""
     .normal-sn {{ background: rgba(56, 189, 248, 0.1); color: #38bdf8 !important; border-color: rgba(56, 189, 248, 0.3); }}
     .normal-sn:hover {{ 
         background: #38bdf8 !important; color: #000 !important; 
-        box-shadow: 0 0 20px #38bdf8 !important; border-color: #38bdf8 !important;
-        text-decoration: none !important;
+        box-shadow: 0 0 20px #38bdf8 !important; text-decoration: none !important; 
     }}
     
     .error-sn-pill {{ background: rgba(245, 158, 11, 0.1); color: #f59e0b !important; border-color: rgba(245, 158, 11, 0.3); }}
     .error-sn-pill:hover {{ 
         background: #f59e0b !important; color: #000 !important; 
-        box-shadow: 0 0 20px #f59e0b !important; border-color: #f59e0b !important;
-        text-decoration: none !important;
-    }}
-
-    /* 📤 上传区域样式对齐 */
-    [data-testid="stFileUploader"] {{
-        background: rgba(255, 255, 255, 0.02) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        border-radius: 20px !important; padding: 30px !important; backdrop-filter: blur(10px);
+        box-shadow: 0 0 20px #f59e0b !important; text-decoration: none !important; 
     }}
 
     .grand-title {{ font-size: 3.5rem !important; font-weight: 900; letter-spacing: 10px; background: linear-gradient(to bottom, #ffffff 30%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
@@ -120,7 +117,7 @@ st.markdown(f"""
     <div style="text-align:center; margin-bottom:50px;"><h1 class="grand-title">SKU 属性解析中枢</h1></div>
 """, unsafe_allow_html=True)
 
-# --- 3. 核心逻辑 ---
+# --- 3. 核心逻辑 (维持原样) ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -149,11 +146,12 @@ def process_sku_logic(uploaded_file):
 
 # --- 4. 渲染 ---
 upload_zone = st.empty()
-uploaded_file = upload_zone.file_uploader("Upload SKU Excel", type=["xlsx"])
+uploaded_file = upload_zone.file_uploader("Upload SKU Data", type=["xlsx"])
 
 if uploaded_file:
     v_df, e_df = process_sku_logic(uploaded_file)
     upload_zone.empty() 
+    
     t1, t2 = st.tabs(["汇总数据", "异常拦截"])
     
     with t1:
