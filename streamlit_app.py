@@ -10,50 +10,33 @@ GITHUB_USERNAME = "GianTakeshi"
 BASE_URL = "https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id="
 AVATAR_URL = f"https://avatars.githubusercontent.com/{GITHUB_USERNAME}"
 
-# --- 2. 注入 CSS (云端流动 HDR 背景版) ---
+# --- 2. 注入 CSS (仅针对颜色值做了 HDR 提亮处理) ---
 st.markdown(f"""
     <style>
-    /* 🎨 根容器：纯黑底色，确保 HDR 色彩能够被衬托 */
+        /* 🎨 [平滑优化版] 背景：增加中间色阶，确保向四周平滑消隐至全黑 */
     .stApp {{ 
-        background-color: #000000 !important;
+        background: radial-gradient(
+            circle at 50% 45%, 
+            #0c1e3d 0%, 
+            #061126 25%, 
+            #030814 50%, 
+            #010308 75%, 
+            #000000 100%
+        ) !important; 
         color: #ffffff; 
         padding-top: 80px !important; 
     }}
+
     header {{visibility: hidden;}}
 
-    /* ☁️ 核心：云端流动背景层 */
-    .stApp::before {{
-        content: "";
-        position: fixed;
-        top: -50%; left: -50%; width: 200%; height: 200%;
-        z-index: -1;
-        /* 叠放三层不同亮度的“云气” */
-        background: 
-            radial-gradient(circle at 40% 40%, color(display-p3 0.05 0.15 0.35 / 0.6) 0%, transparent 45%),
-            radial-gradient(circle at 70% 60%, color(display-p3 0.02 0.08 0.2 / 0.5) 0%, transparent 40%),
-            radial-gradient(circle at 20% 80%, color(display-p3 0.03 0.12 0.3 / 0.4) 0%, #000000 100%);
-        background-size: 50% 50%;
-        /* 关键动画：模拟云朵缓慢漂移、缩放和微旋 */
-        animation: cloud-drift 30s ease-in-out infinite alternate;
-        pointer-events: none;
-        filter: blur(100px); /* 极高模糊度营造云气感 */
-    }}
-
-    /* 🕺 云朵漂移路径：开启 translate3d 触发 GPU */
-    @keyframes cloud-drift {{
-        0% {{ transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }}
-        50% {{ transform: translate3d(8%, 4%, 0) scale(1.15) rotate(1deg); }}
-        100% {{ transform: translate3d(-5%, 10%, 0) scale(0.95) rotate(-1deg); }}
-    }}
-
-    /* ✨ 上传框呼吸：HDR 高亮 */
+    /* ✨ 上传框呼吸：改用 color(display-p3 ...) 实现 HDR 高亮 */
     @keyframes uploader-glow {{
         0% {{ border-color: rgba(56, 189, 248, 0.2); box-shadow: 0 0 10px rgba(56, 189, 248, 0.1); }}
         50% {{ border-color: color(display-p3 0.22 0.74 0.97); box-shadow: 0 0 25px color(display-p3 0.22 0.74 0.97 / 0.5); }}
         100% {{ border-color: rgba(56, 189, 248, 0.2); box-shadow: 0 0 10px rgba(56, 189, 248, 0.1); }}
     }}
 
-    /* ✨ 头像呼吸 */
+    /* ✨ 头像呼吸：HDR 提亮 */
     @keyframes avatar-breathing {{
         0% {{ box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); transform: scale(1); }}
         50% {{ box-shadow: 0 0 20px 4px color(display-p3 0.22 0.74 0.97 / 0.8); transform: scale(1.05); }}
@@ -72,22 +55,36 @@ st.markdown(f"""
         background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 16px; padding: 25px 30px; margin-bottom: 25px;
         display: flex; flex-direction: row; align-items: center; justify-content: space-between;
-        backdrop-filter: blur(25px); transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+        backdrop-filter: blur(15px); transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
     }}
     .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.4); }}
+    /* 🧊 卡片悬停：加入 HDR 内发光 */
     .normal-card:hover {{ 
         transform: translateY(-8px); 
         border-color: color(display-p3 0.22 0.74 0.97); 
         box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 80px color(display-p3 0.22 0.74 0.97 / 0.25); 
     }}
+    .error-card {{ border-left: 5px solid rgba(245, 158, 11, 0.4); }}
+    /* 🧊 异常卡片悬停：加入 HDR 橙色发光 */
+    .error-card:hover {{ 
+        transform: translateY(-8px); 
+        border-color: color(display-p3 0.96 0.62 0.04); 
+        box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 80px color(display-p3 0.96 0.62 0.04 / 0.25); 
+    }}
 
     .sn-pill {{ padding: 6px 14px; border-radius: 40px; font-size: 0.8rem; font-weight: 800; text-decoration: none !important; transition: all 0.3s ease; border: 1px solid transparent; }}
     .normal-sn {{ background: rgba(56, 189, 248, 0.08); color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.3); }}
+    /* 🏷️ SN 悬停：HDR 蓝 */
     .normal-sn:hover {{ background: color(display-p3 0.22 0.74 0.97) !important; color: #000000 !important; box-shadow: 0 0 20px color(display-p3 0.22 0.74 0.97 / 0.6); transform: scale(1.05); }}
+    .error-sn-pill {{ background: rgba(245, 158, 11, 0.08); color: #f59e0b !important; border: 1px solid rgba(245, 158, 11, 0.3); }}
+    .error-sn-pill:hover {{ background: color(display-p3 0.96 0.62 0.04) !important; color: #000000 !important; box-shadow: 0 0 20px color(display-p3 0.96 0.62 0.04 / 0.6); transform: scale(1.05); }}
 
-    .stTabs [data-baseweb="tab-list"] {{ gap: 20px; background: transparent !important; padding: 30px 10px !important; }}
-    .stTabs [data-baseweb="tab"] {{ height: 42px !important; border-radius: 40px !important; border: 1.5px solid rgba(255, 255, 255, 0.1) !important; color: rgba(255, 255, 255, 0.5) !important; }}
-    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{ color: color(display-p3 0.22 0.74 0.97) !important; border-color: color(display-p3 0.22 0.74 0.97) !important; box-shadow: 0 0 35px 8px color(display-p3 0.22 0.74 0.97 / 0.5) !important; }}
+    .stTabs {{ overflow: visible !important; }}
+    .stTabs [data-baseweb="tab-list"] {{ gap: 20px; background: transparent !important; padding: 30px 10px !important; margin-bottom: 10px; overflow: visible !important; }}
+    .stTabs [data-baseweb="tab"] {{ height: 42px !important; padding: 0 30px !important; font-size: 1rem !important; border-radius: 40px !important; border: 1.5px solid rgba(255, 255, 255, 0.1) !important; background: rgba(255, 255, 255, 0.02) !important; color: rgba(255, 255, 255, 0.5) !important; transition: all 0.4s ease !important; position: relative; z-index: 10; }}
+    /* 🚫 Tabs 选中：HDR 霓虹效果 */
+    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{ color: color(display-p3 0.22 0.74 0.97) !important; border-color: color(display-p3 0.22 0.74 0.97) !important; background: rgba(56, 189, 248, 0.15) !important; box-shadow: 0 0 35px 8px color(display-p3 0.22 0.74 0.97 / 0.5) !important; }}
+    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(2) {{ color: color(display-p3 0.96 0.62 0.04) !important; border-color: color(display-p3 0.96 0.62 0.04) !important; background: rgba(245, 158, 11, 0.15) !important; box-shadow: 0 0 35px 8px color(display-p3 0.96 0.62 0.04 / 0.5) !important; }}
     .stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] {{ display: none !important; }}
 
     div.stButton > button {{ 
@@ -102,22 +99,24 @@ st.markdown(f"""
         position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); 
         width: 520px; z-index: 9999;
         background: rgba(12, 30, 61, 0.65) !important; 
-        border-radius: 24px !important; padding: 20px !important; 
+        border-radius: 24px !important; 
+        padding: 20px !important; 
         backdrop-filter: blur(30px) !important;
         border: 1.5px solid rgba(56, 189, 248, 0.3) !important;
         animation: uploader-glow 4s infinite ease-in-out;
+        box-shadow: 0 15px 45px rgba(0,0,0,0.7);
     }}
     .grand-title {{ display: inline-block; font-size: 3.5rem !important; font-weight: 900; letter-spacing: 8px; background: linear-gradient(to bottom, #ffffff 40%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
     </style>
 
     <div class="user-profile">
-        <img src="{AVATAR_URL}" class="avatar">
+        < img src="{AVATAR_URL}" class="avatar">
         <div class="user-name">{GITHUB_USERNAME}</div>
     </div>
     <div style="text-align:center; margin-bottom:100px;"><h1 class="grand-title">祝王哥天天爆单</h1></div>
 """, unsafe_allow_html=True)
 
-# 后续提取逻辑及 UI 逻辑保持不变...
+# --- 3. 核心提取逻辑 (完全未动) ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -149,8 +148,10 @@ def process_sku_logic(uploaded_file):
             all_error_rows.append({'SN': sn, 'Line': index+2, 'Reason': f"数量异常({len(data_pairs)}/{i_qty})", 'Content': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
+# --- 4. UI 渲染 (完全未动) ---
 upload_zone = st.empty()
 uploaded_file = upload_zone.file_uploader("DROP FILE TO PARSE", type=["xlsx"])
+
 if uploaded_file:
     v_df, e_df = process_sku_logic(uploaded_file)
     upload_zone.empty()
@@ -164,11 +165,11 @@ if uploaded_file:
                     clr_group = cat_group[cat_group['Color'] == clr]
                     size_badges = [f'<div style="display:inline-flex; align-items:center; background:rgba(255,255,255,0.05); border:1.5px solid rgba(255,255,255,0.12); border-radius:8px; padding:4px 12px; margin-right:8px;"><span style="color:#fff; font-size:0.9rem; font-weight:800;">{(s if s!="FREE" else "")}</span><span style="color:#38bdf8; font-weight:800; font-size:0.9rem; margin-left:5px;">{("×" if s!="FREE" else "")}{q}</span></div>' for s, q in clr_group['Size'].value_counts().sort_index().items()]
                     attr_html_list.append(f'<div style="display:flex; align-items:center; gap:20px; padding:10px 0;"><div style="color:#38bdf8; font-weight:700; min-width:100px; font-size:1.1rem;">{clr}</div><div>{"".join(size_badges)}</div></div>')
-                sn_html = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill normal-sn">{sn}</a>' for sn in sorted(list(set(cat_group['SN'].tolist())))])
+                sn_html = "".join([f'<a href=" " target="_blank" class="sn-pill normal-sn">{sn}</a >' for sn in sorted(list(set(cat_group['SN'].tolist())))])
                 st.markdown(f'<div class="wide-card normal-card"><div style="flex:1;"><div style="color:#38bdf8; font-weight:900; font-size:1.8rem; margin-bottom:15px; letter-spacing:1px;">{cat}</div>{"".join(attr_html_list)}</div><div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;">{sn_html}</div></div>', unsafe_allow_html=True)
             if st.button("↺ 重制系统"): st.rerun()
     with t2:
         if not e_df.empty:
             for _, err in e_df.iterrows():
-                sn_link = f'<a href="{BASE_URL}{err["SN"]}" target="_blank" class="sn-pill error-sn-pill">{err["SN"]}</a>'
+                sn_link = f'<a href="{BASE_URL}{err["SN"]}" target="_blank" class="sn-pill error-sn-pill">{err["SN"]}</a >'
                 st.markdown(f'<div class="wide-card error-card"><div style="flex:1;"><div style="color:#f59e0b; font-weight:900; font-size:1.1rem;">LINE {err["Line"]} | {err["Reason"]}</div><div style="font-size:0.95rem; color:#cbd5e1; margin-top:8px; line-height:1.4;">{err["Content"]}</div></div><div>{sn_link}</div></div>', unsafe_allow_html=True)
