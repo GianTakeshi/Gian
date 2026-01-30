@@ -7,7 +7,6 @@ st.set_page_config(page_title="SKU 属性解析中枢", page_icon="🚀", layout
 
 GITHUB_USERNAME = "GianTakeshi" 
 BASE_URL = "https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id="
-# 修复后的稳定头像直链
 AVATAR_URL = f"https://github.com/{GITHUB_USERNAME}.png"
 
 # --- 2. 注入深度定制 CSS ---
@@ -20,7 +19,13 @@ st.markdown(f"""
     }}
     header {{visibility: hidden;}}
 
-    /* 🛡️ 用户面板 & 头像霓虹呼吸光效 */
+    /* ✨ 定义入场动画 */
+    @keyframes fadeIn {{
+        from {{ opacity: 0; transform: translateY(20px); filter: blur(5px); }}
+        to {{ opacity: 1; transform: translateY(0); filter: blur(0); }}
+    }}
+
+    /* 🛡️ 用户面板 & 头像呼吸光效 */
     @keyframes avatarPulse {{
         0% {{ box-shadow: 0 0 5px rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.3); }}
         50% {{ box-shadow: 0 0 20px rgba(56, 189, 248, 0.6); border-color: rgba(56, 189, 248, 0.8); }}
@@ -46,14 +51,17 @@ st.markdown(f"""
         filter: drop-shadow(0 0 15px rgba(56, 189, 248, 0.3));
     }}
 
-    /* 🧊 毛玻璃卡片系统 & 浮动霓虹效果 */
+    /* 🧊 毛玻璃卡片系统 */
     .wide-card {{
         background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 20px; padding: 25px 30px; margin-bottom: 25px;
         display: flex; flex-direction: row; align-items: center; justify-content: space-between;
         backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-        transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
         
+        /* 🚀 注入动画：淡入并在 0.5s 内平滑升起 */
+        animation: fadeIn 0.5s ease-out forwards;
+        
+        transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
     }}
     .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.5); }}
     .normal-card:hover {{
@@ -66,56 +74,46 @@ st.markdown(f"""
         box-shadow: 0 25px 50px rgba(0,0,0,0.6), 0 0 45px rgba(245, 158, 11, 0.35);
     }}
 
-    /* 💊 精致微药丸 Tabs (无红线) */
+    /* 💊 Tabs 无红线胶囊设计 */
     .stTabs [data-baseweb="tab-highlight"] {{ display: none !important; }}
     .stTabs [data-baseweb="tab-list"] {{ gap: 12px; background-color: transparent !important; border-bottom: none !important; }}
     .stTabs [data-baseweb="tab"] {{
         height: 32px !important; padding: 0 20px !important; border-radius: 50px !important;
         border: 1px solid rgba(255, 255, 255, 0.1) !important; background: rgba(255, 255, 255, 0.02) !important;
-        color: rgba(255, 255, 255, 0.4) !important; transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1) !important;
-        font-size: 0.85rem !important; font-weight: 600 !important;
+        color: rgba(255, 255, 255, 0.4) !important; transition: all 0.4s !important;
     }}
     .stTabs [data-baseweb="tab"]:nth-child(1)[aria-selected="true"] {{
-        color: #38bdf8 !important; background: rgba(56, 189, 248, 0.1) !important;
-        border: 1px solid #38bdf8 !important; box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
+        color: #38bdf8 !important; background: rgba(56, 189, 248, 0.1) !important; border-color: #38bdf8 !important;
     }}
     .stTabs [data-baseweb="tab"]:nth-child(2)[aria-selected="true"] {{
-        color: #f59e0b !important; background: rgba(245, 158, 11, 0.1) !important;
-        border: 1px solid #f59e0b !important; box-shadow: 0 0 15px rgba(245, 158, 11, 0.25);
+        color: #f59e0b !important; background: rgba(245, 158, 11, 0.1) !important; border-color: #f59e0b !important;
     }}
 
-    /* 🌪️ 内容淡入平移动效 */
+    /* 🌪️ 内容切屏动效 */
     @keyframes slideIn {{
-        from {{ opacity: 0; transform: translateX(15px); filter: blur(4px); }}
-        to {{ opacity: 1; transform: translateX(0); filter: blur(0);
-        animation: fadeIn 0.5s ease-out forwards;
-        transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1);}}
+        from {{ opacity: 0; transform: translateX(15px); }}
+        to {{ opacity: 1; transform: translateX(0); }}
     }}
-    [data-baseweb="tab-panel"] {{ animation: slideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1); }}
+    [data-baseweb="tab-panel"] {{ animation: slideIn 0.4s ease-out; }}
 
-    /* SN 码药丸 */
+    /* SN 药丸 */
     .sn-pill {{
         padding: 5px 15px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; 
         transition: 0.3s ease; text-decoration: none !important; display: inline-block;
     }}
     .normal-sn {{ background: rgba(56, 189, 248, 0.1); color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.2); }}
-    .normal-sn:hover {{ background: #38bdf8 !important; color: #000 !important; box-shadow: 0 0 15px #38bdf8; transform: translateY(-2px); }}
-    .error-sn {{ background: rgba(245, 158, 11, 0.1); color: #f59e0b !important; border: 1px solid rgba(245, 158, 11, 0.3); }}
-    .error-sn:hover {{ background: #f59e0b !important; color: #000 !important; box-shadow: 0 0 15px #f59e0b; transform: translateY(-2px); }}
+    .normal-sn:hover {{ background: #38bdf8 !important; color: #000 !important; box-shadow: 0 0 15px #38bdf8; }}
 
-    /* 重制按钮与底部上传框 */
     div.stButton > button {{
         background: rgba(255, 255, 255, 0.03) !important; color: #38bdf8 !important;
         border: 1px solid rgba(56, 189, 248, 0.3) !important; border-radius: 50px !important;
-        padding: 10px 50px !important; font-weight: 800 !important; backdrop-filter: blur(10px) !important;
-        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important; margin: 30px auto !important; display: block !important;
+        padding: 10px 50px !important; font-weight: 800 !important; margin: 30px auto !important; display: block !important;
     }}
 
     [data-testid="stFileUploader"] {{
         position: fixed; bottom: 35px; left: 50%; transform: translateX(-50%); width: 450px; z-index: 9999;
         background: rgba(255, 255, 255, 0.08) !important; border: 1px solid rgba(56, 189, 248, 0.3) !important;
         border-radius: 50px !important; padding: 15px 35px !important; backdrop-filter: blur(25px) !important;
-        box-shadow: 0 0 40px rgba(0,0,0,0.7);
     }}
     [data-testid="stFileUploader"] label, [data-testid="stFileUploader"] small {{ display: none !important; }}
     </style>
