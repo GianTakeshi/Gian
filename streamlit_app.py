@@ -27,7 +27,7 @@ st.markdown(f"""
         100% {{ transform: scale(1); box-shadow: 0 0 5px rgba(56, 189, 248, 0.4); }}
     }}
 
-    /* 🛡️ 用户面板：白色高亮毛玻璃 */
+    /* 🛡️ 用户面板 */
     .user-profile {{
         position: fixed; top: 35px; left: 35px; display: flex; align-items: center; gap: 12px; z-index: 10000; 
         background: rgba(255, 255, 255, 0.18) !important; padding: 8px 24px 8px 8px; border-radius: 60px;
@@ -38,69 +38,73 @@ st.markdown(f"""
         animation: avatar-pulse 3s infinite ease-in-out; 
     }}
 
-    /* 🧊 核心：全系统重度向内扩散光效 */
-    .wide-card {{ 
-        background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); 
-        border-radius: 24px; padding: 32px; margin-bottom: 25px; 
-        display: flex; flex-direction: row; align-items: center; justify-content: space-between; 
-        backdrop-filter: blur(25px); transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1); 
-        position: relative; z-index: 10;
-        overflow: hidden; 
+    /* 🧊 核心卡片容器：强化 transition 权重 */
+    div.wide-card {{ 
+        background: rgba(255, 255, 255, 0.03) !important; 
+        border: 1px solid rgba(255, 255, 255, 0.1) !important; 
+        border-radius: 24px !important; 
+        padding: 32px !important; 
+        margin-bottom: 25px !important; 
+        display: flex !important; 
+        flex-direction: row !important; 
+        align-items: center !important; 
+        justify-content: space-between !important; 
+        backdrop-filter: blur(25px) !important; 
+        transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1) !important; 
+        position: relative !important; 
+        z-index: 10 !important;
+        overflow: hidden !important; 
     }}
 
-    /* 【汇总数据卡片】重蓝内陷 */
-    .normal-card:hover {{ 
-        transform: translateY(-8px) scale(1.02);
+    /* 【汇总数据】悬浮：蓝光重度内陷 */
+    div.normal-card:hover {{ 
+        transform: translateY(-10px) scale(1.02) !important;
         z-index: 9999 !important;
-        border-color: rgba(56, 189, 248, 0.8) !important;
+        border-color: rgba(56, 189, 248, 0.9) !important;
         box-shadow: 
-            0 30px 60px rgba(0,0,0,0.6), 
-            0 0 30px rgba(56, 189, 248, 0.3), 
-            inset 0 0 100px 15px rgba(56, 189, 248, 0.45) !important; /* 深度加强 */
+            0 35px 70px rgba(0,0,0,0.7), 
+            0 0 30px rgba(56, 189, 248, 0.4), 
+            inset 0 0 100px 20px rgba(56, 189, 248, 0.5) !important;
     }}
 
-    /* 【异常拦截卡片】重橙内陷 */
-    .error-card:hover {{ 
-        transform: translateY(-8px) scale(1.02);
+    /* 【异常拦截】悬浮：橙光重度内陷 */
+    div.error-card:hover {{ 
+        transform: translateY(-10px) scale(1.02) !important;
         z-index: 9999 !important;
-        border-color: rgba(245, 158, 11, 0.8) !important;
+        border-color: rgba(245, 158, 11, 0.9) !important;
         box-shadow: 
-            0 30px 60px rgba(0,0,0,0.6), 
-            0 0 30px rgba(245, 158, 11, 0.3), 
-            inset 0 0 100px 15px rgba(245, 158, 11, 0.45) !important; /* 深度加强 */
+            0 35px 70px rgba(0,0,0,0.7), 
+            0 0 30px rgba(245, 158, 11, 0.4), 
+            inset 0 0 100px 20px rgba(245, 158, 11, 0.5) !important;
     }}
 
-    /* 🏷️ SN 气泡：干练发光，不放大 */
+    /* 🏷️ SN 气泡：干练发光 */
     .sn-pill {{ 
-        padding: 6px 16px; border-radius: 40px; font-size: 0.75rem; font-weight: 700; 
-        border: 1px solid transparent; margin: 3px; display: inline-block;
-        text-decoration: none !important; transition: all 0.2s ease;
+        padding: 6px 16px !important; border-radius: 40px !important; font-size: 0.75rem !important; 
+        font-weight: 700 !important; border: 1px solid transparent !important; margin: 3px !important; 
+        display: inline-block !important; text-decoration: none !important; 
+        transition: all 0.3s ease !important;
     }}
-    .normal-sn {{ background: rgba(56, 189, 248, 0.1); color: #38bdf8 !important; border-color: rgba(56, 189, 248, 0.3); }}
+    .normal-sn {{ background: rgba(56, 189, 248, 0.1) !important; color: #38bdf8 !important; border-color: rgba(56, 189, 248, 0.3) !important; }}
     .normal-sn:hover {{ 
         background: #38bdf8 !important; color: #000 !important; 
-        box-shadow: 0 0 20px #38bdf8 !important; text-decoration: none !important; 
+        box-shadow: 0 0 20px #38bdf8 !important; 
     }}
-    .error-sn-pill {{ background: rgba(245, 158, 11, 0.1); color: #f59e0b !important; border-color: rgba(245, 158, 11, 0.3); }}
+    .error-sn-pill {{ background: rgba(245, 158, 11, 0.1) !important; color: #f59e0b !important; border-color: rgba(245, 158, 11, 0.3) !important; }}
     .error-sn-pill:hover {{ 
         background: #f59e0b !important; color: #000 !important; 
-        box-shadow: 0 0 20px #f59e0b !important; text-decoration: none !important; 
+        box-shadow: 0 0 20px #f59e0b !important;
     }}
 
-    /* 🚫 Tabs 选定态 */
-    .stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] {{ display: none !important; }}
+    /* 🚫 Tabs 修正 */
     .stTabs [data-baseweb="tab"] {{ 
-        height: 42px !important; padding: 0 35px !important; border-radius: 40px !important; 
-        border: 1px solid rgba(255, 255, 255, 0.1) !important; 
-        background: rgba(255, 255, 255, 0.02) !important; color: rgba(255, 255, 255, 0.4) !important; 
+        transition: all 0.4s ease !important;
     }}
     .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{ 
-        color: #38bdf8 !important; border-color: #38bdf8 !important; 
-        background: rgba(56, 189, 248, 0.15) !important; box-shadow: 0 0 30px rgba(56, 189, 248, 0.6) !important;
+        box-shadow: 0 0 30px rgba(56, 189, 248, 0.6) !important;
     }}
     .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(2) {{ 
-        color: #f59e0b !important; border-color: #f59e0b !important; 
-        background: rgba(245, 158, 11, 0.15) !important; box-shadow: 0 0 30px rgba(245, 158, 11, 0.6) !important;
+        box-shadow: 0 0 30px rgba(245, 158, 11, 0.6) !important;
     }}
 
     .grand-title {{ font-size: 3.5rem !important; font-weight: 900; letter-spacing: 10px; background: linear-gradient(to bottom, #ffffff 30%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
@@ -113,7 +117,7 @@ st.markdown(f"""
     <div style="text-align:center; margin-bottom:50px;"><h1 class="grand-title">SKU 属性解析中枢</h1></div>
 """, unsafe_allow_html=True)
 
-# --- 3. 核心逻辑 ---
+# --- 3. 核心逻辑 (维持原样) ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
