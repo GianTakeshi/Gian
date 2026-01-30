@@ -99,7 +99,7 @@ st.markdown(f"""
         <img src="{AVATAR_URL}" class="avatar">
         <div class="user-name">{GITHUB_USERNAME}</div>
     </div>
-    <div style="text-align:center; margin-bottom:50px;"><h1 class="grand-title">祝王哥天天爆单</h1></div>
+    <div style="text-align:center; margin-bottom:100px;"><h1 class="grand-title">祝王哥天天爆单</h1></div>
 """, unsafe_allow_html=True)
 
 # --- 3. 核心逻辑 (维持原样) ---
