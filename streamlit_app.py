@@ -12,99 +12,86 @@ AVATAR_URL = f"https://avatars.githubusercontent.com/{GITHUB_USERNAME}"
 # --- 2. 注入深度定制 CSS ---
 st.markdown(f"""
     <style>
-    /* 🎭 整体布局优化 */
+    /* 🎭 整体布局与溢出控制 */
     .stApp {{ 
         background: radial-gradient(circle at 50% 50%, #0c1e3d 0%, #020617 60%, #000000 100%) !important; 
         color: #ffffff; 
-        padding: 80px 50px 0 50px !important; /* 增加左右边距，防止放大溢出 */
+        padding: 80px 50px 0 50px !important; 
     }}
     header {{visibility: hidden;}}
 
-    /* ✨ 动画库 */
-    @keyframes borderRotate {{
-        0% {{ background-position: 0% 50%; }}
-        50% {{ background-position: 100% 50%; }}
-        100% {{ background-position: 0% 50%; }}
+    /* 🛡️ 解决被遮挡的核心补丁：允许 Tab 内容溢出显示 */
+    [data-testid="stTabPanel"] {{
+        overflow: visible !important;
+        z-index: 1 !important;
     }}
-
-    /* 🎆 头像呼吸灯 */
-    @keyframes avatarPulse {{
-        0% {{ box-shadow: 0 0 10px rgba(56, 189, 248, 0.4); border-color: rgba(56, 189, 248, 0.4); }}
-        50% {{ box-shadow: 0 0 30px rgba(56, 189, 248, 1); border-color: rgba(56, 189, 248, 1); }}
-        100% {{ box-shadow: 0 0 10px rgba(56, 189, 248, 0.4); border-color: rgba(56, 189, 248, 0.4); }}
-    }}
-
-    /* 🛡️ 用户面板：平时极淡，悬浮时层级置顶 */
+    
+    /* 🛡️ 用户面板 */
     .user-profile {{
         position: fixed; top: 35px; left: 35px; display: flex; align-items: center; gap: 12px; z-index: 10000; 
         background: rgba(255, 255, 255, 0.02); padding: 8px 20px 8px 8px; border-radius: 60px;
         border: 1.5px solid rgba(56, 189, 248, 0.1); backdrop-filter: blur(10px);
         transition: all 0.4s ease; cursor: pointer; opacity: 0.5;
     }}
-    .user-profile:hover {{ 
-        opacity: 1; transform: scale(1.1); z-index: 10001;
-        border-color: #38bdf8; box-shadow: 0 0 30px rgba(56, 189, 248, 0.5); 
-    }}
-    .avatar {{ width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; animation: avatarPulse 2s infinite ease-in-out; }}
+    .user-profile:hover {{ opacity: 1; transform: scale(1.1); z-index: 10001; border-color: #38bdf8; box-shadow: 0 0 30px rgba(56, 189, 248, 0.5); }}
+    .avatar {{ width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; }}
 
-    /* 🚫 Tabs 按钮：增加选中时的流光/通电感 */
+    /* 🚫 Tabs 按钮：选定态光效强化 */
     .stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] {{ display: none !important; }}
-    .stTabs [data-baseweb="tab-list"] {{ gap: 20px; background: transparent !important; margin-bottom: 30px; }}
+    .stTabs [data-baseweb="tab-list"] {{ gap: 20px; background: transparent !important; margin-bottom: 30px; overflow: visible !important; }}
     .stTabs [data-baseweb="tab"] {{ 
         height: 42px !important; padding: 0 35px !important; 
         border-radius: 40px !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; 
         background: rgba(255, 255, 255, 0.02) !important; color: rgba(255, 255, 255, 0.4) !important; 
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; 
     }}
-    .stTabs [data-baseweb="tab"]:hover {{ transform: scale(1.15) !important; z-index: 100; color: #fff !important; }}
-
-    /* 选定态光效果：增加外发光旋转感 */
+    
+    /* 选定态光环：增加辉光感 */
     .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{ 
         color: #38bdf8 !important; border-color: #38bdf8 !important; 
-        background: rgba(56, 189, 248, 0.15) !important; 
-        box-shadow: 0 0 25px rgba(56, 189, 248, 0.6), inset 0 0 10px rgba(56, 189, 248, 0.3);
+        background: rgba(56, 189, 248, 0.2) !important; 
+        box-shadow: 0 0 30px rgba(56, 189, 248, 0.6), inset 0 0 15px rgba(56, 189, 248, 0.4);
+        transform: scale(1.05);
     }}
     .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(2) {{ 
         color: #f59e0b !important; border-color: #f59e0b !important; 
-        background: rgba(245, 158, 11, 0.15) !important; 
-        box-shadow: 0 0 25px rgba(245, 158, 11, 0.6), inset 0 0 10px rgba(245, 158, 11, 0.3);
+        background: rgba(245, 158, 11, 0.2) !important; 
+        box-shadow: 0 0 30px rgba(245, 158, 11, 0.6), inset 0 0 15px rgba(245, 158, 11, 0.4);
+        transform: scale(1.05);
     }}
 
-    /* 🏷️ SN 气泡：常态光圈 */
-    .sn-pill {{ 
-        padding: 4px 14px; border-radius: 40px; font-size: 0.75rem; font-weight: 700; 
-        transition: all 0.3s ease; border: 1.5px solid transparent; margin: 3px;
-    }}
-    .normal-sn {{ background: rgba(56, 189, 248, 0.1); color: #38bdf8 !important; border-color: rgba(56, 189, 248, 0.4); box-shadow: 0 0 10px rgba(56, 189, 248, 0.1); }}
-    .normal-sn:hover {{ transform: scale(1.3) !important; z-index: 500; background: #38bdf8 !important; color: #000 !important; box-shadow: 0 0 25px #38bdf8; }}
-    
-    .error-sn-pill {{ background: rgba(245, 158, 11, 0.1); color: #f59e0b !important; border-color: rgba(245, 158, 11, 0.4); box-shadow: 0 0 10px rgba(245, 158, 11, 0.1); }}
-    .error-sn-pill:hover {{ transform: scale(1.3) !important; z-index: 500; background: #f59e0b !important; color: #000 !important; box-shadow: 0 0 25px #f59e0b; }}
-
-    /* 🧊 卡片：重点解决悬浮遮挡问题 */
+    /* 🧊 卡片：强制层级置顶 */
     .wide-card {{ 
-        background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.1); 
+        background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); 
         border-radius: 20px; padding: 30px; margin-bottom: 25px; 
         display: flex; flex-direction: row; align-items: center; justify-content: space-between; 
-        backdrop-filter: blur(25px); transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); 
-        position: relative; z-index: 1; /* 初始层级 */
+        backdrop-filter: blur(25px); transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); 
+        position: relative; /* 必须是 relative 才能让 z-index 生效 */
+        z-index: 10;
     }}
     
-    /* 🚀 核心：悬浮时强制置顶 z-index，解决遮挡 */
+    /* 🖱️ Hover 时不仅放大，且强制置于最顶层，无视前后顺序 */
     .wide-card:hover {{ 
-        transform: scale(1.03); 
-        z-index: 999 !important; /* 悬浮时跳到最前层 */
-        box-shadow: 0 40px 80px rgba(0,0,0,0.8);
+        transform: scale(1.05); 
+        z-index: 9999 !important; /* 核心：层级瞬间爆发 */
+        box-shadow: 0 30px 60px rgba(0,0,0,0.9);
+        border-color: rgba(255,255,255,0.4);
     }}
 
     .normal-card {{ box-shadow: 0 0 20px rgba(56, 189, 248, 0.05), inset 0 0 40px rgba(56, 189, 248, 0.1); }}
-    .normal-card:hover {{ border-color: #38bdf8; box-shadow: 0 0 50px rgba(56, 189, 248, 0.3), inset 0 0 100px rgba(56, 189, 248, 0.2); }}
+    .normal-card:hover {{ border-color: #38bdf8; box-shadow: 0 0 50px rgba(56, 189, 248, 0.4), inset 0 0 80px rgba(56, 189, 248, 0.2); }}
 
     .error-card {{ box-shadow: 0 0 20px rgba(245, 158, 11, 0.05), inset 0 0 40px rgba(245, 158, 11, 0.1); }}
-    .error-card:hover {{ border-color: #f59e0b; box-shadow: 0 0 50px rgba(245, 158, 11, 0.3), inset 0 0 100px rgba(245, 158, 11, 0.2); }}
-    
-    .wide-card:active {{ transform: scale(0.96) !important; filter: brightness(1.2); transition: all 0.1s ease !important; }}
+    .error-card:hover {{ border-color: #f59e0b; box-shadow: 0 0 50px rgba(245, 158, 11, 0.4), inset 0 0 80px rgba(245, 158, 11, 0.2); }}
 
+    /* 🏷️ SN 气泡 */
+    .sn-pill {{ 
+        padding: 5px 15px; border-radius: 40px; font-size: 0.75rem; font-weight: 700; 
+        transition: all 0.3s ease; border: 1.5px solid transparent; margin: 3px; position: relative;
+    }}
+    .normal-sn {{ background: rgba(56, 189, 248, 0.15); color: #38bdf8 !important; border-color: rgba(56, 189, 248, 0.3); }}
+    .normal-sn:hover {{ transform: scale(1.4) !important; z-index: 10000; background: #38bdf8 !important; color: #000 !important; box-shadow: 0 0 30px #38bdf8; }}
+    
     .grand-title {{ font-size: 3.5rem !important; font-weight: 900; letter-spacing: 10px; background: linear-gradient(to bottom, #ffffff 30%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
     </style>
 
