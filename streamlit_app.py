@@ -19,17 +19,16 @@ st.markdown(f"""
     }}
     header {{visibility: hidden;}}
 
-    /* ✨ 定义入场动画 */
+    /* ✨ 定义入场动画 (移除 forwards 以避免锁定状态) */
     @keyframes fadeIn {{
         from {{ opacity: 0; transform: translateY(20px); filter: blur(5px); }}
         to {{ opacity: 1; transform: translateY(0); filter: blur(0); }}
     }}
 
-    /* 🛡️ 用户面板 & 头像呼吸光效 */
+    /* 🛡️ 用户面板 */
     @keyframes avatarPulse {{
-        0% {{ box-shadow: 0 0 5px rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.3); }}
+        0%, 100% {{ box-shadow: 0 0 5px rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.3); }}
         50% {{ box-shadow: 0 0 20px rgba(56, 189, 248, 0.6); border-color: rgba(56, 189, 248, 0.8); }}
-        100% {{ box-shadow: 0 0 5px rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.3); }}
     }}
 
     .user-profile {{
@@ -37,78 +36,70 @@ st.markdown(f"""
         background: rgba(255, 255, 255, 0.05); padding: 8px 18px 8px 8px; border-radius: 50px;
         border: 1px solid rgba(56, 189, 248, 0.2); backdrop-filter: blur(15px);
     }}
-    .avatar {{ 
-        width: 40px; height: 40px; border-radius: 50%; 
-        border: 2px solid #38bdf8; object-fit: cover; 
-        animation: avatarPulse 2.5s infinite ease-in-out; 
-    }}
+    .avatar {{ width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; animation: avatarPulse 2.5s infinite ease-in-out; }}
     
-    .hero-container {{ text-align: center; width: 100%; padding: 40px 0 20px 0; }}
     .grand-title {{
-        display: block; font-family: 'Inter', sans-serif; font-size: 3.5rem !important; font-weight: 900; letter-spacing: 10px;
+        text-align: center; font-size: 3.5rem !important; font-weight: 900; letter-spacing: 10px;
         background: linear-gradient(to bottom, #ffffff 40%, #38bdf8 100%);
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 40px;
-        filter: drop-shadow(0 0 15px rgba(56, 189, 248, 0.3));
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 40px 0;
     }}
 
-    /* 🧊 毛玻璃卡片系统 */
+    /* 🧊 毛玻璃卡片系统核心 - 修复版 */
     .wide-card {{
         background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 20px; padding: 25px 30px; margin-bottom: 25px;
         display: flex; flex-direction: row; align-items: center; justify-content: space-between;
         backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
         
-        /* 🚀 注入动画：淡入并在 0.5s 内平滑升起 */
-        animation: fadeIn 0.5s ease-out forwards;
+        /* 入场动画 - 仅执行一次，不锁定属性 */
+        animation: fadeIn 0.6s cubic-bezier(0.23, 1, 0.32, 1);
         
-        transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        /* 混合过渡 - 显式包含 transform 确保浮动灵敏 */
+        transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                    background 0.4s ease, 
+                    box-shadow 0.4s ease, 
+                    border-color 0.4s ease;
     }}
+
+    /* 🔵 正常卡片：悬停时科技蓝氛围影 */
     .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.5); }}
     .normal-card:hover {{
-        background: rgba(56, 189, 248, 0.06); transform: translateY(-8px) scale(1.005); border-color: #38bdf8;
-        box-shadow: 0 25px 50px rgba(0,0,0,0.6), 0 0 45px rgba(56, 189, 248, 0.35);
+        background: rgba(56, 189, 248, 0.08); 
+        transform: translateY(-10px) scale(1.01); 
+        border-color: #38bdf8;
+        /* 增强的霓虹投影：一层深色外阴影 + 一层核心亮色阴影 */
+        box-shadow: 0 20px 40px rgba(0,0,0,0.6), 
+                    0 0 25px rgba(56, 189, 248, 0.3);
     }}
+
+    /* 🟠 异常卡片：悬停时警告橙氛围影 */
     .error-card {{ border-left: 5px solid rgba(245, 158, 11, 0.5); }}
     .error-card:hover {{
-        background: rgba(245, 158, 11, 0.06); transform: translateY(-8px) scale(1.005); border-color: #f59e0b;
-        box-shadow: 0 25px 50px rgba(0,0,0,0.6), 0 0 45px rgba(245, 158, 11, 0.35);
+        background: rgba(245, 158, 11, 0.08); 
+        transform: translateY(-10px) scale(1.01); 
+        border-color: #f59e0b;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.6), 
+                    0 0 25px rgba(245, 158, 11, 0.3);
     }}
 
-    /* 💊 Tabs 无红线胶囊设计 */
+    /* 💊 Tabs (无红线定稿版) */
     .stTabs [data-baseweb="tab-highlight"] {{ display: none !important; }}
-    .stTabs [data-baseweb="tab-list"] {{ gap: 12px; background-color: transparent !important; border-bottom: none !important; }}
+    .stTabs [data-baseweb="tab-list"] {{ gap: 12px; background: transparent !important; }}
     .stTabs [data-baseweb="tab"] {{
-        height: 32px !important; padding: 0 20px !important; border-radius: 50px !important;
+        height: 35px !important; padding: 0 25px !important; border-radius: 50px !important;
         border: 1px solid rgba(255, 255, 255, 0.1) !important; background: rgba(255, 255, 255, 0.02) !important;
-        color: rgba(255, 255, 255, 0.4) !important; transition: all 0.4s !important;
+        color: rgba(255, 255, 255, 0.4) !important; transition: 0.3s ease !important;
     }}
-    .stTabs [data-baseweb="tab"]:nth-child(1)[aria-selected="true"] {{
-        color: #38bdf8 !important; background: rgba(56, 189, 248, 0.1) !important; border-color: #38bdf8 !important;
+    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{
+        color: #38bdf8 !important; border-color: #38bdf8 !important; background: rgba(56, 189, 248, 0.1) !important;
     }}
-    .stTabs [data-baseweb="tab"]:nth-child(2)[aria-selected="true"] {{
-        color: #f59e0b !important; background: rgba(245, 158, 11, 0.1) !important; border-color: #f59e0b !important;
+    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(2) {{
+        color: #f59e0b !important; border-color: #f59e0b !important; background: rgba(245, 158, 11, 0.1) !important;
     }}
 
-    /* 🌪️ 内容切屏动效 */
-    @keyframes slideIn {{
-        from {{ opacity: 0; transform: translateX(15px); }}
-        to {{ opacity: 1; transform: translateX(0); }}
-    }}
-    [data-baseweb="tab-panel"] {{ animation: slideIn 0.4s ease-out; }}
-
-    /* SN 药丸 */
-    .sn-pill {{
-        padding: 5px 15px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; 
-        transition: 0.3s ease; text-decoration: none !important; display: inline-block;
-    }}
+    .sn-pill {{ padding: 5px 15px; border-radius: 50px !important; font-size: 0.75rem; font-weight: 600; text-decoration: none !important; transition: 0.2s; }}
     .normal-sn {{ background: rgba(56, 189, 248, 0.1); color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.2); }}
-    .normal-sn:hover {{ background: #38bdf8 !important; color: #000 !important; box-shadow: 0 0 15px #38bdf8; }}
-
-    div.stButton > button {{
-        background: rgba(255, 255, 255, 0.03) !important; color: #38bdf8 !important;
-        border: 1px solid rgba(56, 189, 248, 0.3) !important; border-radius: 50px !important;
-        padding: 10px 50px !important; font-weight: 800 !important; margin: 30px auto !important; display: block !important;
-    }}
+    .normal-sn:hover {{ background: #38bdf8 !important; color: #000 !important; box-shadow: 0 0 10px #38bdf8; }}
 
     [data-testid="stFileUploader"] {{
         position: fixed; bottom: 35px; left: 50%; transform: translateX(-50%); width: 450px; z-index: 9999;
@@ -125,7 +116,7 @@ st.markdown(f"""
             <div style="font-size: 0.6rem; color: #38bdf8; font-weight: bold;">● QUANTUM ANALYZER</div>
         </div>
     </div>
-    <div class="hero-container"><h1 class="grand-title">SKU 属性解析中枢</h1></div>
+    <div style="text-align:center;"><h1 class="grand-title">SKU 属性解析中枢</h1></div>
 """, unsafe_allow_html=True)
 
 # --- 3. 核心逻辑 (保持原样) ---
@@ -173,19 +164,21 @@ if uploaded_file:
         if not v_df.empty:
             for cat in sorted(v_df['Category'].unique()):
                 cat_group = v_df[v_df['Category'] == cat]
-                attr_html = ""
+                
+                # 安全的 HTML 构建逻辑
+                attr_html_list = []
                 for clr in sorted(cat_group['Color'].unique()):
                     clr_group = cat_group[cat_group['Color'] == clr]
                     size_counts = clr_group['Size'].value_counts().sort_index()
-                    sizes_html = "".join([f"<div style='display:inline-flex; align-items:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:3px 12px; margin-right:8px;'><span style='color:#fff; font-size:0.8rem; font-weight:600;'>{(s if s!='FREE' else '')}</span><span style='color:#38bdf8; font-weight:800; margin-left:5px;'>{('×' if s!='FREE' else '')}{q}</span></div>" for s, q in size_counts.items()])
-                    attr_html += f"<div style='display:flex; align-items:center; gap:20px; padding:8px 0;'><div style='color:#38bdf8; font-weight:700; font-size:1rem; min-width:100px;'>{clr}</div><div>{sizes_html}</div></div>"
-                sns = sorted(list(set(cat_group['SN'].tolist())))
-                sn_html = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill normal-sn">{sn}</a>' for sn in sns])
-                st.markdown(f'''<div class="wide-card normal-card"><div style="flex:1;"><div style="color:#38bdf8; font-weight:900; font-size:1.6rem; margin-bottom:12px; letter-spacing:1px;">{cat}</div>{attr_html}</div><div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;">{sn_html}</div></div>''', unsafe_allow_html=True)
+                    size_badges = [f'<div style="display:inline-flex; align-items:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:3px 12px; margin-right:8px;"><span style="color:#fff; font-size:0.8rem;">{(s if s!="FREE" else "")}</span><span style="color:#38bdf8; font-weight:800; margin-left:5px;">{("×" if s!="FREE" else "")}{q}</span></div>' for s, q in size_counts.items()]
+                    attr_html_list.append(f'<div style="display:flex; align-items:center; gap:20px; padding:8px 0;"><div style="color:#38bdf8; font-weight:700; min-width:100px;">{clr}</div><div>{"".join(size_badges)}</div></div>')
+                
+                sn_html = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill normal-sn">{sn}</a>' for sn in sorted(list(set(cat_group['SN'].tolist())))])
+                st.markdown(f'<div class="wide-card normal-card"><div style="flex:1;"><div style="color:#38bdf8; font-weight:900; font-size:1.6rem; margin-bottom:12px;">{cat}</div>{"".join(attr_html_list)}</div><div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;">{sn_html}</div></div>', unsafe_allow_html=True)
             if st.button("↺ 重制系统"): st.rerun()
 
     with t2:
         if not e_df.empty:
             for _, err in e_df.iterrows():
-                sn_link = f'<a href="{BASE_URL}{err["SN"]}" target="_blank" class="sn-pill error-sn">{err["SN"]}</a>'
-                st.markdown(f'''<div class="wide-card error-card"><div style="flex:1;"><div style="color:#f59e0b; font-weight:900; font-size:1.1rem;">LINE {err["Line"]} | {err["Reason"]}</div><div style="font-size:0.85rem; color:#cbd5e1; margin-top:8px; line-height:1.5;">{err["Content"]}</div></div><div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;">{sn_link}</div></div>''', unsafe_allow_html=True)
+                sn_link = f'<a href="{BASE_URL}{err["SN"]}" target="_blank" class="sn-pill normal-sn" style="color:#f59e0b !important; border-color:#f59e0b !important;">{err["SN"]}</a>'
+                st.markdown(f'<div class="wide-card error-card"><div style="flex:1;"><div style="color:#f59e0b; font-weight:900;">LINE {err["Line"]} | {err["Reason"]}</div><div style="font-size:0.85rem; color:#cbd5e1; margin-top:8px;">{err["Content"]}</div></div><div>{sn_link}</div></div>', unsafe_allow_html=True)
