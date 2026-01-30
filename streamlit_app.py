@@ -12,7 +12,7 @@ AVATAR_URL = f"https://avatars.githubusercontent.com/{GITHUB_USERNAME}"
 # --- 2. 注入极致定制 CSS ---
 st.markdown(f"""
     <style>
-    /* 🎭 整体背景与基础布局 */
+    /* 🎭 整体背景 */
     .stApp {{ 
         background: radial-gradient(circle at 50% 50%, #0c1e3d 0%, #020617 60%, #000000 100%) !important; 
         color: #ffffff; 
@@ -38,57 +38,56 @@ st.markdown(f"""
         animation: avatar-pulse 3s infinite ease-in-out; 
     }}
 
-    /* 🧊 核心：加强版向内扩散光效 */
+    /* 🧊 核心：全系统重度向内扩散光效 */
     .wide-card {{ 
         background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); 
         border-radius: 24px; padding: 32px; margin-bottom: 25px; 
         display: flex; flex-direction: row; align-items: center; justify-content: space-between; 
         backdrop-filter: blur(25px); transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1); 
         position: relative; z-index: 10;
-        overflow: hidden; /* 确保内扩散阴影不会溢出 */
+        overflow: hidden; 
     }}
-    
-    /* 汇总卡片：重度蓝光内陷 */
+
+    /* 【汇总数据卡片】重蓝内陷 */
     .normal-card:hover {{ 
-        transform: translateY(-5px) scale(1.02);
+        transform: translateY(-8px) scale(1.02);
         z-index: 9999 !important;
         border-color: rgba(56, 189, 248, 0.8) !important;
         box-shadow: 
-            0 25px 50px rgba(0,0,0,0.6), 
+            0 30px 60px rgba(0,0,0,0.6), 
             0 0 30px rgba(56, 189, 248, 0.3), 
-            inset 0 0 80px 10px rgba(56, 189, 248, 0.4) !important; /* 关键：增加扩散距离 */
+            inset 0 0 100px 15px rgba(56, 189, 248, 0.45) !important; /* 深度加强 */
     }}
 
-    /* 异常卡片：重度橙光内陷 */
+    /* 【异常拦截卡片】重橙内陷 */
     .error-card:hover {{ 
-        transform: translateY(-5px) scale(1.02);
+        transform: translateY(-8px) scale(1.02);
         z-index: 9999 !important;
         border-color: rgba(245, 158, 11, 0.8) !important;
         box-shadow: 
-            0 25px 50px rgba(0,0,0,0.6), 
+            0 30px 60px rgba(0,0,0,0.6), 
             0 0 30px rgba(245, 158, 11, 0.3), 
-            inset 0 0 80px 10px rgba(245, 158, 11, 0.4) !important; /* 关键：增加扩散距离 */
+            inset 0 0 100px 15px rgba(245, 158, 11, 0.45) !important; /* 深度加强 */
     }}
 
     /* 🏷️ SN 气泡：干练发光，不放大 */
     .sn-pill {{ 
         padding: 6px 16px; border-radius: 40px; font-size: 0.75rem; font-weight: 700; 
         border: 1px solid transparent; margin: 3px; display: inline-block;
-        text-decoration: none !important; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none !important; transition: all 0.2s ease;
     }}
     .normal-sn {{ background: rgba(56, 189, 248, 0.1); color: #38bdf8 !important; border-color: rgba(56, 189, 248, 0.3); }}
     .normal-sn:hover {{ 
         background: #38bdf8 !important; color: #000 !important; 
         box-shadow: 0 0 20px #38bdf8 !important; text-decoration: none !important; 
     }}
-    
     .error-sn-pill {{ background: rgba(245, 158, 11, 0.1); color: #f59e0b !important; border-color: rgba(245, 158, 11, 0.3); }}
     .error-sn-pill:hover {{ 
         background: #f59e0b !important; color: #000 !important; 
         box-shadow: 0 0 20px #f59e0b !important; text-decoration: none !important; 
     }}
 
-    /* 🚫 Tabs 样式回归 */
+    /* 🚫 Tabs 选定态 */
     .stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] {{ display: none !important; }}
     .stTabs [data-baseweb="tab"] {{ 
         height: 42px !important; padding: 0 35px !important; border-radius: 40px !important; 
@@ -114,7 +113,7 @@ st.markdown(f"""
     <div style="text-align:center; margin-bottom:50px;"><h1 class="grand-title">SKU 属性解析中枢</h1></div>
 """, unsafe_allow_html=True)
 
-# --- 3. 核心逻辑 (维持原样) ---
+# --- 3. 核心逻辑 ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
