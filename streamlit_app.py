@@ -8,17 +8,17 @@ st.set_page_config(page_title="SKU 属性解析中枢", page_icon="🚀", layout
 GITHUB_USERNAME = "GianTakeshi" 
 BASE_URL = "https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id="
 
-# --- 2. 注入 V11.0 核心 CSS + 流水动画 ---
+# --- 2. 注入 V11.0 核心 CSS + 流水动画 (无鼠标动效纯净版) ---
 st.markdown(f"""
     <style>
-    /* 🎭 舞台光背景 (V11) */
+    /* 🎭 舞台底色与全局重置 */
     .stApp {{ 
         background: radial-gradient(circle at 50% 50%, #0c1e3d 0%, #020617 60%, #000000 100%) !important; 
         color: #ffffff; 
     }}
     header {{visibility: hidden;}}
 
-    /* 🛡️ 用户面板 (V11) */
+    /* 🛡️ 用户面板 - 头像呼吸灯 (V11) */
     @keyframes avatarPulse {{
         0% {{ box-shadow: 0 0 5px rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.3); }}
         50% {{ box-shadow: 0 0 20px rgba(56, 189, 248, 0.6); border-color: rgba(56, 189, 248, 0.8); }}
@@ -42,7 +42,7 @@ st.markdown(f"""
         filter: drop-shadow(0 0 15px rgba(56, 189, 248, 0.3));
     }}
 
-    /* 🌊 流水浮现关键帧 */
+    /* 🌊 流水浮现关键帧 (淡入+平滑上移) */
     @keyframes cardReveal {{
         from {{ opacity: 0; transform: translateY(20px); filter: blur(5px); }}
         to {{ opacity: 1; transform: translateY(0); filter: blur(0); }}
@@ -55,12 +55,17 @@ st.markdown(f"""
         display: flex; flex-direction: row; align-items: center; justify-content: space-between;
         backdrop-filter: blur(15px);
         transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-        animation: cardReveal 0.6s ease-out both; /* 激活流水动画 */
+        animation: cardReveal 0.6s ease-out both; 
     }}
     .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.5); }}
-    .normal-card:hover {{ background: rgba(56, 189, 248, 0.06); transform: translateY(-5px); border-color: #38bdf8; box-shadow: 0 15px 30px rgba(0,0,0,0.5); }}
+    .normal-card:hover {{ 
+        background: rgba(56, 189, 248, 0.06); 
+        transform: translateY(-5px); 
+        border-color: #38bdf8; 
+        box-shadow: 0 15px 30px rgba(0,0,0,0.5); 
+    }}
 
-    /* 💊 药丸 Tabs (V11 点击缩小反馈) */
+    /* 💊 药丸 Tabs (点击反馈版) */
     .stTabs [data-baseweb="tab-highlight"] {{ display: none !important; }}
     .stTabs [data-baseweb="tab-list"] {{ gap: 12px; background-color: transparent !important; border-bottom: none !important; }}
     .stTabs [data-baseweb="tab"] {{
@@ -71,10 +76,11 @@ st.markdown(f"""
     .stTabs [data-baseweb="tab"]:active {{ transform: scale(0.92) !important; }}
     .stTabs [aria-selected="true"] {{ color: #38bdf8 !important; border: 1.5px solid #38bdf8 !important; box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); }}
 
-    /* SN 码 & 按钮点击反馈 (V11) */
+    /* SN 药丸 & 按钮 */
     .sn-pill {{ padding: 5px 15px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; transition: 0.2s; text-decoration: none !important; display: inline-block; }}
     .sn-pill:active {{ transform: scale(0.9) !important; }}
     .normal-sn {{ background: rgba(56, 189, 248, 0.1); color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.2); }}
+    .error-sn {{ background: rgba(245, 158, 11, 0.1); color: #f59e0b !important; border: 1px solid rgba(245, 158, 11, 0.2); }}
 
     div.stButton > button {{
         background: rgba(255, 255, 255, 0.03) !important; color: #38bdf8 !important;
@@ -101,7 +107,7 @@ st.markdown(f"""
     <div class="hero-container"><h1 class="grand-title">SKU 属性解析中枢</h1></div>
 """, unsafe_allow_html=True)
 
-# --- 3. 核心逻辑 (V11) ---
+# --- 3. 核心处理逻辑 ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -133,7 +139,7 @@ def process_sku_logic(uploaded_file):
             all_error_rows.append({'SN': sn, 'Line': index+2, 'Reason': f"数量异常({len(data_pairs)}/{i_qty})", 'Content': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 4. 渲染循环 (注入流式延迟) ---
+# --- 4. 渲染界面 ---
 upload_zone = st.empty()
 uploaded_file = upload_zone.file_uploader("Upload", type=["xlsx"])
 
@@ -147,10 +153,9 @@ if uploaded_file:
         if not v_df.empty:
             cats = sorted(v_df['Category'].unique())
             for i, cat in enumerate(cats):
-                delay = i * 0.08 # 每一个卡片比前一个晚 0.08 秒跳出
+                delay = i * 0.08 # 卡片流水出现的间隔
                 cat_group = v_df[v_df['Category'] == cat]
                 attr_html = ""
-                # ... [此处保持 attr_html 构建逻辑不变] ...
                 for clr in sorted(cat_group['Color'].unique()):
                     clr_group = cat_group[cat_group['Color'] == clr]
                     size_counts = clr_group['Size'].value_counts().sort_index()
@@ -168,4 +173,4 @@ if uploaded_file:
             for i, (_, err) in enumerate(e_df.iterrows()):
                 delay = i * 0.05
                 sn_link = f'<a href="{BASE_URL}{err["SN"]}" target="_blank" class="sn-pill error-sn">{err["SN"]}</a>'
-                st.markdown(f'''<div class="wide-card error-card" style="animation-delay: {delay}s;"><div style="flex:1;"><div style="color:#f59e0b; font-weight:900; font-size:1.1rem;">LINE {err["Line"]} | {err["Reason"]}</div><div style="font-size:0.85rem; color:#cbd5e1; margin-top:8px; line-height:1.5;">{err["Content"]}</div></div><div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;">{sn_link}</div></div>''', unsafe_allow_html=True)
+                st.markdown(f'''<div class="wide-card" style="animation-delay: {delay}s; border-left: 5px solid #f59e0b;"><div style="flex:1;"><div style="color:#f59e0b; font-weight:900; font-size:1.1rem;">LINE {err["Line"]} | {err["Reason"]}</div><div style="font-size:0.85rem; color:#cbd5e1; margin-top:8px; line-height:1.5;">{err["Content"]}</div></div><div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;">{sn_link}</div></div>''', unsafe_allow_html=True)
