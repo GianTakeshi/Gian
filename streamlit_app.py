@@ -53,8 +53,7 @@ st.markdown(f"""
         display: flex; flex-direction: row; align-items: center; justify-content: space-between;
         backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
         transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-        animation: fadeIn 0.5s ease-out forwards;
-        transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1);
+        
     }}
     .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.5); }}
     .normal-card:hover {{
@@ -88,7 +87,9 @@ st.markdown(f"""
     /* 🌪️ 内容淡入平移动效 */
     @keyframes slideIn {{
         from {{ opacity: 0; transform: translateX(15px); filter: blur(4px); }}
-        to {{ opacity: 1; transform: translateX(0); filter: blur(0); }}
+        to {{ opacity: 1; transform: translateX(0); filter: blur(0);
+        animation: fadeIn 0.5s ease-out forwards;
+        transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1);}}
     }}
     [data-baseweb="tab-panel"] {{ animation: slideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1); }}
 
