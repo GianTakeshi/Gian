@@ -42,57 +42,63 @@ st.markdown(f"""
         display: flex; flex-direction: row; align-items: center; justify-content: space-between;
         backdrop-filter: blur(15px); transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
     }}
-    .normal-card {{ border-left: 4px solid rgba(56, 189, 248, 0.4); }}
-    .normal-card:hover {{
-        transform: translateY(-6px); border-color: #38bdf8;
+    .normal-card:hover, .error-card:hover {{
+        transform: translateY(-6px);
         box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 30px rgba(56, 189, 248, 0.2);
     }}
-    .error-card {{ border-left: 4px solid rgba(245, 158, 11, 0.4); }}
-    .error-card:hover {{
-        transform: translateY(-6px); border-color: #f59e0b;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 30px rgba(245, 158, 11, 0.2);
-    }}
 
-    /* 💊 Tabs：缩小尺寸 */
+    /* 💊 Tabs 遮挡修复核心代码 */
+    .stTabs {{
+        overflow: visible !important; /* 允许溢出显示 */
+    }}
+    .stTabs [data-baseweb="tab-list"] {{
+        gap: 12px; 
+        background: transparent !important; 
+        padding-top: 15px !important; /* ✅ 关键：为按钮浮动留出预留空间 */
+        margin-bottom: 20px;
+        overflow: visible !important;
+    }}
     .stTabs [data-baseweb="tab-highlight"] {{ display: none !important; }}
-    .stTabs [data-baseweb="tab-list"] {{ gap: 10px; background: transparent !important; margin-bottom: 20px; }}
+    
     .stTabs [data-baseweb="tab"] {{
-        height: 32px !important; /* 从 40px 降至 32px */
-        padding: 0 18px !important; /* 宽度收缩 */
+        height: 32px !important;
+        padding: 0 18px !important;
         font-size: 0.85rem !important;
         border-radius: 40px !important;
         border: 1px solid rgba(255, 255, 255, 0.1) !important; 
         background: rgba(255, 255, 255, 0.02) !important;
-        color: rgba(255, 255, 255, 0.4) !important; transition: all 0.3s ease !important;
+        color: rgba(255, 255, 255, 0.4) !important; 
+        transition: all 0.3s ease !important;
     }}
+    
+    /* 修正后的 Tab 悬停逻辑 */
     .stTabs [data-baseweb="tab"]:hover {{
-        transform: translateY(-2px);
-        background: rgba(255, 255, 255, 0.05) !important;
+        transform: translateY(-4px) !important; /* 向上浮动 */
+        background: rgba(255, 255, 255, 0.08) !important;
+        border-color: rgba(255, 255, 255, 0.4) !important;
     }}
+    
     .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{
         color: #38bdf8 !important; border-color: #38bdf8 !important; 
-        background: rgba(56, 189, 248, 0.1) !important; box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+        background: rgba(56, 189, 248, 0.1) !important; 
+        box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
     }}
     .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(2) {{
         color: #f59e0b !important; border-color: #f59e0b !important; 
-        background: rgba(245, 158, 11, 0.1) !important; box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
+        background: rgba(245, 158, 11, 0.1) !important; 
+        box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
     }}
 
-    /* 🔄 重制按钮：精致版 */
+    /* 🔄 重制按钮 */
     div.stButton > button {{
         background: rgba(56, 189, 248, 0.05) !important; color: #38bdf8 !important;
         border: 1.5px solid rgba(56, 189, 248, 0.4) !important; border-radius: 40px !important;
-        padding: 6px 30px !important; /* 大幅缩小内边距 */
-        font-size: 0.8rem !important;
-        font-weight: 700 !important;
+        padding: 6px 30px !important; font-size: 0.8rem !important;
         transition: all 0.3s ease !important; margin: 30px auto !important; display: block !important;
     }}
-    div.stButton > button:hover {{
-        transform: translateY(-3px) !important;
-        box-shadow: 0 0 25px rgba(56, 189, 248, 0.4) !important;
-    }}
+    div.stButton > button:hover {{ transform: translateY(-3px) !important; box-shadow: 0 0 20px rgba(56, 189, 248, 0.4) !important; }}
 
-    /* SN 药丸 */
+    /* 其他辅助样式保持一致... */
     .sn-pill {{ padding: 4px 12px; border-radius: 40px; font-size: 0.7rem; font-weight: 600; text-decoration: none !important; transition: all 0.2s ease; }}
     .normal-sn {{ background: rgba(56, 189, 248, 0.08); color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.15); }}
     .normal-sn:hover {{ background: #38bdf8 !important; color: #000 !important; box-shadow: 0 0 12px rgba(56, 189, 248, 0.6); }}
@@ -160,7 +166,7 @@ if uploaded_file:
                 for clr in sorted(cat_group['Color'].unique()):
                     clr_group = cat_group[cat_group['Color'] == clr]
                     size_badges = [f'<div style="display:inline-flex; align-items:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:2px 10px; margin-right:6px;"><span style="color:#fff; font-size:0.75rem;">{(s if s!="FREE" else "")}</span><span style="color:#38bdf8; font-weight:800; margin-left:4px;">{("×" if s!="FREE" else "")}{q}</span></div>' for s, q in clr_group['Size'].value_counts().sort_index().items()]
-                    attr_html_list.append(f'<div style="display:flex; align-items:center; gap:15px; padding:6px 0;"><div style="color:#38bdf8; font-weight:700; min-width:80px; font-size:0.9rem;">{clr}</div><div>{"".join(size_badges)}</div></div>')
+                    attr_html_list.append(f'<div style="display:flex; align-items:center; gap:15px; padding:6px 0;"><div style="color:#38bdf8; font-weight:700; min-width:80px; font-size:0.9rem;">{clr}</div><div>{"..".join(size_badges)}</div></div>')
                 sn_html = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill normal-sn">{sn}</a>' for sn in sorted(list(set(cat_group['SN'].tolist())))])
                 st.markdown(f'<div class="wide-card normal-card"><div style="flex:1;"><div style="color:#38bdf8; font-weight:900; font-size:1.4rem; margin-bottom:10px;">{cat}</div>{"".join(attr_html_list)}</div><div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end; max-width:350px;">{sn_html}</div></div>', unsafe_allow_html=True)
             if st.button("↺ 重制系统"): st.rerun()
