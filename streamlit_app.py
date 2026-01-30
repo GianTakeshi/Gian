@@ -10,57 +10,28 @@ GITHUB_USERNAME = "GianTakeshi"
 BASE_URL = "https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id="
 AVATAR_URL = f"https://avatars.githubusercontent.com/{GITHUB_USERNAME}"
 
-# --- 2. 注入 CSS (动态极光 HDR 背景版) ---
+# --- 2. 注入 CSS (动态极光 HDR 背景整合版) ---
 st.markdown(f"""
     <style>
-    /* 🎨 [极光流体] 基础底色 */
+    /* 🎨 [整合版] 动态背景逻辑 */
     .stApp {{ 
-        background: #000000 !important;
+        /* 叠加两个不同位置的 P3 径向渐变气泡 */
+        background: 
+            radial-gradient(circle at 20% 30%, color(display-p3 0.05 0.2 0.4 / 0.6) 0%, transparent 50%),
+            radial-gradient(circle at 80% 70%, color(display-p3 0.1 0.1 0.3 / 0.6) 0%, #000000 100%) !important;
+        
+        background-size: 200% 200% !important;
+        animation: aurora-flow 20s ease infinite alternate !important;
         color: #ffffff; 
         padding-top: 80px !important; 
     }}
     header {{visibility: hidden;}}
 
-    /* 🌊 极光气泡层 - 使用双大括号转义 Python 语法 */
-    .stApp::before, .stApp::after {{
-        content: "";
-        position: fixed;
-        width: 100vw;
-        height: 100vw;
-        border-radius: 50%;
-        z-index: -2;
-        filter: blur(100px);
-        opacity: 0.6;
-        pointer-events: none;
-    }}
-
-    /* 深海蓝气泡 */
-    .stApp::before {{
-        background: radial-gradient(circle, color(display-p3 0.05 0.2 0.4) 0%, transparent 70%);
-        top: -30%;
-        left: -20%;
-        animation: aurora-1 25s infinite alternate ease-in-out;
-    }}
-
-    /* 电磁蓝气泡 */
-    .stApp::after {{
-        background: radial-gradient(circle, color(display-p3 0.1 0.1 0.3) 0%, transparent 70%);
-        bottom: -30%;
-        right: -10%;
-        animation: aurora-2 30s infinite alternate-reverse ease-in-out;
-    }}
-
-    /* 🕺 动力学动画定义 */
-    @keyframes aurora-1 {{
-        0% {{ transform: translate3d(0, 0, 0) scale(1); }}
-        50% {{ transform: translate3d(20%, 15%, 0) scale(1.2); }}
-        100% {{ transform: translate3d(-10%, 25%, 0) scale(0.9); }}
-    }}
-
-    @keyframes aurora-2 {{
-        0% {{ transform: translate3d(0, 0, 0) scale(1.1); }}
-        50% {{ transform: translate3d(-25%, -20%, 0) scale(0.8); }}
-        100% {{ transform: translate3d(15%, -10%, 0) scale(1.3); }}
+    /* 🕺 背景流动动画曲线 */
+    @keyframes aurora-flow {{
+        0% {{ background-position: 0% 0%; }}
+        50% {{ background-position: 50% 100%; }}
+        100% {{ background-position: 100% 50%; }}
     }}
 
     /* ✨ 上传框呼吸：HDR 提亮 */
@@ -89,7 +60,7 @@ st.markdown(f"""
         background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 16px; padding: 25px 30px; margin-bottom: 25px;
         display: flex; flex-direction: row; align-items: center; justify-content: space-between;
-        backdrop-filter: blur(25px); transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+        backdrop-filter: blur(20px); transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
     }}
     .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.4); }}
     .normal-card:hover {{ 
@@ -126,5 +97,60 @@ st.markdown(f"""
     <div style="text-align:center; margin-bottom:100px;"><h1 class="grand-title">祝王哥天天爆单</h1></div>
 """, unsafe_allow_html=True)
 
-# 后续业务逻辑逻辑代码...
-# [此处接你之前的 process_sku_logic 和 UI 渲染逻辑]
+# --- 3. 核心提取逻辑 (保持不变) ---
+def process_sku_logic(uploaded_file):
+    COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
+    SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
+    df = pd.read_excel(uploaded_file, engine='openpyxl')
+    cols = df.columns
+    all_normal_data, all_error_rows = [], []
+    for index, row in df.iterrows():
+        c_raw = str(row[cols[2]]).strip()
+        if not c_raw or c_raw == 'nan': continue
+        cat = c_raw.split(' ')[0].upper()
+        if cat.startswith('WZ'): cat = 'WZ'
+        g_text, i_val, sn = str(row[cols[6]]), str(row[cols[8]]), str(row[cols[0]])
+        i_qty = int(re.findall(r'\d+', i_val)[0]) if re.findall(r'\d+', i_val) else 0
+        if ';' in c_raw or '；' in c_raw:
+            all_error_rows.append({'SN': sn, 'Line': index+2, 'Reason': "多个商品", 'Content': g_text})
+            continue
+        chunks = [c.strip() for c in re.split(r'[;；]', g_text) if c.strip()]
+        data_pairs = []
+        for chunk in chunks:
+            c_m, s_m = re.search(COLOR_REG, chunk), re.search(SIZE_REG, chunk)
+            if c_m: 
+                clr = c_m.group(1).strip().upper()
+                raw_s = s_m.group(1).strip().upper() if s_m else "FREE"
+                data_pairs.append((clr, SIZE_MAP.get(raw_s, raw_s)))
+        if len(data_pairs) == i_qty and i_qty > 0:
+            for c_val, s_val in data_pairs: 
+                all_normal_data.append({'Category': cat, 'Color': c_val, 'Size': s_val, 'SN': sn})
+        else:
+            all_error_rows.append({'SN': sn, 'Line': index+2, 'Reason': f"数量异常({len(data_pairs)}/{i_qty})", 'Content': g_text})
+    return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
+
+# --- 4. UI 渲染 (保持不变) ---
+upload_zone = st.empty()
+uploaded_file = upload_zone.file_uploader("DROP FILE TO PARSE", type=["xlsx"])
+
+if uploaded_file:
+    v_df, e_df = process_sku_logic(uploaded_file)
+    upload_zone.empty()
+    t1, t2 = st.tabs(["汇总数据", "异常拦截"])
+    with t1:
+        if not v_df.empty:
+            for cat in sorted(v_df['Category'].unique()):
+                cat_group = v_df[v_df['Category'] == cat]
+                attr_html_list = []
+                for clr in sorted(cat_group['Color'].unique()):
+                    clr_group = cat_group[cat_group['Color'] == clr]
+                    size_badges = [f'<div style="display:inline-flex; align-items:center; background:rgba(255,255,255,0.05); border:1.5px solid rgba(255,255,255,0.12); border-radius:8px; padding:4px 12px; margin-right:8px;"><span style="color:#fff; font-size:0.9rem; font-weight:800;">{(s if s!="FREE" else "")}</span><span style="color:#38bdf8; font-weight:800; font-size:0.9rem; margin-left:5px;">{("×" if s!="FREE" else "")}{q}</span></div>' for s, q in clr_group['Size'].value_counts().sort_index().items()]
+                    attr_html_list.append(f'<div style="display:flex; align-items:center; gap:20px; padding:10px 0;"><div style="color:#38bdf8; font-weight:700; min-width:100px; font-size:1.1rem;">{clr}</div><div>{"".join(size_badges)}</div></div>')
+                sn_html = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill normal-sn">{sn}</a>' for sn in sorted(list(set(cat_group['SN'].tolist())))])
+                st.markdown(f'<div class="wide-card normal-card"><div style="flex:1;"><div style="color:#38bdf8; font-weight:900; font-size:1.8rem; margin-bottom:15px; letter-spacing:1px;">{cat}</div>{"".join(attr_html_list)}</div><div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;">{sn_html}</div></div>', unsafe_allow_html=True)
+            if st.button("↺ 重制系统"): st.rerun()
+    with t2:
+        if not e_df.empty:
+            for _, err in e_df.iterrows():
+                sn_link = f'<a href="{BASE_URL}{err["SN"]}" target="_blank" class="sn-pill error-sn-pill">{err["SN"]}</a>'
+                st.markdown(f'<div class="wide-card error-card"><div style="flex:1;"><div style="color:#f59e0b; font-weight:900; font-size:1.1rem;">LINE {err["Line"]} | {err["Reason"]}</div><div style="font-size:0.95rem; color:#cbd5e1; margin-top:8px; line-height:1.4;">{err["Content"]}</div></div><div>{sn_link}</div></div>', unsafe_allow_html=True)
