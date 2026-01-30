@@ -99,7 +99,7 @@ st.markdown(f"""
         <img src="{AVATAR_URL}" class="avatar">
         <div class="user-name">{GITHUB_USERNAME}</div>
     </div>
-    <div style="text-align:center; margin-bottom:50px;"><h1 class="grand-title">SKU 属性解析中枢</h1></div>
+    <div style="text-align:center; margin-bottom:50px;"><h1 class="grand-title">12345678</h1></div>
 """, unsafe_allow_html=True)
 
 # --- 3. 核心逻辑 (维持原样) ---
