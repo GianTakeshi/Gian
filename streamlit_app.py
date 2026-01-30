@@ -39,7 +39,7 @@ st.markdown(f"""
     /* ✨ 头像呼吸：HDR 提亮 */
     @keyframes avatar-breathing {{
         0% {{ box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); transform: scale(1); }}
-        50% {{ box-shadow: 0 0 20px 4px color(display-p3 0.22 0.74 0.97 / 0.8); transform: scale(1.05); }}
+        50% {{ box-shadow: 0 0 20px 4px color(display-p3 0.4 0.9 1.0 / 1); transform: scale(1.05); }}
         100% {{ box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); transform: scale(1); }}
     }}
 
