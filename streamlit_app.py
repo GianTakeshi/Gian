@@ -1,3 +1,4 @@
+记住这个代码
 import streamlit as st
 import pandas as pd
 import re
@@ -10,69 +11,100 @@ GITHUB_USERNAME = "GianTakeshi"
 BASE_URL = "https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id="
 AVATAR_URL = f"https://avatars.githubusercontent.com/{GITHUB_USERNAME}"
 
-# --- 2. 注入修复后的 CSS (含背景平滑与卡片去断层噪点) ---
+# --- 2. 注入仅包含 HDR 提亮与平滑修补的 CSS ---
 st.markdown(f"""
     <style>
-    /* 🎭 背景平滑进化版：增加中间色阶防止断层 */
+        /* 🎨 [平滑优化版] 背景：增加中间色阶，确保向四周平滑消隐至全黑 */
     .stApp {{ 
-        background: radial-gradient(circle at 50% 45%, #0c1e3d 0%, #061126 25%, #030814 50%, #010308 75%, #000000 100%) !important; 
+        background: radial-gradient(
+            circle at 50% 45%, 
+            #0c1e3d 0%, 
+            #061126 25%, 
+            #030814 50%, 
+            #010308 75%, 
+            #000000 100%
+        ) !important; 
         color: #ffffff; 
         padding-top: 80px !important; 
     }}
     header {{visibility: hidden;}}
 
-    /* ✨ 上传框呼吸动画 */
+    /* ✨ 上传框呼吸：HDR 极限提亮 + 5层分层阴影（防断层） */
     @keyframes uploader-glow {{
         0% {{ border-color: rgba(56, 189, 248, 0.2); box-shadow: 0 0 10px rgba(56, 189, 248, 0.1); }}
         50% {{ 
             border-color: color(display-p3 0.4 0.85 1); 
-            box-shadow: 0 0 15px #fff, 0 0 30px color(display-p3 0.22 0.74 0.97 / 0.7), 0 0 50px color(display-p3 0.22 0.74 0.97 / 0.3), 0 0 80px color(display-p3 0.22 0.74 0.97 / 0.1); 
+            box-shadow: 
+                0 0 15px #fff, 
+                0 0 30px color(display-p3 0.22 0.74 0.97 / 0.7), 
+                0 0 50px color(display-p3 0.22 0.74 0.97 / 0.3),
+                0 0 80px color(display-p3 0.22 0.74 0.97 / 0.1); 
         }}
         100% {{ border-color: rgba(56, 189, 248, 0.2); box-shadow: 0 0 10px rgba(56, 189, 248, 0.1); }}
     }}
 
-    /* 🛡️ 用户面板 */
+    /* ✨ 头像呼吸：HDR 提亮 */
+    @keyframes avatar-breathing {{
+        0% {{ box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); transform: scale(1); }}
+        50% {{ box-shadow: 0 0 25px 5px color(display-p3 0.22 0.74 0.97 / 0.8); transform: scale(1.05); }}
+        100% {{ box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); transform: scale(1); }}
+    }}
+
     .user-profile {{
         position: fixed; top: 35px; left: 35px; display: flex; align-items: center; gap: 12px; z-index: 1000000; 
         background: rgba(255, 255, 255, 0.05); padding: 8px 20px 8px 8px; border-radius: 60px;
         border: 1.5px solid rgba(56, 189, 248, 0.2); backdrop-filter: blur(15px);
     }}
-    .avatar {{ width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; }}
+    .avatar {{ width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; animation: avatar-breathing 3s infinite ease-in-out; }}
+    .user-name {{ font-size: 0.95rem; font-weight: 600; color: #fff; letter-spacing: 0.5px; }}
 
-    /* 🧊 数据卡片：引入噪声滤镜 (Noise Dithering) 彻底干掉断层 */
     .wide-card {{
-        background-color: rgba(255, 255, 255, 0.04) !important;
-        /* 使用 SVG 噪点背景打碎颜色断层 */
-        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 16px; padding: 25px 30px; margin-bottom: 25px;
         display: flex; flex-direction: row; align-items: center; justify-content: space-between;
-        backdrop-filter: blur(40px) saturate(150%); 
-        transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+        backdrop-filter: blur(15px); transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
     }}
     .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.4); }}
+    /* 🧊 卡片悬停：HDR 极限亮度 + 平滑扩散 */
     .normal-card:hover {{ 
         transform: translateY(-8px); 
         border-color: color(display-p3 0.4 0.85 1); 
-        box-shadow: 0 20px 50px rgba(0,0,0,0.6), inset 0 0 40px color(display-p3 0.22 0.74 0.97 / 0.5); 
+        box-shadow: 0 20px 50px rgba(0,0,0,0.6), inset 0 0 40px color(display-p3 0.22 0.74 0.97 / 0.5), inset 0 0 100px color(display-p3 0.22 0.74 0.97 / 0.2); 
+    }}
+    .error-card {{ border-left: 5px solid rgba(245, 158, 11, 0.4); }}
+    .error-card:hover {{ 
+        transform: translateY(-8px); 
+        border-color: color(display-p3 1 0.7 0.2); 
+        box-shadow: 0 20px 50px rgba(0,0,0,0.6), inset 0 0 40px color(display-p3 0.96 0.62 0.04 / 0.5), inset 0 0 100px color(display-p3 0.96 0.62 0.04 / 0.2); 
     }}
 
-    /* 🚫 Tabs 选中样式 */
+    .sn-pill {{ padding: 6px 14px; border-radius: 40px; font-size: 0.8rem; font-weight: 800; text-decoration: none !important; transition: all 0.3s ease; border: 1px solid transparent; }}
+    .normal-sn {{ background: rgba(56, 189, 248, 0.08); color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.3); }}
+    /* 🏷️ SN 悬停：HDR 提亮 */
+    .normal-sn:hover {{ background: color(display-p3 0.22 0.74 0.97) !important; color: #000000 !important; box-shadow: 0 0 20px color(display-p3 0.22 0.74 0.97); transform: scale(1.05); }}
+    
+    .stTabs [data-baseweb="tab-list"] {{ gap: 20px; }}
+    .stTabs [data-baseweb="tab"] {{ height: 42px !important; border-radius: 40px !important; }}
+    /* 🚫 Tabs 选中：HDR 霓虹强光 */
     .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{ 
         color: #fff !important; border-color: color(display-p3 0.4 0.85 1) !important; 
         background: rgba(56, 189, 248, 0.15) !important; 
-        box-shadow: 0 0 15px #fff, 0 0 40px color(display-p3 0.22 0.74 0.97) !important; 
+        box-shadow: 0 0 15px #fff, 0 0 40px color(display-p3 0.22 0.74 0.97), 0 0 80px color(display-p3 0.22 0.74 0.97 / 0.3) !important; 
+    }}
+    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(2) {{ 
+        color: #fff !important; border-color: color(display-p3 1 0.7 0.2) !important; 
+        background: rgba(245, 158, 11, 0.15) !important; 
+        box-shadow: 0 0 15px #fff, 0 0 40px color(display-p3 0.96 0.62 0.04), 0 0 80px color(display-p3 0.96 0.62 0.04 / 0.3) !important; 
     }}
     .stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] {{ display: none !important; }}
 
-    /* 其他 UI 保持原样 */
-    .sn-pill {{ padding: 6px 14px; border-radius: 40px; font-size: 0.8rem; font-weight: 800; text-decoration: none !important; transition: all 0.3s ease; }}
-    .normal-sn {{ background: rgba(56, 189, 248, 0.08); color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.3); }}
-    
+    div.stButton > button:hover {{ background: color(display-p3 0.22 0.74 0.97) !important; color: #000000 !important; box-shadow: 0 0 30px 5px color(display-p3 0.22 0.74 0.97); transform: scale(1.05); }}
+
     [data-testid="stFileUploader"] {{
         position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); 
-        width: 520px; z-index: 9999; background: rgba(12, 30, 61, 0.7) !important; 
-        border-radius: 24px !important; backdrop-filter: blur(30px) !important;
+        width: 520px; z-index: 9999;
+        background: rgba(12, 30, 61, 0.65) !important; 
+        border-radius: 24px !important; padding: 20px !important; backdrop-filter: blur(30px) !important;
         border: 1.5px solid rgba(56, 189, 248, 0.3) !important;
         animation: uploader-glow 4s infinite ease-in-out;
     }}
@@ -86,7 +118,7 @@ st.markdown(f"""
     <div style="text-align:center; margin-bottom:100px;"><h1 class="grand-title">祝王哥天天爆单</h1></div>
 """, unsafe_allow_html=True)
 
-# --- 3. 核心提取逻辑 (逻辑不动) ---
+# --- 3. 核心提取逻辑 (保持原始逻辑不动) ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -118,7 +150,7 @@ def process_sku_logic(uploaded_file):
             all_error_rows.append({'SN': sn, 'Line': index+2, 'Reason': f"数量异常({len(data_pairs)}/{i_qty})", 'Content': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 4. UI 渲染 (渲染不动) ---
+# --- 4. UI 渲染 (保持原始渲染结构不动) ---
 upload_zone = st.empty()
 uploaded_file = upload_zone.file_uploader("DROP FILE TO PARSE", type=["xlsx"])
 if uploaded_file:
