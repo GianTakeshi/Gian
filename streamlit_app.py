@@ -3,7 +3,7 @@ import pandas as pd
 import re
 
 # --- 1. 页面配置 ---
-st.set_page_config(page_title="SKU 属性解析中枢", page_icon="🚀", layout="wide")
+st.set_page_config(page_title="123456789", page_icon="🚀", layout="wide")
 
 GITHUB_USERNAME = "GianTakeshi" 
 BASE_URL = "https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id="
