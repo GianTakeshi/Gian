@@ -53,8 +53,7 @@ st.markdown(f"""
         display: flex; flex-direction: row; align-items: center; justify-content: space-between;
         backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
         transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-                animation: fadeIn 0.5s ease-out forwards;
-
+        animation: fadeIn 0.5s ease-out forwards;
         transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1);
     }
     }}
