@@ -12,7 +12,6 @@ AVATAR_URL = f"https://avatars.githubusercontent.com/{GITHUB_USERNAME}"
 # --- 2. 注入极致定制 CSS ---
 st.markdown(f"""
     <style>
-    /* 🎭 整体背景 */
     .stApp {{ 
         background: radial-gradient(circle at 50% 50%, #0c1e3d 0%, #020617 60%, #000000 100%) !important; 
         color: #ffffff; 
@@ -20,91 +19,82 @@ st.markdown(f"""
     }}
     header {{visibility: hidden;}}
 
-    /* ✨ 头像图片局部呼吸 */
+    /* ✨ 头像呼吸 (静止外壳) */
     @keyframes avatar-pulse {{
-        0% {{ transform: scale(1); box-shadow: 0 0 5px rgba(56, 189, 248, 0.4); }}
-        50% {{ transform: scale(1.1); box-shadow: 0 0 15px rgba(56, 189, 248, 0.8); }}
-        100% {{ transform: scale(1); box-shadow: 0 0 5px rgba(56, 189, 248, 0.4); }}
+        0% {{ transform: scale(1); filter: drop-shadow(0 0 2px #38bdf8); }}
+        50% {{ transform: scale(1.15); filter: drop-shadow(0 0 8px #38bdf8); }}
+        100% {{ transform: scale(1); filter: drop-shadow(0 0 2px #38bdf8); }}
     }}
 
-    /* 🛡️ 用户面板 */
     .user-profile {{
         position: fixed; top: 35px; left: 35px; display: flex; align-items: center; gap: 12px; z-index: 10000; 
-        background: rgba(255, 255, 255, 0.18) !important; padding: 8px 24px 8px 8px; border-radius: 60px;
-        border: 1px solid rgba(255, 255, 255, 0.35); backdrop-filter: blur(20px);
+        background: rgba(255, 255, 255, 0.15); padding: 8px 22px 8px 8px; border-radius: 60px;
+        border: 1px solid rgba(255, 255, 255, 0.3); backdrop-filter: blur(20px);
     }}
     .avatar {{ 
         width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; 
         animation: avatar-pulse 3s infinite ease-in-out; 
     }}
 
-    /* 🧊 核心卡片容器：强化 transition 权重 */
-    div.wide-card {{ 
-        background: rgba(255, 255, 255, 0.03) !important; 
-        border: 1px solid rgba(255, 255, 255, 0.1) !important; 
-        border-radius: 24px !important; 
-        padding: 32px !important; 
-        margin-bottom: 25px !important; 
-        display: flex !important; 
-        flex-direction: row !important; 
-        align-items: center !important; 
-        justify-content: space-between !important; 
-        backdrop-filter: blur(25px) !important; 
-        transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1) !important; 
-        position: relative !important; 
-        z-index: 10 !important;
-        overflow: hidden !important; 
+    /* 🧊 核心卡片逻辑：恢复最轻盈的 Transition */
+    .wide-card {{ 
+        background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); 
+        border-radius: 20px; padding: 30px; margin-bottom: 25px; 
+        display: flex; flex-direction: row; align-items: center; justify-content: space-between; 
+        backdrop-filter: blur(20px); transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); 
+        position: relative; overflow: hidden;
     }}
+    
+    .wide-card:hover {{ transform: translateY(-5px); }}
 
-    /* 【汇总数据】悬浮：蓝光重度内陷 */
-    div.normal-card:hover {{ 
-        transform: translateY(-10px) scale(1.02) !important;
-        z-index: 9999 !important;
-        border-color: rgba(56, 189, 248, 0.9) !important;
+    /* 🌌 重点：汇总数据（蓝光重度内向扩散） */
+    .normal-card:hover {{ 
+        border-color: #38bdf8;
         box-shadow: 
-            0 35px 70px rgba(0,0,0,0.7), 
-            0 0 30px rgba(56, 189, 248, 0.4), 
-            inset 0 0 100px 20px rgba(56, 189, 248, 0.5) !important;
+            0 20px 40px rgba(0,0,0,0.5), 
+            0 0 20px rgba(56, 189, 248, 0.3), 
+            inset 0 0 60px rgba(56, 189, 248, 0.4), 
+            inset 0 0 120px rgba(56, 189, 248, 0.2); /* 双层内缩增强厚度 */
     }}
 
-    /* 【异常拦截】悬浮：橙光重度内陷 */
-    div.error-card:hover {{ 
-        transform: translateY(-10px) scale(1.02) !important;
-        z-index: 9999 !important;
-        border-color: rgba(245, 158, 11, 0.9) !important;
+    /* 🌌 重点：异常拦截（橙光重度内向扩散） */
+    .error-card:hover {{ 
+        border-color: #f59e0b;
         box-shadow: 
-            0 35px 70px rgba(0,0,0,0.7), 
-            0 0 30px rgba(245, 158, 11, 0.4), 
-            inset 0 0 100px 20px rgba(245, 158, 11, 0.5) !important;
+            0 20px 40px rgba(0,0,0,0.5), 
+            0 0 20px rgba(245, 158, 11, 0.3), 
+            inset 0 0 60px rgba(245, 158, 11, 0.4), 
+            inset 0 0 120px rgba(245, 158, 11, 0.2); /* 双层内缩增强厚度 */
     }}
 
-    /* 🏷️ SN 气泡：干练发光 */
+    /* 🏷️ SN 气泡：还原霓虹感，去除放大 */
     .sn-pill {{ 
-        padding: 6px 16px !important; border-radius: 40px !important; font-size: 0.75rem !important; 
-        font-weight: 700 !important; border: 1px solid transparent !important; margin: 3px !important; 
-        display: inline-block !important; text-decoration: none !important; 
-        transition: all 0.3s ease !important;
+        padding: 6px 16px; border-radius: 40px; font-size: 0.75rem; font-weight: 700; 
+        border: 1.5px solid transparent; margin: 3px; display: inline-block;
+        text-decoration: none !important; transition: all 0.3s ease;
     }}
-    .normal-sn {{ background: rgba(56, 189, 248, 0.1) !important; color: #38bdf8 !important; border-color: rgba(56, 189, 248, 0.3) !important; }}
+    .normal-sn {{ background: rgba(56, 189, 248, 0.1); color: #38bdf8 !important; border-color: rgba(56, 189, 248, 0.3); }}
     .normal-sn:hover {{ 
         background: #38bdf8 !important; color: #000 !important; 
-        box-shadow: 0 0 20px #38bdf8 !important; 
+        box-shadow: 0 0 20px #38bdf8; transform: none;
     }}
-    .error-sn-pill {{ background: rgba(245, 158, 11, 0.1) !important; color: #f59e0b !important; border-color: rgba(245, 158, 11, 0.3) !important; }}
+    
+    .error-sn-pill {{ background: rgba(245, 158, 11, 0.1); color: #f59e0b !important; border-color: rgba(245, 158, 11, 0.3); }}
     .error-sn-pill:hover {{ 
         background: #f59e0b !important; color: #000 !important; 
-        box-shadow: 0 0 20px #f59e0b !important;
+        box-shadow: 0 0 20px #f59e0b; transform: none;
     }}
 
-    /* 🚫 Tabs 修正 */
+    /* 🚫 Tabs 辉光 */
+    .stTabs [data-baseweb="tab-highlight"] {{ display: none !important; }}
     .stTabs [data-baseweb="tab"] {{ 
-        transition: all 0.4s ease !important;
+        transition: all 0.3s ease !important; border-radius: 40px !important;
     }}
     .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{ 
-        box-shadow: 0 0 30px rgba(56, 189, 248, 0.6) !important;
+        color: #38bdf8 !important; box-shadow: 0 0 20px rgba(56, 189, 248, 0.4) !important;
     }}
     .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(2) {{ 
-        box-shadow: 0 0 30px rgba(245, 158, 11, 0.6) !important;
+        color: #f59e0b !important; box-shadow: 0 0 20px rgba(245, 158, 11, 0.4) !important;
     }}
 
     .grand-title {{ font-size: 3.5rem !important; font-weight: 900; letter-spacing: 10px; background: linear-gradient(to bottom, #ffffff 30%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
@@ -117,7 +107,7 @@ st.markdown(f"""
     <div style="text-align:center; margin-bottom:50px;"><h1 class="grand-title">SKU 属性解析中枢</h1></div>
 """, unsafe_allow_html=True)
 
-# --- 3. 核心逻辑 (维持原样) ---
+# --- 3. 核心逻辑 (保持精简) ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -144,14 +134,13 @@ def process_sku_logic(uploaded_file):
         else: all_error_rows.append({'SN': sn, 'Line': index+2, 'Reason': f"数量异常({len(data_pairs)}/{i_qty})", 'Content': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 4. 渲染 ---
+# --- 4. 渲染布局 ---
 upload_zone = st.empty()
-uploaded_file = upload_zone.file_uploader("Upload SKU Data", type=["xlsx"])
+uploaded_file = upload_zone.file_uploader("Upload SKU Excel", type=["xlsx"])
 
 if uploaded_file:
     v_df, e_df = process_sku_logic(uploaded_file)
     upload_zone.empty() 
-    
     t1, t2 = st.tabs(["汇总数据", "异常拦截"])
     
     with t1:
