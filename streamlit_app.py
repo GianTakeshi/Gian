@@ -33,56 +33,92 @@ st.markdown(f"""
         100% {{ box-shadow: 0 0 5px rgba(56, 189, 248, 0.3); border-color: rgba(56, 189, 248, 0.4); }}
     }}
 
-    /* 🛡️ 用户面板：悬浮放大效果 */
+    /* 🛡️ 用户面板：悬浮放大 */
     .user-profile {{
         position: fixed; top: 35px; left: 35px; display: flex; align-items: center; gap: 12px; z-index: 1000000; 
         background: rgba(255, 255, 255, 0.05); padding: 8px 20px 8px 8px; border-radius: 60px;
         border: 1.5px solid rgba(56, 189, 248, 0.2); backdrop-filter: blur(15px);
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* 增加弹性过渡 */
-        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer;
     }}
-    
-    /* 🚀 鼠标悬停时的放大悬浮效果 */
     .user-profile:hover {{ 
-        transform: translateY(-8px) scale(1.1); /* 向上位移并整体放大 */
+        transform: translateY(-8px) scale(1.1);
         border-color: #38bdf8; 
-        background: rgba(56, 189, 248, 0.12);
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(56, 189, 248, 0.3); 
     }}
-    
-    .avatar {{ 
-        width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; 
-        background: #0c1e3d; object-fit: cover; 
-        animation: avatarPulse 2.5s infinite ease-in-out; 
-    }}
+    .avatar {{ width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; background: #0c1e3d; object-fit: cover; animation: avatarPulse 2.5s infinite ease-in-out; }}
     .user-name {{ font-size: 0.95rem; font-weight: 900; color: #fff; letter-spacing: 0.5px; }}
 
-    /* 🚫 移除 Tab 红条并恢复按钮动画 */
+    /* 🚫 Tabs 按钮：悬浮放大 + 霓虹 */
     .stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] {{ display: none !important; }}
-    .stTabs [data-baseweb="tab-list"] {{ gap: 12px; background: transparent !important; padding-top: 15px !important; margin-bottom: 20px; }}
+    .stTabs [data-baseweb="tab-list"] {{ gap: 15px; background: transparent !important; padding-top: 15px !important; margin-bottom: 20px; }}
     .stTabs [data-baseweb="tab"] {{ 
-        height: 36px !important; padding: 0 25px !important; font-size: 0.9rem !important; 
+        height: 38px !important; padding: 0 28px !important; font-size: 0.9rem !important; 
         border-radius: 40px !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; 
         background: rgba(255, 255, 255, 0.02) !important; color: rgba(255, 255, 255, 0.5) !important; 
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important; cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; cursor: pointer;
     }}
-    .stTabs [data-baseweb="tab"]:hover {{ transform: translateY(-2px); border-color: rgba(255,255,255,0.4); color: #fff !important; }}
-    .stTabs [data-baseweb="tab"]:active {{ transform: translateY(1px) scale(0.95) !important; }}
-    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{ color: #38bdf8 !important; border-color: #38bdf8 !important; background: rgba(56, 189, 248, 0.1) !important; box-shadow: 0 0 20px rgba(56, 189, 248, 0.4); }}
-    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(2) {{ color: #f59e0b !important; border-color: #f59e0b !important; background: rgba(245, 158, 11, 0.1) !important; box-shadow: 0 0 20px rgba(245, 158, 11, 0.4); }}
+    .stTabs [data-baseweb="tab"]:hover {{ 
+        transform: translateY(-6px) scale(1.08) !important; 
+        color: #fff !important; 
+        box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+    }}
+    .stTabs [data-baseweb="tab"]:active {{ transform: translateY(2px) scale(0.95) !important; }}
+    
+    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{ 
+        color: #38bdf8 !important; border-color: #38bdf8 !important; background: rgba(56, 189, 248, 0.1) !important; 
+        box-shadow: 0 0 20px rgba(56, 189, 248, 0.4); 
+    }}
+    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(2) {{ 
+        color: #f59e0b !important; border-color: #f59e0b !important; background: rgba(245, 158, 11, 0.1) !important; 
+        box-shadow: 0 0 20px rgba(245, 158, 11, 0.4); 
+    }}
 
-    /* 🧊 卡片与 SN 霓虹效果 */
-    .wide-card {{ background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 20px 25px; margin-bottom: 25px; display: flex; flex-direction: row; align-items: center; justify-content: space-between; backdrop-filter: blur(15px); transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); animation: fadeIn 0.4s ease-out; cursor: pointer; position: relative; }}
-    .normal-card {{ border-left: 4px solid rgba(56, 189, 248, 0.4); }}
-    .normal-card:hover {{ transform: translateY(-8px); border-color: #38bdf8; background: rgba(56, 189, 248, 0.03); box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 80px rgba(56, 189, 248, 0.25), inset 0 0 15px rgba(56, 189, 248, 0.4); }}
-    .error-card {{ border-left: 4px solid rgba(245, 158, 11, 0.4); }}
-    .error-card:hover {{ transform: translateY(-8px); border-color: #f59e0b; background: rgba(245, 158, 11, 0.03); box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 80px rgba(245, 158, 11, 0.25), inset 0 0 15px rgba(245, 158, 11, 0.4); }}
-
-    .sn-pill {{ padding: 4px 12px; border-radius: 40px; font-size: 0.7rem; font-weight: 600; text-decoration: none !important; transition: all 0.3s ease; border: 1px solid transparent; }}
+    /* 🏷️ SN 气泡：霓虹 + 悬浮放大 */
+    .sn-pill {{ 
+        padding: 4px 12px; border-radius: 40px; font-size: 0.7rem; font-weight: 600; 
+        text-decoration: none !important; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        border: 1px solid transparent; display: inline-block;
+    }}
     .normal-sn {{ background: rgba(56, 189, 248, 0.08); color: #38bdf8 !important; border-color: rgba(56, 189, 248, 0.2); }}
-    .normal-sn:hover {{ background: #38bdf8 !important; color: #000000 !important; box-shadow: 0 0 15px #38bdf8, 0 0 30px rgba(56, 189, 248, 0.6); transform: scale(1.05); }}
+    .normal-sn:hover {{ 
+        background: #38bdf8 !important; color: #000000 !important; 
+        transform: translateY(-5px) scale(1.15);
+        box-shadow: 0 0 20px #38bdf8, 0 10px 20px rgba(0,0,0,0.5);
+    }}
     .error-sn-pill {{ background: rgba(245, 158, 11, 0.08); color: #f59e0b !important; border-color: rgba(245, 158, 11, 0.2); }}
-    .error-sn-pill:hover {{ background: #f59e0b !important; color: #000000 !important; box-shadow: 0 0 15px #f59e0b, 0 0 30px rgba(245, 158, 11, 0.6); transform: scale(1.05); }}
+    .error-sn-pill:hover {{ 
+        background: #f59e0b !important; color: #000000 !important; 
+        transform: translateY(-5px) scale(1.15);
+        box-shadow: 0 0 20px #f59e0b, 0 10px 20px rgba(0,0,0,0.5);
+    }}
+
+    /* 🧊 卡片逻辑：悬浮 + 深度点击效果 */
+    .wide-card {{ 
+        background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); 
+        border-radius: 16px; padding: 20px 25px; margin-bottom: 25px; 
+        display: flex; flex-direction: row; align-items: center; justify-content: space-between; 
+        backdrop-filter: blur(15px); transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); 
+        animation: fadeIn 0.4s ease-out; cursor: pointer; position: relative; 
+    }}
+    .normal-card {{ border-left: 4px solid rgba(56, 189, 248, 0.4); }}
+    .normal-card:hover {{ 
+        transform: translateY(-10px) scale(1.01); 
+        border-color: #38bdf8; 
+        box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 0 80px rgba(56, 189, 248, 0.15); 
+    }}
+    .error-card {{ border-left: 4px solid rgba(245, 158, 11, 0.4); }}
+    .error-card:hover {{ 
+        transform: translateY(-10px) scale(1.01); 
+        border-color: #f59e0b; 
+        box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 0 80px rgba(245, 158, 11, 0.15); 
+    }}
+    
+    /* 🖱️ 卡片点击动画 (下陷感) */
+    .wide-card:active {{ 
+        transform: translateY(4px) scale(0.98) !important; 
+        box-shadow: 0 5px 10px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,255,255,0.05) !important;
+        transition: all 0.1s ease !important;
+    }}
 
     .grand-title {{ display: inline-block; font-size: 3rem !important; font-weight: 900; letter-spacing: 8px; background: linear-gradient(to bottom, #ffffff 40%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
     div.stButton > button {{ background: rgba(56, 189, 248, 0.05) !important; color: #38bdf8 !important; border: 1.5px solid rgba(56, 189, 248, 0.4) !important; border-radius: 40px !important; padding: 6px 30px !important; transition: all 0.3s ease !important; margin: 30px auto !important; display: block !important; }}
