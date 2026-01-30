@@ -43,54 +43,59 @@ st.markdown(f"""
     .avatar {{ width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; background: #0c1e3d; object-fit: cover; animation: avatarPulse 3s infinite ease-in-out; }}
     .user-name {{ font-size: 0.95rem; font-weight: 900; color: #fff; letter-spacing: 0.5px; }}
 
-    /* 🧊 卡片：光效向中间扩散逻辑 */
+    /* 🧊 卡片：边缘向中心散射效果 */
     .wide-card {{
         position: relative; overflow: hidden;
         background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 16px; padding: 20px 25px; margin-bottom: 25px;
         display: flex; flex-direction: row; align-items: center; justify-content: space-between;
         backdrop-filter: blur(15px); 
-        transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
         animation: fadeIn 0.8s ease-out;
         cursor: pointer;
     }}
 
-    /* 核心扩散光感：使用径向渐变伪元素 */
+    /* 核心：散射光效伪元素 */
+    /* 使用巨大的空心径向渐变，营造光从边缘切入的感觉 */
     .wide-card::before {{
-        content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-        background: radial-gradient(circle at center, rgba(56, 189, 248, 0.15) 0%, transparent 70%);
-        opacity: 0; transition: opacity 0.5s ease, transform 0.5s ease;
-        transform: scale(1.5); /* 初始态在外围 */
+        content: ""; position: absolute; top: -50%; left: -50%; right: -50%; bottom: -50%;
+        background: radial-gradient(circle, transparent 30%, rgba(56, 189, 248, 0.2) 60%, transparent 80%);
+        opacity: 0; transition: all 0.6s ease;
+        transform: scale(1.2); 
         pointer-events: none;
+        z-index: 0;
     }}
 
     .wide-card:hover::before {{
         opacity: 1;
-        transform: scale(1); /* 悬停时缩回中间，形成“向中间扩散/汇聚”感 */
+        transform: scale(0.8); /* 悬停时光环向内收缩，形成向中心散射的动态感 */
     }}
 
-    /* 汇总卡片专用 hover */
+    /* 汇总卡片专用 */
     .normal-card {{ border-left: 4px solid rgba(56, 189, 248, 0.4); }}
     .normal-card:hover {{
         transform: translateY(-5px); border-color: #38bdf8;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 0 20px rgba(56, 189, 248, 0.1);
+        box-shadow: inset 0 0 30px rgba(56, 189, 248, 0.1), 0 10px 30px rgba(0,0,0,0.5);
     }}
 
-    /* 异常卡片专用 hover (光效改用橙色) */
+    /* 异常卡片专用 */
     .error-card {{ border-left: 4px solid rgba(245, 158, 11, 0.4); }}
-    .error-card::before {{ background: radial-gradient(circle at center, rgba(245, 158, 11, 0.15) 0%, transparent 70%); }}
+    .error-card::before {{ background: radial-gradient(circle, transparent 30%, rgba(245, 158, 11, 0.2) 60%, transparent 80%); }}
     .error-card:hover {{
         transform: translateY(-5px); border-color: #f59e0b;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 0 20px rgba(245, 158, 11, 0.1);
+        box-shadow: inset 0 0 30px rgba(245, 158, 11, 0.1), 0 10px 30px rgba(0,0,0,0.5);
     }}
 
     .wide-card:active {{ transform: translateY(-2px) scale(0.985); }}
+    
+    /* 确保内部文字在光效上方 */
+    .wide-card > div {{ position: relative; z-index: 1; }}
 
     /* 其他逻辑维持原样 */
     .grand-title {{ display: inline-block; font-size: 3rem !important; font-weight: 900; letter-spacing: 8px; background: linear-gradient(to bottom, #ffffff 40%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
-    .stTabs [data-baseweb="tab-list"] {{ gap: 12px; background: transparent !important; padding-top: 15px !important; margin-bottom: 20px; overflow: visible !important; }}
+    .stTabs [data-baseweb="tab-list"] {{ gap: 12px; background: transparent !important; padding-top: 15px !important; margin-bottom: 20px; }}
     .stTabs [data-baseweb="tab"] {{ height: 32px !important; padding: 0 18px !important; font-size: 0.85rem !important; border-radius: 40px !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; background: rgba(255, 255, 255, 0.02) !important; color: rgba(255, 255, 255, 0.4) !important; transition: all 0.3s ease !important; }}
-    .stTabs [data-baseweb="tab"]:hover {{ transform: translateY(-4px) !important; background: rgba(255, 255, 255, 0.08) !important; }}
+    .stTabs [data-baseweb="tab"]:hover {{ transform: translateY(-4px) !important; }}
     .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{ color: #38bdf8 !important; border-color: #38bdf8 !important; background: rgba(56, 189, 248, 0.1) !important; }}
     .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(2) {{ color: #f59e0b !important; border-color: #f59e0b !important; background: rgba(245, 158, 11, 0.1) !important; }}
 
@@ -135,7 +140,7 @@ def process_sku_logic(uploaded_file):
         else: all_error_rows.append({'SN': sn, 'Line': index+2, 'Reason': f"数量异常({len(data_pairs)}/{i_qty})", 'Content': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 4. 渲染 (维持) ---
+# --- 4. 渲染 ---
 upload_zone = st.empty()
 uploaded_file = upload_zone.file_uploader("Upload", type=["xlsx"])
 
@@ -154,11 +159,11 @@ if uploaded_file:
                     size_badges = [f'<div style="display:inline-flex; align-items:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:2px 10px; margin-right:6px;"><span style="color:#fff; font-size:0.75rem;">{(s if s!="FREE" else "")}</span><span style="color:#38bdf8; font-weight:800; margin-left:4px;">{("×" if s!="FREE" else "")}{q}</span></div>' for s, q in clr_group['Size'].value_counts().sort_index().items()]
                     attr_html_list.append(f'<div style="display:flex; align-items:center; gap:15px; padding:6px 0;"><div style="color:#38bdf8; font-weight:700; min-width:80px; font-size:0.9rem;">{clr}</div><div>{"".join(size_badges)}</div></div>')
                 sn_html = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill normal-sn">{sn}</a>' for sn in sorted(list(set(cat_group['SN'].tolist())))])
-                st.markdown(f'<div class="wide-card normal-card"><div style="flex:1;"><div style="color:#38bdf8; font-weight:900; font-size:1.4rem; margin-bottom:10px;">{cat}</div>{"".join(attr_html_list)}</div><div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end; max-width:350px;">{sn_html}</div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="wide-card normal-card"><div><div style="color:#38bdf8; font-weight:900; font-size:1.4rem; margin-bottom:10px;">{cat}</div>{"".join(attr_html_list)}</div><div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end; max-width:350px;">{sn_html}</div></div>', unsafe_allow_html=True)
             if st.button("↺ 重制系统"): st.rerun()
 
     with t2:
         if not e_df.empty:
             for _, err in e_df.iterrows():
                 sn_link = f'<a href="{BASE_URL}{err["SN"]}" target="_blank" class="sn-pill error-sn-pill">{err["SN"]}</a>'
-                st.markdown(f'<div class="wide-card error-card"><div style="flex:1;"><div style="color:#f59e0b; font-weight:900; font-size:0.9rem;">LINE {err["Line"]} | {err["Reason"]}</div><div style="font-size:0.8rem; color:#cbd5e1; margin-top:5px;">{err["Content"]}</div></div><div>{sn_link}</div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="wide-card error-card"><div><div style="color:#f59e0b; font-weight:900; font-size:0.9rem;">LINE {err["Line"]} | {err["Reason"]}</div><div style="font-size:0.8rem; color:#cbd5e1; margin-top:5px;">{err["Content"]}</div></div><div>{sn_link}</div></div>', unsafe_allow_html=True)
