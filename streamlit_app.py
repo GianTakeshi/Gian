@@ -72,7 +72,7 @@ st.markdown(f"""
         display: flex; flex-direction: row; align-items: center; justify-content: space-between;
         backdrop-filter: blur(15px); 
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* 统一交互曲线 */
-        animation: fadeIn 0.8s ease-out;
+        animation: fadeIn 0.5s ease-out;
         cursor: pointer; /* 提示可点击 */
     }}
     
