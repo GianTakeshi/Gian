@@ -12,94 +12,108 @@ AVATAR_URL = f"https://avatars.githubusercontent.com/{GITHUB_USERNAME}"
 # --- 2. 注入深度定制 CSS ---
 st.markdown(f"""
     <style>
-    /* 🎭 整体布局调整 */
+    /* 🎭 整体布局与背景 */
     .stApp {{ 
         background: radial-gradient(circle at 50% 50%, #0c1e3d 0%, #020617 60%, #000000 100%) !important; 
         color: #ffffff; 
-        /* ✅ 整个页面内容向下移动 */
         padding-top: 80px !important; 
     }}
     header {{visibility: hidden;}}
 
     @keyframes fadeIn {{
-        from {{ opacity: 0; transform: translateY(20px); filter: blur(5px); }}
+        from {{ opacity: 0; transform: translateY(15px); filter: blur(5px); }}
         to {{ opacity: 1; transform: translateY(0); filter: blur(0); }}
     }}
 
-    /* 🛡️ 用户面板 - 随页面微调位置 */
+    /* 🛡️ 用户面板 */
     .user-profile {{
         position: fixed; top: 35px; left: 35px; display: flex; align-items: center; gap: 12px; z-index: 1000000; 
         background: rgba(255, 255, 255, 0.05); padding: 8px 18px 8px 8px; border-radius: 50px;
         border: 1px solid rgba(56, 189, 248, 0.2); backdrop-filter: blur(15px);
     }}
-    .avatar {{ 
-        width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; 
-        background: #0c1e3d; object-fit: cover;
-    }}
+    .avatar {{ width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; background: #0c1e3d; object-fit: cover; }}
     
-    /* 标题容器下移 */
-    .hero-container {{
-        margin-top: 20px;
-        margin-bottom: 50px;
-        text-align: center;
-    }}
-    
+    .hero-container {{ margin-top: 20px; margin-bottom: 50px; text-align: center; }}
     .grand-title {{
         display: inline-block; font-size: 3.5rem !important; font-weight: 900; letter-spacing: 10px;
         background: linear-gradient(to bottom, #ffffff 40%, #38bdf8 100%);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }}
 
-    /* 🧊 卡片通用样式 */
+    /* 🧊 卡片通用样式 - 调弱浮动 (12px -> 6px) */
     .wide-card {{
         background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 20px; padding: 25px 30px; margin-bottom: 35px;
+        border-radius: 20px; padding: 25px 30px; margin-bottom: 30px;
         display: flex; flex-direction: row; align-items: center; justify-content: space-between;
         backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-        animation: fadeIn 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-        transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        animation: fadeIn 0.6s ease-out;
+        transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
     }}
 
-    /* 🔵 汇总卡片：科技蓝 */
-    .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.5); }}
+    /* 🔵 汇总卡片悬停 */
+    .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.4); }}
     .normal-card:hover {{
-        background: rgba(56, 189, 248, 0.1); transform: translateY(-12px) scale(1.015); border-color: #38bdf8;
-        box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 30px rgba(56, 189, 248, 0.5), 0 0 70px rgba(56, 189, 248, 0.2);
+        background: rgba(56, 189, 248, 0.08); 
+        transform: translateY(-6px); /* 弱化位移 */
+        border-color: #38bdf8;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.6), 0 0 40px rgba(56, 189, 248, 0.3);
     }}
 
-    /* 🟠 异常卡片：警告橙 */
-    .error-card {{ border-left: 5px solid rgba(245, 158, 11, 0.5); }}
+    /* 🟠 异常卡片悬停 */
+    .error-card {{ border-left: 5px solid rgba(245, 158, 11, 0.4); }}
     .error-card:hover {{
-        background: rgba(245, 158, 11, 0.1); transform: translateY(-12px) scale(1.015); border-color: #f59e0b;
-        box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 30px rgba(245, 158, 11, 0.5), 0 0 70px rgba(245, 158, 11, 0.2);
+        background: rgba(245, 158, 11, 0.08); 
+        transform: translateY(-6px); 
+        border-color: #f59e0b;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.6), 0 0 40px rgba(245, 158, 11, 0.3);
+    }}
+
+    /* 💊 Tabs 动效增强 */
+    .stTabs [data-baseweb="tab-highlight"] {{ display: none !important; }}
+    .stTabs [data-baseweb="tab-list"] {{ gap: 15px; background: transparent !important; margin-bottom: 25px; }}
+    .stTabs [data-baseweb="tab"] {{
+        height: 40px !important; padding: 0 30px !important; border-radius: 50px !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important; background: rgba(255, 255, 255, 0.02) !important;
+        color: rgba(255, 255, 255, 0.4) !important; transition: all 0.4s ease !important;
+    }}
+    
+    /* Tabs 悬停效果 */
+    .stTabs [data-baseweb="tab"]:hover {{
+        border-color: rgba(255, 255, 255, 0.4) !important;
+        transform: translateY(-2px);
+        background: rgba(255, 255, 255, 0.05) !important;
+    }}
+
+    /* 激活态：汇总数据流 (蓝) */
+    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{
+        color: #38bdf8 !important; border-color: #38bdf8 !important; 
+        background: rgba(56, 189, 248, 0.1) !important;
+        box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+    }}
+    /* 激活态：异常拦截 (橙) */
+    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(2) {{
+        color: #f59e0b !important; border-color: #f59e0b !important; 
+        background: rgba(245, 158, 11, 0.1) !important;
+        box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
     }}
 
     /* 🔄 重制按钮 */
     div.stButton > button {{
         background: rgba(56, 189, 248, 0.05) !important; color: #38bdf8 !important;
         border: 2px solid rgba(56, 189, 248, 0.4) !important; border-radius: 50px !important;
-        padding: 12px 60px !important; font-weight: 900 !important;
-        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1) !important; margin: 50px auto !important; display: block !important;
+        padding: 10px 50px !important; transition: all 0.4s ease !important;
     }}
     div.stButton > button:hover {{
-        box-shadow: 0 0 30px rgba(56, 189, 248, 0.6), 0 0 60px rgba(56, 189, 248, 0.3) !important;
+        transform: translateY(-4px) !important;
+        box-shadow: 0 0 30px rgba(56, 189, 248, 0.5) !important;
     }}
 
-    /* 💊 SN 药丸 */
-    .sn-pill {{ padding: 5px 15px; border-radius: 50px !important; font-size: 0.75rem; font-weight: 600; text-decoration: none !important; transition: all 0.3s ease; }}
+    /* SN 药丸光晕 */
+    .sn-pill {{ padding: 5px 15px; border-radius: 50px; font-size: 0.75rem; font-weight: 600; text-decoration: none !important; transition: all 0.3s ease; }}
     .normal-sn {{ background: rgba(56, 189, 248, 0.1); color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.2); }}
-    .normal-sn:hover {{ background: #38bdf8 !important; color: #000 !important; box-shadow: 0 0 20px rgba(56, 189, 248, 0.8); }}
+    .normal-sn:hover {{ background: #38bdf8 !important; color: #000 !important; box-shadow: 0 0 15px rgba(56, 189, 248, 0.8); }}
     .error-sn-pill {{ background: rgba(245, 158, 11, 0.1); color: #f59e0b !important; border: 1px solid rgba(245, 158, 11, 0.3); }}
-    .error-sn-pill:hover {{ background: #f59e0b !important; color: #000 !important; box-shadow: 0 0 20px rgba(245, 158, 11, 0.8); transform: translateY(-2px); }}
-
-    /* Tabs 修正 */
-    .stTabs [data-baseweb="tab-highlight"] {{ display: none !important; }}
-    .stTabs [data-baseweb="tab-list"] {{ gap: 12px; background: transparent !important; }}
-    .stTabs [data-baseweb="tab"] {{
-        height: 35px !important; padding: 0 25px !important; border-radius: 50px !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important; background: rgba(255, 255, 255, 0.02) !important;
-        color: rgba(255, 255, 255, 0.4) !important; transition: 0.3s ease !important;
-    }}
+    .error-sn-pill:hover {{ background: #f59e0b !important; color: #000 !important; box-shadow: 0 0 15px rgba(245, 158, 11, 0.8); }}
 
     [data-testid="stFileUploader"] {{
         position: fixed; bottom: 35px; left: 50%; transform: translateX(-50%); width: 450px; z-index: 9999;
@@ -118,7 +132,7 @@ st.markdown(f"""
     <div class="hero-container"><h1 class="grand-title">SKU 属性解析中枢</h1></div>
 """, unsafe_allow_html=True)
 
-# --- 3. 核心逻辑 (保持功能完整) ---
+# --- 3. 核心逻辑 (完整功能) ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
