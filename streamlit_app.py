@@ -12,7 +12,7 @@ AVATAR_URL = f"https://avatars.githubusercontent.com/{GITHUB_USERNAME}"
 # --- 2. 注入深度定制 CSS ---
 st.markdown(f"""
     <style>
-    /* 🎭 整体布局 - 保持原样 */
+    /* 🎭 整体布局 */
     .stApp {{ 
         background: radial-gradient(circle at 50% 50%, #0c1e3d 0%, #020617 60%, #000000 100%) !important; 
         color: #ffffff; 
@@ -43,59 +43,50 @@ st.markdown(f"""
     .avatar {{ width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; background: #0c1e3d; object-fit: cover; animation: avatarPulse 3s infinite ease-in-out; }}
     .user-name {{ font-size: 0.95rem; font-weight: 900; color: #fff; letter-spacing: 0.5px; }}
 
-    /* 🧊 卡片：边缘向中心散射效果 */
+    /* 🧊 卡片：上下边缘向内扩散散射效果 */
     .wide-card {{
-        position: relative; overflow: hidden;
+        position: relative;
         background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 16px; padding: 20px 25px; margin-bottom: 25px;
         display: flex; flex-direction: row; align-items: center; justify-content: space-between;
         backdrop-filter: blur(15px); 
-        transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        /* 过渡动画：增加 box-shadow 的平滑度 */
+        transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
         animation: fadeIn 0.8s ease-out;
         cursor: pointer;
     }}
 
-    /* 核心：散射光效伪元素 */
-    /* 使用巨大的空心径向渐变，营造光从边缘切入的感觉 */
-    .wide-card::before {{
-        content: ""; position: absolute; top: -50%; left: -50%; right: -50%; bottom: -50%;
-        background: radial-gradient(circle, transparent 30%, rgba(56, 189, 248, 0.2) 60%, transparent 80%);
-        opacity: 0; transition: all 0.6s ease;
-        transform: scale(1.2); 
-        pointer-events: none;
-        z-index: 0;
-    }}
-
-    .wide-card:hover::before {{
-        opacity: 1;
-        transform: scale(0.8); /* 悬停时光环向内收缩，形成向中心散射的动态感 */
-    }}
-
-    /* 汇总卡片专用 */
+    /* 汇总卡片：蓝光由四向往中间喷射 */
     .normal-card {{ border-left: 4px solid rgba(56, 189, 248, 0.4); }}
     .normal-card:hover {{
-        transform: translateY(-5px); border-color: #38bdf8;
-        box-shadow: inset 0 0 30px rgba(56, 189, 248, 0.1), 0 10px 30px rgba(0,0,0,0.5);
+        transform: translateY(-5px);
+        border-color: #38bdf8;
+        /* 外发光 + 强力的内散射阴影 */
+        box-shadow: 
+            0 15px 35px rgba(0,0,0,0.5), 
+            0 0 20px rgba(56, 189, 248, 0.2),
+            inset 0 0 40px rgba(56, 189, 248, 0.15),
+            inset 0 0 10px rgba(56, 189, 248, 0.3);
     }}
 
-    /* 异常卡片专用 */
+    /* 异常卡片：橙光由四向往中间喷射 */
     .error-card {{ border-left: 4px solid rgba(245, 158, 11, 0.4); }}
-    .error-card::before {{ background: radial-gradient(circle, transparent 30%, rgba(245, 158, 11, 0.2) 60%, transparent 80%); }}
     .error-card:hover {{
-        transform: translateY(-5px); border-color: #f59e0b;
-        box-shadow: inset 0 0 30px rgba(245, 158, 11, 0.1), 0 10px 30px rgba(0,0,0,0.5);
+        transform: translateY(-5px);
+        border-color: #f59e0b;
+        box-shadow: 
+            0 15px 35px rgba(0,0,0,0.5), 
+            0 0 20px rgba(245, 158, 11, 0.2),
+            inset 0 0 40px rgba(245, 158, 11, 0.15),
+            inset 0 0 10px rgba(245, 158, 11, 0.3);
     }}
 
     .wide-card:active {{ transform: translateY(-2px) scale(0.985); }}
-    
-    /* 确保内部文字在光效上方 */
-    .wide-card > div {{ position: relative; z-index: 1; }}
 
-    /* 其他逻辑维持原样 */
+    /* 其他元素逻辑原封不动 */
     .grand-title {{ display: inline-block; font-size: 3rem !important; font-weight: 900; letter-spacing: 8px; background: linear-gradient(to bottom, #ffffff 40%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
     .stTabs [data-baseweb="tab-list"] {{ gap: 12px; background: transparent !important; padding-top: 15px !important; margin-bottom: 20px; }}
     .stTabs [data-baseweb="tab"] {{ height: 32px !important; padding: 0 18px !important; font-size: 0.85rem !important; border-radius: 40px !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; background: rgba(255, 255, 255, 0.02) !important; color: rgba(255, 255, 255, 0.4) !important; transition: all 0.3s ease !important; }}
-    .stTabs [data-baseweb="tab"]:hover {{ transform: translateY(-4px) !important; }}
     .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{ color: #38bdf8 !important; border-color: #38bdf8 !important; background: rgba(56, 189, 248, 0.1) !important; }}
     .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(2) {{ color: #f59e0b !important; border-color: #f59e0b !important; background: rgba(245, 158, 11, 0.1) !important; }}
 
@@ -113,7 +104,7 @@ st.markdown(f"""
     <div class="hero-container"><h1 class="grand-title">SKU 属性解析中枢</h1></div>
 """, unsafe_allow_html=True)
 
-# --- 3. 核心逻辑 (维持) ---
+# --- 3. 核心逻辑 (完全维持) ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -140,7 +131,7 @@ def process_sku_logic(uploaded_file):
         else: all_error_rows.append({'SN': sn, 'Line': index+2, 'Reason': f"数量异常({len(data_pairs)}/{i_qty})", 'Content': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 4. 渲染 ---
+# --- 4. 渲染 (完全维持) ---
 upload_zone = st.empty()
 uploaded_file = upload_zone.file_uploader("Upload", type=["xlsx"])
 
