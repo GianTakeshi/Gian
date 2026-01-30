@@ -51,12 +51,30 @@ st.markdown(f"""
     .avatar {{ width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; animation: avatar-breathing 3s infinite ease-in-out; }}
     .user-name {{ font-size: 0.95rem; font-weight: 600; color: #fff; letter-spacing: 0.5px; }}
 
-    .wide-card {{
-        background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 16px; padding: 25px 30px; margin-bottom: 25px;
-        display: flex; flex-direction: row; align-items: center; justify-content: space-between;
-        backdrop-filter: blur(15px); transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
-    }}
+       /* 🧊 修复卡片断层的最终方案 */
+    .wide-card {
+        /* 1. 基础背景 */
+        background: rgba(255, 255, 255, 0.03) !important;
+        
+        /* 2. 关键：叠加一层极淡的噪声纹理，利用 Base64 噪点图打碎断层 */
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        background-blend-mode: overlay; /* 混合模式，让噪点只在暗部和亮部交界处起作用 */
+        opacity: 0.98; /* 微调透明度 */
+
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px; 
+        padding: 25px 30px; 
+        margin-bottom: 25px;
+        display: flex; 
+        flex-direction: row; 
+        align-items: center; 
+        justify-content: space-between;
+        
+        /* 3. 增强模糊：增加模糊像素，帮助色彩混合 */
+        backdrop-filter: blur(40px) saturate(150%); 
+        transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+
     .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.4); }}
     /* 🧊 卡片悬停：加入 HDR 内发光 */
     .normal-card:hover {{ 
