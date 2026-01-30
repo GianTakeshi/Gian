@@ -3,7 +3,7 @@ import pandas as pd
 import re
 
 # --- 1. 页面配置 ---
-st.set_page_config(page_title="123456789", page_icon="🚀", layout="wide")
+st.set_page_config(page_title="爆单", page_icon="🚀", layout="wide")
 
 GITHUB_USERNAME = "GianTakeshi" 
 BASE_URL = "https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id="
@@ -40,7 +40,7 @@ st.markdown(f"""
         border: 1.5px solid rgba(56, 189, 248, 0.2); backdrop-filter: blur(15px);
     }}
     .avatar {{ width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; animation: avatar-breathing 3s infinite ease-in-out; }}
-    .user-name {{ font-size: 0.95rem; font-weight: 700; color: #fff; letter-spacing: 0.5px; }}
+    .user-name {{ font-size: 0.95rem; font-weight: 600; color: #fff; letter-spacing: 0.5px; }}
 
     /* 🧊 卡片基础样式 */
     .wide-card {{
