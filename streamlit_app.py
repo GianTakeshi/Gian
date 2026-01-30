@@ -8,100 +8,115 @@ st.set_page_config(page_title="SKU 属性解析中枢", page_icon="🚀", layout
 GITHUB_USERNAME = "GianTakeshi" 
 BASE_URL = "https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id="
 
-# --- 2. 注入 V11.0 核心 CSS + 流水动画 ---
+# --- 2. 注入极致动效 CSS ---
 st.markdown(f"""
     <style>
-    /* 🎭 舞台光背景 (V11) */
+    /* 🎭 背景与全局初始化 */
     .stApp {{ 
         background: radial-gradient(circle at 50% 50%, #0c1e3d 0%, #020617 60%, #000000 100%) !important; 
         color: #ffffff; 
     }}
     header {{visibility: hidden;}}
 
-    /* 🛡️ 用户面板 (V11) */
+    /* 🛡️ 用户面板 - 深度交互逻辑 */
     @keyframes avatarPulse {{
-        0% {{ box-shadow: 0 0 5px rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.3); }}
-        50% {{ box-shadow: 0 0 20px rgba(56, 189, 248, 0.6); border-color: rgba(56, 189, 248, 0.8); }}
-        100% {{ box-shadow: 0 0 5px rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.3); }}
+        0% {{ box-shadow: 0 0 5px rgba(56, 189, 248, 0.3); border-color: rgba(56, 189, 248, 0.3); }}
+        50% {{ box-shadow: 0 0 20px rgba(56, 189, 248, 0.7); border-color: rgba(56, 189, 248, 0.9); }}
+        100% {{ box-shadow: 0 0 5px rgba(56, 189, 248, 0.3); border-color: rgba(56, 189, 248, 0.3); }}
     }}
+    
     .user-profile {{
         position: fixed; top: 25px; left: 25px; display: flex; align-items: center; gap: 12px; z-index: 1000000; 
-        background: rgba(255, 255, 255, 0.05); padding: 8px 18px 8px 8px; border-radius: 50px;
+        background: rgba(255, 255, 255, 0.05); padding: 8px 20px 8px 8px; border-radius: 50px;
         border: 1px solid rgba(56, 189, 248, 0.2); backdrop-filter: blur(15px);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer;
     }}
+
+    /* ✨ 找回：鼠标放到头像上的增强光效 */
+    .user-profile:hover {{
+        background: rgba(56, 189, 248, 0.12);
+        border-color: #38bdf8;
+        box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
+        transform: translateY(2px) scale(1.02);
+    }}
+    .user-profile:active {{ transform: scale(0.92); }}
+
     .avatar {{ 
-        width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; 
+        width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; 
         animation: avatarPulse 2.5s infinite ease-in-out; 
     }}
     
-    .hero-container {{ text-align: center; width: 100%; padding: 40px 0 20px 0; }}
-    .grand-title {{
-        display: block; font-family: 'Inter', sans-serif; font-size: 3.5rem !important; font-weight: 900; letter-spacing: 10px;
-        background: linear-gradient(to bottom, #ffffff 40%, #38bdf8 100%);
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 40px;
-        filter: drop-shadow(0 0 15px rgba(56, 189, 248, 0.3));
+    /* 🌪️ 找回：内容切入动效 (Tab 切换动画) */
+    @keyframes contentSlideIn {{
+        0% {{ opacity: 0; transform: translateY(15px) scale(0.98); filter: blur(10px); }}
+        100% {{ opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }}
+    }}
+    [data-baseweb="tab-panel"] {{
+        animation: contentSlideIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
     }}
 
-    /* 🌊 流水浮现关键帧 */
-    @keyframes cardReveal {{
-        from {{ opacity: 0; transform: translateY(20px); filter: blur(5px); }}
-        to {{ opacity: 1; transform: translateY(0); filter: blur(0); }}
-    }}
-
-    /* 🧊 卡片系统 (V11 + Animation) */
+    /* 🧊 霓虹卡片与 SN 码 */
     .wide-card {{
-        background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 20px; padding: 25px 30px; margin-bottom: 25px;
+        background: rgba(255, 255, 255, 0.03); border-radius: 20px; padding: 25px 30px; margin-bottom: 25px;
         display: flex; flex-direction: row; align-items: center; justify-content: space-between;
-        backdrop-filter: blur(15px);
-        transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-        animation: cardReveal 0.6s ease-out both; /* 激活流水动画 */
+        backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.4s ease;
     }}
-    .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.5); }}
-    .normal-card:hover {{ background: rgba(56, 189, 248, 0.06); transform: translateY(-5px); border-color: #38bdf8; box-shadow: 0 15px 30px rgba(0,0,0,0.5); }}
-
-    /* 💊 药丸 Tabs (V11 点击缩小反馈) */
-    .stTabs [data-baseweb="tab-highlight"] {{ display: none !important; }}
-    .stTabs [data-baseweb="tab-list"] {{ gap: 12px; background-color: transparent !important; border-bottom: none !important; }}
-    .stTabs [data-baseweb="tab"] {{
-        height: 34px !important; padding: 0 22px !important; border-radius: 50px !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important; background: rgba(255, 255, 255, 0.02) !important;
-        color: rgba(255, 255, 255, 0.4) !important; transition: all 0.2s ease !important;
+    .normal-card {{ border-left: 5px solid #38bdf8; }}
+    .normal-card:hover {{
+        transform: translateX(8px); background: rgba(56, 189, 248, 0.08);
+        box-shadow: -10px 0 20px rgba(56, 189, 248, 0.2);
     }}
-    .stTabs [data-baseweb="tab"]:active {{ transform: scale(0.92) !important; }}
-    .stTabs [aria-selected="true"] {{ color: #38bdf8 !important; border: 1.5px solid #38bdf8 !important; box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); }}
 
-    /* SN 码 & 按钮点击反馈 (V11) */
-    .sn-pill {{ padding: 5px 15px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; transition: 0.2s; text-decoration: none !important; display: inline-block; }}
-    .sn-pill:active {{ transform: scale(0.9) !important; }}
-    .normal-sn {{ background: rgba(56, 189, 248, 0.1); color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.2); }}
+    .sn-pill {{ 
+        padding: 6px 16px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; 
+        transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); text-decoration: none !important; display: inline-block;
+    }}
+    .normal-sn {{ background: rgba(56, 189, 248, 0.1); color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.3); }}
+    /* ✨ SN 霓虹强光 */
+    .normal-sn:hover {{ 
+        background: #38bdf8 !important; color: #000 !important; 
+        box-shadow: 0 0 20px #38bdf8; transform: translateY(-3px);
+    }}
 
+    /* 🔘 重制按钮 - 找回点击与光效 */
     div.stButton > button {{
-        background: rgba(255, 255, 255, 0.03) !important; color: #38bdf8 !important;
-        border: 1px solid rgba(56, 189, 248, 0.3) !important; border-radius: 50px !important;
-        padding: 10px 50px !important; font-weight: 800 !important; backdrop-filter: blur(10px) !important;
-        transition: all 0.2s !important; margin: 30px auto !important; display: block !important;
+        background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(0,0,0,0.5) 100%) !important;
+        color: #38bdf8 !important; border: 1px solid #38bdf8 !important;
+        border-radius: 50px !important; padding: 12px 60px !important;
+        font-weight: 800 !important; letter-spacing: 2px;
+        transition: all 0.3s !important; margin: 40px auto !important; display: block !important;
+        box-shadow: 0 0 15px rgba(56, 189, 248, 0.2) !important;
     }}
-    div.stButton > button:active {{ transform: scale(0.95) !important; background: rgba(56, 189, 248, 0.2) !important; }}
-
-    [data-testid="stFileUploader"] {{
-        position: fixed; bottom: 35px; left: 50%; transform: translateX(-50%); width: 450px; z-index: 9999;
-        background: rgba(255, 255, 255, 0.08) !important; border: 1px solid rgba(56, 189, 248, 0.3) !important;
-        border-radius: 50px !important; padding: 15px 35px !important; backdrop-filter: blur(25px) !important;
+    div.stButton > button:hover {{
+        background: #38bdf8 !important; color: #000 !important;
+        box-shadow: 0 0 35px rgba(56, 189, 248, 0.6) !important;
+        transform: scale(1.05);
     }}
+    div.stButton > button:active {{ transform: scale(0.95); }}
     </style>
-
-    <div class="user-profile">
-        < img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
-        <div class="user-info">
-            <div style="font-size: 0.9rem; font-weight: 900; color: #fff; margin-left: 10px;">{GITHUB_USERNAME}</div>
-            <div style="font-size: 0.6rem; color: #38bdf8; font-weight: bold; margin-left: 10px;">● QUANTUM ANALYZER</div>
-        </div>
-    </div>
-    <div class="hero-container"><h1 class="grand-title">SKU 属性解析中枢</h1></div>
 """, unsafe_allow_html=True)
 
-# --- 3. 核心逻辑 (V11) ---
+# --- 3. 触发重制逻辑 ---
+with st.sidebar:
+    if st.button("RESET", key="reset_trigger"):
+        st.rerun()
+
+# 用户面板渲染 (整合 Hover JS 逻辑)
+st.markdown(f"""
+    <div class="user-profile" onclick="document.querySelector('button[kind=secondary]').click();">
+        < img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
+        <div style="font-size: 0.95rem; font-weight: 900; color: #fff; margin-left: 5px;">{GITHUB_USERNAME}</div>
+    </div>
+    <div style="text-align: center; width: 100%; padding: 40px 0 20px 0;">
+        <h1 style="font-family: 'Inter', sans-serif; font-size: 3.5rem !important; font-weight: 900; letter-spacing: 10px;
+        background: linear-gradient(to bottom, #ffffff 40%, #38bdf8 100%);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 40px;
+        filter: drop-shadow(0 0 15px rgba(56, 189, 248, 0.3));">SKU 属性解析中枢</h1>
+    </div>
+""", unsafe_allow_html=True)
+
+# --- 4. 核心逻辑 (保持不变) ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -133,7 +148,7 @@ def process_sku_logic(uploaded_file):
             all_error_rows.append({'SN': sn, 'Line': index+2, 'Reason': f"数量异常({len(data_pairs)}/{i_qty})", 'Content': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 4. 渲染循环 (注入流式延迟) ---
+# --- 5. 渲染引擎 ---
 upload_zone = st.empty()
 uploaded_file = upload_zone.file_uploader("Upload", type=["xlsx"])
 
@@ -145,12 +160,9 @@ if uploaded_file:
     
     with t1:
         if not v_df.empty:
-            cats = sorted(v_df['Category'].unique())
-            for i, cat in enumerate(cats):
-                delay = i * 0.08 # 每一个卡片比前一个晚 0.08 秒跳出
+            for cat in sorted(v_df['Category'].unique()):
                 cat_group = v_df[v_df['Category'] == cat]
                 attr_html = ""
-                # ... [此处保持 attr_html 构建逻辑不变] ...
                 for clr in sorted(cat_group['Color'].unique()):
                     clr_group = cat_group[cat_group['Color'] == clr]
                     size_counts = clr_group['Size'].value_counts().sort_index()
@@ -159,13 +171,11 @@ if uploaded_file:
                 
                 sns = sorted(list(set(cat_group['SN'].tolist())))
                 sn_html = "".join([f'<a href=" " target="_blank" class="sn-pill normal-sn">{sn}</a >' for sn in sns])
-                
-                st.markdown(f'''<div class="wide-card normal-card" style="animation-delay: {delay}s;"><div style="flex:1;"><div style="color:#38bdf8; font-weight:900; font-size:1.6rem; margin-bottom:12px; letter-spacing:1px;">{cat}</div>{attr_html}</div><div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;">{sn_html}</div></div>''', unsafe_allow_html=True)
-            if st.button("↺ 重制系统"): st.rerun()
+                st.markdown(f'<div class="wide-card normal-card"><div style="flex:1;"><div style="color:#38bdf8; font-weight:900; font-size:1.6rem; margin-bottom:12px; letter-spacing:1px;">{cat}</div>{attr_html}</div><div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;">{sn_html}</div></div>', unsafe_allow_html=True)
+            if st.button("↺ 重制系统", key="final_reset"): st.rerun()
 
     with t2:
         if not e_df.empty:
-            for i, (_, err) in enumerate(e_df.iterrows()):
-                delay = i * 0.05
+            for _, err in e_df.iterrows():
                 sn_link = f'<a href="{BASE_URL}{err["SN"]}" target="_blank" class="sn-pill error-sn">{err["SN"]}</a >'
-                st.markdown(f'''<div class="wide-card error-card" style="animation-delay: {delay}s;"><div style="flex:1;"><div style="color:#f59e0b; font-weight:900; font-size:1.1rem;">LINE {err["Line"]} | {err["Reason"]}</div><div style="font-size:0.85rem; color:#cbd5e1; margin-top:8px; line-height:1.5;">{err["Content"]}</div></div><div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;">{sn_link}</div></div>''', unsafe_allow_html=True)
+                st.markdown(f'<div class="wide-card error-card"><div style="flex:1;"><div style="color:#f59e0b; font-weight:900; font-size:1.1rem;">LINE {err["Line"]} | {err["Reason"]}</div><div style="font-size:0.85rem; color:#cbd5e1; margin-top:8px; line-height:1.5;">{err["Content"]}</div></div><div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;">{sn_link}</div></div>', unsafe_allow_html=True)
