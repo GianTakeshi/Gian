@@ -40,7 +40,7 @@ st.markdown(f"""
         border: 1.5px solid rgba(56, 189, 248, 0.2); backdrop-filter: blur(15px);
     }}
     .avatar {{ width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; animation: avatar-breathing 3s infinite ease-in-out; }}
-    .user-name {{ font-size: 0.95rem; font-weight: 900; color: #fff; letter-spacing: 0.5px; }}
+    .user-name {{ font-size: 0.95rem; font-weight: 700; color: #fff; letter-spacing: 0.5px; }}
 
     /* 🧊 卡片基础样式 */
     .wide-card {{
@@ -80,7 +80,7 @@ st.markdown(f"""
 
     /* 📥 上传文件界面 */
     [data-testid="stFileUploader"] {{
-        position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); 
+        position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%); 
         width: 520px; z-index: 9999;
         background: rgba(12, 30, 61, 0.65) !important; 
         border-radius: 24px !important; 
