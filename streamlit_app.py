@@ -20,36 +20,54 @@ st.markdown(f"""
         100% {{ transform: translate(-10%, -10%) scale(1); }}
     }}
 
-    .stApp {{
-        background: #000000 !important;
-        overflow: hidden;
-    }}
+        /* 🎨 [极光流体版] 背景逻辑 */
+    .stApp { 
+        background: #000000 !important; /* 基础底色必须为纯黑，以衬托 HDR 光泽 */
+        color: #ffffff; 
+    }
 
-    /* 在背景中注入两个动态 HDR 光晕层 */
-    .stApp::before, .stApp::after {{
+    /* 在页面最底层生成两个交织流动的 HDR 气泡 */
+    .stApp::before, .stApp::after {
         content: "";
         position: fixed;
-        width: 80vw;
-        height: 80vw;
+        width: 100vw;
+        height: 100vw;
         border-radius: 50%;
-        filter: blur(120px);
-        z-index: -1;
-        opacity: 0.4;
-    }}
+        z-index: -2; /* 置于最底层 */
+        filter: blur(100px); /* 巨大的模糊值形成柔和的极光感 */
+        opacity: 0.6;
+        pointer-events: none;
+    }
 
-    .stApp::before {{
-        background: color(display-p3 0.05 0.12 0.24);
-        top: -10%;
-        left: -10%;
-        animation: moving-glow 20s infinite alternate ease-in-out;
-    }}
+    /* 气泡 1：深海蓝 */
+    .stApp::before {
+        background: radial-gradient(circle, color(display-p3 0.05 0.2 0.4) 0%, transparent 70%);
+        top: -30%;
+        left: -20%;
+        animation: aurora-1 25s infinite alternate ease-in-out;
+    }
 
-    .stApp::after {{
-        background: color(display-p3 0.02 0.08 0.15);
-        bottom: -10%;
+    /* 气泡 2：电磁紫/蓝 */
+    .stApp::after {
+        background: radial-gradient(circle, color(display-p3 0.1 0.1 0.3) 0%, transparent 70%);
+        bottom: -30%;
         right: -10%;
-        animation: moving-glow 25s infinite alternate-reverse ease-in-out;
-    }}
+        animation: aurora-2 30s infinite alternate-reverse ease-in-out;
+    }
+
+    /* 🕺 极光流动路径：使用 translate3d 触发 GPU 加速 */
+    @keyframes aurora-1 {
+        0% { transform: translate3d(0, 0, 0) scale(1); }
+        50% { transform: translate3d(20%, 15%, 0) scale(1.2); }
+        100% { transform: translate3d(-10%, 25%, 0) scale(0.9); }
+    }
+
+    @keyframes aurora-2 {
+        0% { transform: translate3d(0, 0, 0) scale(1.1); }
+        50% { transform: translate3d(-25%, -20%, 0) scale(0.8); }
+        100% { transform: translate3d(15%, -10%, 0) scale(1.3); }
+    }
+
 
 
     header {{visibility: hidden;}}
