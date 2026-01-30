@@ -13,11 +13,20 @@ AVATAR_URL = f"https://avatars.githubusercontent.com/{GITHUB_USERNAME}"
 # --- 2. 注入 CSS (仅针对颜色值做了 HDR 提亮处理) ---
 st.markdown(f"""
     <style>
+        /* 🎨 [平滑优化版] 背景：增加中间色阶，确保向四周平滑消隐至全黑 */
     .stApp {{ 
-        background: radial-gradient(circle at 50% 50%, #0c1e3d 0%, #020617 60%, #000000 100%) !important; 
+        background: radial-gradient(
+            circle at 50% 45%, 
+            #0c1e3d 0%, 
+            #061126 25%, 
+            #030814 50%, 
+            #010308 75%, 
+            #000000 100%
+        ) !important; 
         color: #ffffff; 
         padding-top: 80px !important; 
     }}
+
     header {{visibility: hidden;}}
 
     /* ✨ 上传框呼吸：改用 color(display-p3 ...) 实现 HDR 高亮 */
