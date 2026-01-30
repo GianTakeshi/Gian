@@ -18,6 +18,7 @@ st.markdown(f"""
     }}
     header {{visibility: hidden;}}
 
+    /* 入场动画 */
     @keyframes fadeIn {{
         from {{ opacity: 0; transform: translateY(20px); filter: blur(5px); }}
         to {{ opacity: 1; transform: translateY(0); filter: blur(0); }}
@@ -138,7 +139,6 @@ if uploaded_file:
             for cat in sorted(v_df['Category'].unique()):
                 cat_group = v_df[v_df['Category'] == cat]
                 
-                # --- 修复后的分层构建逻辑，彻底解决 SyntaxError ---
                 attr_html_list = []
                 for clr in sorted(cat_group['Color'].unique()):
                     clr_group = cat_group[cat_group['Color'] == clr]
