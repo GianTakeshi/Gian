@@ -20,13 +20,38 @@ st.markdown(f"""
     }}
     header {{visibility: hidden;}}
 
+    /* ✨ 定义动画库 */
+    @keyframes fadeIn {{
+        from {{ opacity: 0; transform: translateY(15px); filter: blur(5px); }}
+        to {{ opacity: 1; transform: translateY(0); filter: blur(0); }}
+    }}
+
+    /* 💓 头像呼吸效果：重新注入 */
+    @keyframes avatarPulse {{
+        0%, 100% {{ 
+            box-shadow: 0 0 8px rgba(56, 189, 248, 0.3); 
+            border-color: rgba(56, 189, 248, 0.4); 
+        }}
+        50% {{ 
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.7); 
+            border-color: rgba(56, 189, 248, 1); 
+        }}
+    }}
+
     /* 🛡️ 用户面板 */
     .user-profile {{
         position: fixed; top: 35px; left: 35px; display: flex; align-items: center; gap: 10px; z-index: 1000000; 
         background: rgba(255, 255, 255, 0.05); padding: 6px 15px 6px 6px; border-radius: 50px;
         border: 1px solid rgba(56, 189, 248, 0.2); backdrop-filter: blur(15px);
     }}
-    .avatar {{ width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid #38bdf8; background: #0c1e3d; object-fit: cover; }}
+    .avatar {{ 
+        width: 32px; height: 32px; border-radius: 50%; 
+        border: 1.5px solid #38bdf8; 
+        background: #0c1e3d; 
+        object-fit: cover;
+        /* ✅ 重新应用呼吸动画 */
+        animation: avatarPulse 3s infinite ease-in-out; 
+    }}
     
     .hero-container {{ margin-top: 10px; margin-bottom: 40px; text-align: center; }}
     .grand-title {{
@@ -41,52 +66,43 @@ st.markdown(f"""
         border-radius: 16px; padding: 20px 25px; margin-bottom: 25px;
         display: flex; flex-direction: row; align-items: center; justify-content: space-between;
         backdrop-filter: blur(15px); transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        animation: fadeIn 0.8s ease-out;
     }}
-    .normal-card:hover, .error-card:hover {{
-        transform: translateY(-6px);
+    .normal-card {{ border-left: 4px solid rgba(56, 189, 248, 0.4); }}
+    .normal-card:hover {{
+        transform: translateY(-6px); border-color: #38bdf8;
         box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 30px rgba(56, 189, 248, 0.2);
     }}
-
-    /* 💊 Tabs 遮挡修复核心代码 */
-    .stTabs {{
-        overflow: visible !important; /* 允许溢出显示 */
+    .error-card {{ border-left: 4px solid rgba(245, 158, 11, 0.4); }}
+    .error-card:hover {{
+        transform: translateY(-6px); border-color: #f59e0b;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 30px rgba(245, 158, 11, 0.2);
     }}
+
+    /* 💊 Tabs 溢出修复 */
+    .stTabs {{ overflow: visible !important; }}
     .stTabs [data-baseweb="tab-list"] {{
-        gap: 12px; 
-        background: transparent !important; 
-        padding-top: 15px !important; /* ✅ 关键：为按钮浮动留出预留空间 */
-        margin-bottom: 20px;
+        gap: 12px; background: transparent !important; 
+        padding-top: 15px !important; margin-bottom: 20px;
         overflow: visible !important;
     }}
     .stTabs [data-baseweb="tab-highlight"] {{ display: none !important; }}
-    
     .stTabs [data-baseweb="tab"] {{
-        height: 32px !important;
-        padding: 0 18px !important;
-        font-size: 0.85rem !important;
-        border-radius: 40px !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important; 
-        background: rgba(255, 255, 255, 0.02) !important;
-        color: rgba(255, 255, 255, 0.4) !important; 
+        height: 32px !important; padding: 0 18px !important; font-size: 0.85rem !important;
+        border-radius: 40px !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; 
+        background: rgba(255, 255, 255, 0.02) !important; color: rgba(255, 255, 255, 0.4) !important; 
         transition: all 0.3s ease !important;
     }}
-    
-    /* 修正后的 Tab 悬停逻辑 */
     .stTabs [data-baseweb="tab"]:hover {{
-        transform: translateY(-4px) !important; /* 向上浮动 */
-        background: rgba(255, 255, 255, 0.08) !important;
-        border-color: rgba(255, 255, 255, 0.4) !important;
+        transform: translateY(-4px) !important; background: rgba(255, 255, 255, 0.08) !important;
     }}
-    
     .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{
         color: #38bdf8 !important; border-color: #38bdf8 !important; 
-        background: rgba(56, 189, 248, 0.1) !important; 
-        box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+        background: rgba(56, 189, 248, 0.1) !important; box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
     }}
     .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(2) {{
         color: #f59e0b !important; border-color: #f59e0b !important; 
-        background: rgba(245, 158, 11, 0.1) !important; 
-        box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+        background: rgba(245, 158, 11, 0.1) !important; box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
     }}
 
     /* 🔄 重制按钮 */
@@ -98,7 +114,6 @@ st.markdown(f"""
     }}
     div.stButton > button:hover {{ transform: translateY(-3px) !important; box-shadow: 0 0 20px rgba(56, 189, 248, 0.4) !important; }}
 
-    /* 其他辅助样式保持一致... */
     .sn-pill {{ padding: 4px 12px; border-radius: 40px; font-size: 0.7rem; font-weight: 600; text-decoration: none !important; transition: all 0.2s ease; }}
     .normal-sn {{ background: rgba(56, 189, 248, 0.08); color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.15); }}
     .normal-sn:hover {{ background: #38bdf8 !important; color: #000 !important; box-shadow: 0 0 12px rgba(56, 189, 248, 0.6); }}
@@ -122,7 +137,7 @@ st.markdown(f"""
     <div class="hero-container"><h1 class="grand-title">SKU 属性解析中枢</h1></div>
 """, unsafe_allow_html=True)
 
-# --- 3. 核心逻辑 (完整功能) ---
+# --- 3. 核心逻辑 (完整保留) ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -166,7 +181,7 @@ if uploaded_file:
                 for clr in sorted(cat_group['Color'].unique()):
                     clr_group = cat_group[cat_group['Color'] == clr]
                     size_badges = [f'<div style="display:inline-flex; align-items:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:2px 10px; margin-right:6px;"><span style="color:#fff; font-size:0.75rem;">{(s if s!="FREE" else "")}</span><span style="color:#38bdf8; font-weight:800; margin-left:4px;">{("×" if s!="FREE" else "")}{q}</span></div>' for s, q in clr_group['Size'].value_counts().sort_index().items()]
-                    attr_html_list.append(f'<div style="display:flex; align-items:center; gap:15px; padding:6px 0;"><div style="color:#38bdf8; font-weight:700; min-width:80px; font-size:0.9rem;">{clr}</div><div>{"..".join(size_badges)}</div></div>')
+                    attr_html_list.append(f'<div style="display:flex; align-items:center; gap:15px; padding:6px 0;"><div style="color:#38bdf8; font-weight:700; min-width:80px; font-size:0.9rem;">{clr}</div><div>{"".join(size_badges)}</div></div>')
                 sn_html = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill normal-sn">{sn}</a>' for sn in sorted(list(set(cat_group['SN'].tolist())))])
                 st.markdown(f'<div class="wide-card normal-card"><div style="flex:1;"><div style="color:#38bdf8; font-weight:900; font-size:1.4rem; margin-bottom:10px;">{cat}</div>{"".join(attr_html_list)}</div><div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end; max-width:350px;">{sn_html}</div></div>', unsafe_allow_html=True)
             if st.button("↺ 重制系统"): st.rerun()
