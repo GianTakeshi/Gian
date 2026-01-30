@@ -21,6 +21,11 @@ st.markdown(f"""
     header {{visibility: hidden;}}
 
     /* ✨ 动画库 */
+    @keyframes fadeIn {{
+        from {{ opacity: 0; transform: translateY(15px); filter: blur(5px); }}
+        to {{ opacity: 1; transform: translateY(0); filter: blur(0); }}
+    }}
+
     @keyframes avatarPulse {{
         0%, 100% {{ box-shadow: 0 0 10px rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.4); }}
         50% {{ box-shadow: 0 0 25px rgba(56, 189, 248, 0.6); border-color: rgba(56, 189, 248, 1); }}
@@ -33,59 +38,73 @@ st.markdown(f"""
         border: 1.5px solid rgba(56, 189, 248, 0.2); backdrop-filter: blur(15px);
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer;
     }}
+    .user-profile:hover {{ transform: translateY(-4px); border-color: #38bdf8; box-shadow: 0 0 20px rgba(56, 189, 248, 0.3); }}
+    .user-profile:active {{ transform: translateY(-1px) scale(0.97); }}
     .avatar {{ width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; background: #0c1e3d; object-fit: cover; animation: avatarPulse 3s infinite ease-in-out; }}
     .user-name {{ font-size: 0.95rem; font-weight: 900; color: #fff; letter-spacing: 0.5px; }}
 
-    /* 🧊 卡片：超大范围散射效果 */
+    /* 🧊 卡片逻辑：巨量内散射效果 */
     .wide-card {{
-        position: relative;
-        background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06);
-        border-radius: 16px; padding: 25px 30px; margin-bottom: 25px;
+        background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px; padding: 20px 25px; margin-bottom: 25px;
         display: flex; flex-direction: row; align-items: center; justify-content: space-between;
-        backdrop-filter: blur(20px); 
-        transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        backdrop-filter: blur(15px); 
+        transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+        animation: fadeIn 0.4s ease-out;
         cursor: pointer;
     }}
+    
+    .wide-card:active {{
+        transform: translateY(-2px) scale(0.985);
+        filter: brightness(1.2);
+    }}
 
-    /* 汇总卡片：深海蓝巨量散射 */
-    .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.3); }}
+    /* 汇总卡片：蓝光由边缘向内巨量散射 */
+    .normal-card {{ border-left: 4px solid rgba(56, 189, 248, 0.4); }}
     .normal-card:hover {{
         transform: translateY(-8px);
         border-color: #38bdf8;
-        background: rgba(56, 189, 248, 0.03);
-        /* 多层级内散射：第一层深层铺底，第二层边缘高亮 */
+        background: rgba(56, 189, 248, 0.03); /* 背景轻微染蓝 */
         box-shadow: 
-            0 20px 40px rgba(0,0,0,0.6), 
-            0 0 30px rgba(56, 189, 248, 0.1),
-            inset 0 0 80px rgba(56, 189, 248, 0.25), /* 超大范围漫反射 */
-            inset 0 0 20px rgba(56, 189, 248, 0.4);  /* 边缘散射增强 */
+            0 15px 35px rgba(0,0,0,0.5), 
+            0 0 25px rgba(56, 189, 248, 0.2),
+            inset 0 0 80px rgba(56, 189, 248, 0.25), /* 大范围散射 */
+            inset 0 0 15px rgba(56, 189, 248, 0.4);  /* 边缘散射增强 */
     }}
 
-    /* 异常卡片：熔岩橙巨量散射 */
-    .error-card {{ border-left: 5px solid rgba(245, 158, 11, 0.3); }}
+    /* 异常卡片：橙光由边缘向内巨量散射 */
+    .error-card {{ border-left: 4px solid rgba(245, 158, 11, 0.4); }}
     .error-card:hover {{
         transform: translateY(-8px);
         border-color: #f59e0b;
-        background: rgba(245, 158, 11, 0.03);
+        background: rgba(245, 158, 11, 0.03); /* 背景轻微染橙 */
         box-shadow: 
-            0 20px 40px rgba(0,0,0,0.6), 
-            0 0 30px rgba(245, 158, 11, 0.1),
-            inset 0 0 80px rgba(245, 158, 11, 0.25), /* 超大范围漫反射 */
-            inset 0 0 20px rgba(245, 158, 11, 0.4);  /* 边缘散射增强 */
+            0 15px 35px rgba(0,0,0,0.5), 
+            0 0 25px rgba(245, 158, 11, 0.2),
+            inset 0 0 80px rgba(245, 158, 11, 0.25), /* 大范围散射 */
+            inset 0 0 15px rgba(245, 158, 11, 0.4);  /* 边缘散射增强 */
     }}
 
-    .wide-card:active {{ transform: translateY(-2px) scale(0.98); }}
+    /* 其余样式完全不改动 */
+    .hero-container {{ margin-top: 10px; margin-bottom: 40px; text-align: center; }}
+    .grand-title {{
+        display: inline-block; font-size: 3rem !important; font-weight: 900; letter-spacing: 8px;
+        background: linear-gradient(to bottom, #ffffff 40%, #38bdf8 100%);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }}
+    .stTabs [data-baseweb="tab-list"] {{ gap: 12px; background: transparent !important; padding-top: 15px !important; margin-bottom: 20px; }}
+    .stTabs [data-baseweb="tab"] {{ height: 32px !important; padding: 0 18px !important; font-size: 0.85rem !important; border-radius: 40px !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; background: rgba(255, 255, 255, 0.02) !important; color: rgba(255, 255, 255, 0.4) !important; transition: all 0.3s ease !important; }}
+    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{ color: #38bdf8 !important; border-color: #38bdf8 !important; background: rgba(56, 189, 248, 0.1) !important; box-shadow: 0 0 15px rgba(56, 189, 248, 0.3); }}
+    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(2) {{ color: #f59e0b !important; border-color: #f59e0b !important; background: rgba(245, 158, 11, 0.1) !important; box-shadow: 0 0 15px rgba(245, 158, 11, 0.3); }}
 
-    /* 标题与文字样式 - 维持原样 */
-    .grand-title {{ display: inline-block; font-size: 3rem !important; font-weight: 900; letter-spacing: 8px; background: linear-gradient(to bottom, #ffffff 40%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
-    .stTabs [data-baseweb="tab-list"] {{ gap: 12px; }}
-    .stTabs [data-baseweb="tab"] {{ height: 32px !important; border-radius: 40px !important; transition: all 0.3s ease !important; }}
-    
+    div.stButton > button {{ background: rgba(56, 189, 248, 0.05) !important; color: #38bdf8 !important; border: 1.5px solid rgba(56, 189, 248, 0.4) !important; border-radius: 40px !important; padding: 6px 30px !important; font-size: 0.8rem !important; transition: all 0.3s ease !important; margin: 30px auto !important; display: block !important; }}
+    div.stButton > button:hover {{ transform: translateY(-3px) !important; box-shadow: 0 0 20px rgba(56, 189, 248, 0.4) !important; }}
+
     .sn-pill {{ padding: 4px 12px; border-radius: 40px; font-size: 0.7rem; font-weight: 600; text-decoration: none !important; transition: all 0.2s ease; }}
     .normal-sn {{ background: rgba(56, 189, 248, 0.08); color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.15); }}
     .error-sn-pill {{ background: rgba(245, 158, 11, 0.08); color: #f59e0b !important; border: 1px solid rgba(245, 158, 11, 0.2); }}
 
-    [data-testid="stFileUploader"] {{ position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 380px; z-index: 9999; background: rgba(255, 255, 255, 0.1) !important; border-radius: 40px !important; padding: 10px 25px !important; backdrop-filter: blur(20px) !important; }}
+    [data-testid="stFileUploader"] {{ position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 380px; z-index: 9999; background: rgba(255, 255, 255, 0.1) !important; border: 1px solid rgba(56, 189, 248, 0.3) !important; border-radius: 40px !important; padding: 10px 25px !important; backdrop-filter: blur(20px) !important; }}
     </style>
 
     <div class="user-profile">
@@ -122,7 +141,7 @@ def process_sku_logic(uploaded_file):
         else: all_error_rows.append({'SN': sn, 'Line': index+2, 'Reason': f"数量异常({len(data_pairs)}/{i_qty})", 'Content': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 4. 渲染 (完全维持) ---
+# --- 4. 渲染 ---
 upload_zone = st.empty()
 uploaded_file = upload_zone.file_uploader("Upload", type=["xlsx"])
 
@@ -141,11 +160,11 @@ if uploaded_file:
                     size_badges = [f'<div style="display:inline-flex; align-items:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:2px 10px; margin-right:6px;"><span style="color:#fff; font-size:0.75rem;">{(s if s!="FREE" else "")}</span><span style="color:#38bdf8; font-weight:800; margin-left:4px;">{("×" if s!="FREE" else "")}{q}</span></div>' for s, q in clr_group['Size'].value_counts().sort_index().items()]
                     attr_html_list.append(f'<div style="display:flex; align-items:center; gap:15px; padding:6px 0;"><div style="color:#38bdf8; font-weight:700; min-width:80px; font-size:0.9rem;">{clr}</div><div>{"".join(size_badges)}</div></div>')
                 sn_html = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill normal-sn">{sn}</a>' for sn in sorted(list(set(cat_group['SN'].tolist())))])
-                st.markdown(f'<div class="wide-card normal-card"><div><div style="color:#38bdf8; font-weight:900; font-size:1.4rem; margin-bottom:10px;">{cat}</div>{"".join(attr_html_list)}</div><div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end; max-width:350px;">{sn_html}</div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="wide-card normal-card"><div style="flex:1;"><div style="color:#38bdf8; font-weight:900; font-size:1.4rem; margin-bottom:10px;">{cat}</div>{"".join(attr_html_list)}</div><div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end; max-width:350px;">{sn_html}</div></div>', unsafe_allow_html=True)
             if st.button("↺ 重制系统"): st.rerun()
 
     with t2:
         if not e_df.empty:
             for _, err in e_df.iterrows():
                 sn_link = f'<a href="{BASE_URL}{err["SN"]}" target="_blank" class="sn-pill error-sn-pill">{err["SN"]}</a>'
-                st.markdown(f'<div class="wide-card error-card"><div><div style="color:#f59e0b; font-weight:900; font-size:0.9rem;">LINE {err["Line"]} | {err["Reason"]}</div><div style="font-size:0.8rem; color:#cbd5e1; margin-top:5px;">{err["Content"]}</div></div><div>{sn_link}</div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="wide-card error-card"><div style="flex:1;"><div style="color:#f59e0b; font-weight:900; font-size:0.9rem;">LINE {err["Line"]} | {err["Reason"]}</div><div style="font-size:0.8rem; color:#cbd5e1; margin-top:5px;">{err["Content"]}</div></div><div>{sn_link}</div></div>', unsafe_allow_html=True)
