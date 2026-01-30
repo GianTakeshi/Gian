@@ -12,20 +12,17 @@ AVATAR_URL = f"https://github.com/{GITHUB_USERNAME}.png"
 # --- 2. 注入深度定制 CSS ---
 st.markdown(f"""
     <style>
-    /* 🎭 背景 */
     .stApp {{ 
         background: radial-gradient(circle at 50% 50%, #0c1e3d 0%, #020617 60%, #000000 100%) !important; 
         color: #ffffff; 
     }}
     header {{visibility: hidden;}}
 
-    /* ✨ 新增：卡片淡入入场动画 */
     @keyframes fadeIn {{
         from {{ opacity: 0; transform: translateY(20px); filter: blur(5px); }}
         to {{ opacity: 1; transform: translateY(0); filter: blur(0); }}
     }}
 
-    /* 🛡️ 用户面板 */
     @keyframes avatarPulse {{
         0%, 100% {{ box-shadow: 0 0 5px rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.3); }}
         50% {{ box-shadow: 0 0 20px rgba(56, 189, 248, 0.6); border-color: rgba(56, 189, 248, 0.8); }}
@@ -43,16 +40,12 @@ st.markdown(f"""
         -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 40px 0;
     }}
 
-    /* 🧊 毛玻璃卡片系统 (已加入入场动画) */
     .wide-card {{
         background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 20px; padding: 25px 30px; margin-bottom: 25px;
         display: flex; flex-direction: row; align-items: center; justify-content: space-between;
         backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-        
-        /* 💡 注入入场动画：0.5s 淡入并在位移 */
         animation: fadeIn 0.5s ease-out forwards;
-        
         transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1);
     }}
     .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.5); }}
@@ -66,7 +59,6 @@ st.markdown(f"""
         box-shadow: 0 15px 40px rgba(0,0,0,0.5), 0 0 30px rgba(245, 158, 11, 0.2);
     }}
 
-    /* 💊 药丸 Tabs */
     .stTabs [data-baseweb="tab-highlight"] {{ display: none !important; }}
     .stTabs [data-baseweb="tab-list"] {{ gap: 12px; background: transparent !important; }}
     .stTabs [data-baseweb="tab"] {{
@@ -76,14 +68,11 @@ st.markdown(f"""
     }}
     .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{
         color: #38bdf8 !important; border-color: #38bdf8 !important; background: rgba(56, 189, 248, 0.1) !important;
-        box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
     }}
     .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(2) {{
         color: #f59e0b !important; border-color: #f59e0b !important; background: rgba(245, 158, 11, 0.1) !important;
-        box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
     }}
 
-    /* SN 药丸 */
     .sn-pill {{ padding: 5px 15px; border-radius: 50px !important; font-size: 0.75rem; font-weight: 600; text-decoration: none !important; transition: 0.2s; }}
     .normal-sn {{ background: rgba(56, 189, 248, 0.1); color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.2); }}
     .normal-sn:hover {{ background: #38bdf8 !important; color: #000 !important; }}
@@ -137,7 +126,7 @@ def process_sku_logic(uploaded_file):
             all_error_rows.append({'SN': sn, 'Line': index+2, 'Reason': f"数量异常({len(data_pairs)}/{i_qty})", 'Content': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 4. 渲染 ---
+# --- 4. 渲染引擎 ---
 uploaded_file = st.file_uploader("Upload", type=["xlsx"])
 
 if uploaded_file:
@@ -148,13 +137,32 @@ if uploaded_file:
         if not v_df.empty:
             for cat in sorted(v_df['Category'].unique()):
                 cat_group = v_df[v_df['Category'] == cat]
-                attr_html = "".join([f"<div style='display:flex; align-items:center; gap:20px; padding:8px 0;'><div style='color:#38bdf8; font-weight:700; min-width:100px;'>{clr}</div><div>{''.join([f'<div style=\"display:inline-flex; align-items:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:3px 12px; margin-right:8px;\"><span style=\"color:#fff; font-size:0.8rem;\">{(s if s!=\"FREE\" else \"\")}</span><span style=\"color:#38bdf8; font-weight:800; margin-left:5px;\">{(\"×\" if s!=\"FREE\" else \"\")}{q}</span></div>' for s, q in cat_group[cat_group['Color']==clr]['Size'].value_counts().sort_index().items()])}</div></div>" for clr in sorted(cat_group['Color'].unique())])
-                sn_html = "".join([f'<a href=\"{BASE_URL}{sn}\" target=\"_blank\" class=\"sn-pill normal-sn\">{sn}</a>' for sn in sorted(list(set(cat_group['SN'].tolist())))])
-                st.markdown(f'<div class=\"wide-card normal-card\"><div style=\"flex:1;\"><div style=\"color:#38bdf8; font-weight:900; font-size:1.6rem; margin-bottom:12px;\">{cat}</div>{attr_html}</div><div style=\"display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;\">{sn_html}</div></div>', unsafe_allow_html=True)
+                
+                # --- 修复后的分层构建逻辑，彻底解决 SyntaxError ---
+                attr_html_list = []
+                for clr in sorted(cat_group['Color'].unique()):
+                    clr_group = cat_group[cat_group['Color'] == clr]
+                    size_counts = clr_group['Size'].value_counts().sort_index()
+                    
+                    size_badges = []
+                    for s, q in size_counts.items():
+                        s_label = s if s != "FREE" else ""
+                        x_mark = "×" if s != "FREE" else ""
+                        badge = f'<div style="display:inline-flex; align-items:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:3px 12px; margin-right:8px;"><span style="color:#fff; font-size:0.8rem;">{s_label}</span><span style="color:#38bdf8; font-weight:800; margin-left:5px;">{x_mark}{q}</span></div>'
+                        size_badges.append(badge)
+                    
+                    row_html = f'<div style="display:flex; align-items:center; gap:20px; padding:8px 0;"><div style="color:#38bdf8; font-weight:700; min-width:100px;">{clr}</div><div>{"".join(size_badges)}</div></div>'
+                    attr_html_list.append(row_html)
+                
+                attr_html = "".join(attr_html_list)
+                sns = sorted(list(set(cat_group['SN'].tolist())))
+                sn_html = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill normal-sn">{sn}</a>' for sn in sns])
+                
+                st.markdown(f'<div class="wide-card normal-card"><div style="flex:1;"><div style="color:#38bdf8; font-weight:900; font-size:1.6rem; margin-bottom:12px;">{cat}</div>{attr_html}</div><div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; max-width:400px;">{sn_html}</div></div>', unsafe_allow_html=True)
             if st.button("↺ 重制系统"): st.rerun()
 
     with t2:
         if not e_df.empty:
             for _, err in e_df.iterrows():
-                sn_link = f'<a href=\"{BASE_URL}{err[\"SN\"]}\" target=\"_blank\" class=\"sn-pill normal-sn\" style=\"color:#f59e0b !important; border-color:#f59e0b !important;\">{err[\"SN\"]}</a>'
-                st.markdown(f'<div class=\"wide-card error-card\"><div style=\"flex:1;\"><div style=\"color:#f59e0b; font-weight:900;\">LINE {err[\"Line"]} | {err[\"Reason"]}</div><div style=\"font-size:0.85rem; color:#cbd5e1; margin-top:8px;\">{err[\"Content\"]}</div></div><div>{sn_link}</div></div>', unsafe_allow_html=True)
+                sn_link = f'<a href="{BASE_URL}{err["SN"]}" target="_blank" class="sn-pill normal-sn" style="color:#f59e0b !important; border-color:#f59e0b !important;">{err["SN"]}</a>'
+                st.markdown(f'<div class="wide-card error-card"><div style="flex:1;"><div style="color:#f59e0b; font-weight:900;">LINE {err["Line"]} | {err["Reason"]}</div><div style="font-size:0.85rem; color:#cbd5e1; margin-top:8px;">{err["Content"]}</div></div><div>{sn_link}</div></div>', unsafe_allow_html=True)
