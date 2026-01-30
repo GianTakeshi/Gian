@@ -26,6 +26,13 @@ st.markdown(f"""
         to {{ opacity: 1; transform: translateY(0); filter: blur(0); }}
     }}
 
+    /* 🟢 新增：头像呼吸动画 */
+    @keyframes avatar-breathing {{
+        0% {{ box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); transform: scale(1); }}
+        50% {{ box-shadow: 0 0 20px 4px rgba(56, 189, 248, 0.7); transform: scale(1.05); }}
+        100% {{ box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); transform: scale(1); }}
+    }}
+
     /* 🛡️ 用户面板 */
     .user-profile {{
         position: fixed; top: 35px; left: 35px; display: flex; align-items: center; gap: 12px; z-index: 1000000; 
@@ -33,7 +40,11 @@ st.markdown(f"""
         border: 1.5px solid rgba(56, 189, 248, 0.2); backdrop-filter: blur(15px);
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer;
     }}
-    .avatar {{ width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; background: #0c1e3d; object-fit: cover; }}
+    .avatar {{ 
+        width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; 
+        background: #0c1e3d; object-fit: cover; 
+        animation: avatar-breathing 3s infinite ease-in-out; /* 应用呼吸效果 */
+    }}
     .user-name {{ font-size: 0.95rem; font-weight: 900; color: #fff; letter-spacing: 0.5px; }}
 
     /* 🧊 卡片逻辑：巨量内散射效果 */
@@ -73,7 +84,6 @@ st.markdown(f"""
         border: 1px solid transparent;
     }}
     
-    /* 汇总 SN：蓝色霓虹 */
     .normal-sn {{ background: rgba(56, 189, 248, 0.08); color: #38bdf8 !important; border-color: rgba(56, 189, 248, 0.2); }}
     .normal-sn:hover {{ 
         background: #38bdf8 !important; color: #000000 !important; 
@@ -81,7 +91,6 @@ st.markdown(f"""
         transform: scale(1.05);
     }}
 
-    /* 异常 SN：橙色霓虹 */
     .error-sn-pill {{ background: rgba(245, 158, 11, 0.08); color: #f59e0b !important; border-color: rgba(245, 158, 11, 0.2); }}
     .error-sn-pill:hover {{ 
         background: #f59e0b !important; color: #000000 !important; 
@@ -89,7 +98,6 @@ st.markdown(f"""
         transform: scale(1.05);
     }}
 
-    /* 🚫 移除 Tab 下方的红条/横条 */
     .stTabs [data-baseweb="tab-highlight"] {{ display: none !important; }}
     .stTabs [data-baseweb="tab-border"] {{ display: none !important; }}
     
@@ -105,7 +113,6 @@ st.markdown(f"""
     .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{ color: #38bdf8 !important; border-color: #38bdf8 !important; background: rgba(56, 189, 248, 0.1) !important; box-shadow: 0 0 15px rgba(56, 189, 248, 0.3); }}
     .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(2) {{ color: #f59e0b !important; border-color: #f59e0b !important; background: rgba(245, 158, 11, 0.1) !important; box-shadow: 0 0 15px rgba(245, 158, 11, 0.3); }}
 
-    /* 其余部分 */
     .grand-title {{ display: inline-block; font-size: 3rem !important; font-weight: 900; letter-spacing: 8px; background: linear-gradient(to bottom, #ffffff 40%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
     div.stButton > button {{ background: rgba(56, 189, 248, 0.05) !important; color: #38bdf8 !important; border: 1.5px solid rgba(56, 189, 248, 0.4) !important; border-radius: 40px !important; padding: 6px 30px !important; transition: all 0.3s ease !important; margin: 30px auto !important; display: block !important; }}
     [data-testid="stFileUploader"] {{ position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 380px; z-index: 9999; background: rgba(255, 255, 255, 0.1) !important; border-radius: 40px !important; padding: 10px 25px !important; backdrop-filter: blur(20px) !important; }}
@@ -161,7 +168,8 @@ if uploaded_file:
                 attr_html_list = []
                 for clr in sorted(cat_group['Color'].unique()):
                     clr_group = cat_group[cat_group['Color'] == clr]
-                    size_badges = [f'<div style="display:inline-flex; align-items:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:2px 10px; margin-right:6px;"><span style="color:#fff; font-size:0.75rem;">{(s if s!="FREE" else "")}</span><span style="color:#38bdf8; font-weight:800; margin-left:4px;">{("×" if s!="FREE" else "")}{q}</span></div>' for s, q in clr_group['Size'].value_counts().sort_index().items()]
+                    # 🔹 修改点：统一 Size 和 Quantity 的字体加粗程度与大小
+                    size_badges = [f'<div style="display:inline-flex; align-items:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:2px 10px; margin-right:6px;"><span style="color:#fff; font-size:0.75rem; font-weight:800;">{(s if s!="FREE" else "")}</span><span style="color:#38bdf8; font-weight:800; margin-left:4px;">{("×" if s!="FREE" else "")}{q}</span></div>' for s, q in clr_group['Size'].value_counts().sort_index().items()]
                     attr_html_list.append(f'<div style="display:flex; align-items:center; gap:15px; padding:6px 0;"><div style="color:#38bdf8; font-weight:700; min-width:80px; font-size:0.9rem;">{clr}</div><div>{"".join(size_badges)}</div></div>')
                 sn_html = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill normal-sn">{sn}</a>' for sn in sorted(list(set(cat_group['SN'].tolist())))])
                 st.markdown(f'<div class="wide-card normal-card"><div style="flex:1;"><div style="color:#38bdf8; font-weight:900; font-size:1.4rem; margin-bottom:10px;">{cat}</div>{"".join(attr_html_list)}</div><div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end; max-width:350px;">{sn_html}</div></div>', unsafe_allow_html=True)
