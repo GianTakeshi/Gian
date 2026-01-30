@@ -47,7 +47,7 @@ st.markdown(f"""
     }}
     .user-name {{ font-size: 0.95rem; font-weight: 900; color: #fff; letter-spacing: 0.5px; }}
 
-    /* 🧊 卡片逻辑：向外扩散的光晕效果 (Outer Glow) */
+    /* 🧊 卡片基础样式 */
     .wide-card {{
         background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 16px; padding: 20px 25px; margin-bottom: 25px;
@@ -64,12 +64,7 @@ st.markdown(f"""
         transform: translateY(-8px);
         border-color: #38bdf8;
         background: rgba(56, 189, 248, 0.03);
-        /* 🔹 增强：核心内陷 + 巨量外向扩散光晕 */
-        box-shadow: 
-            0 15px 35px rgba(0,0,0,0.5), 
-            0 0 30px 5px rgba(56, 189, 248, 0.3),  /* 向外扩散层 1 */
-            0 0 50px 10px rgba(56, 189, 248, 0.15), /* 向外扩散层 2 */
-            inset 0 0 80px rgba(56, 189, 248, 0.25);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 80px rgba(56, 189, 248, 0.25);
     }}
 
     .error-card {{ border-left: 4px solid rgba(245, 158, 11, 0.4); }}
@@ -77,15 +72,8 @@ st.markdown(f"""
         transform: translateY(-8px);
         border-color: #f59e0b;
         background: rgba(245, 158, 11, 0.03);
-        /* 🔸 增强：核心内陷 + 巨量外向扩散光晕 */
-        box-shadow: 
-            0 15px 35px rgba(0,0,0,0.5), 
-            0 0 30px 5px rgba(245, 158, 11, 0.3),  /* 向外扩散层 1 */
-            0 0 50px 10px rgba(245, 158, 11, 0.15), /* 向外扩散层 2 */
-            inset 0 0 80px rgba(245, 158, 11, 0.25);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 80px rgba(245, 158, 11, 0.25);
     }}
-
-    .wide-card:active {{ transform: translateY(-2px) scale(0.98) !important; filter: brightness(1.2); transition: all 0.1s !important; }}
 
     /* 🏷️ SN 标签霓虹效果 */
     .sn-pill {{ 
@@ -93,36 +81,40 @@ st.markdown(f"""
         text-decoration: none !important; transition: all 0.3s ease; 
         border: 1px solid transparent;
     }}
-    
     .normal-sn {{ background: rgba(56, 189, 248, 0.08); color: #38bdf8 !important; border-color: rgba(56, 189, 248, 0.2); }}
-    .normal-sn:hover {{ 
-        background: #38bdf8 !important; color: #000000 !important; 
-        box-shadow: 0 0 15px #38bdf8, 0 0 30px rgba(56, 189, 248, 0.6);
-        transform: scale(1.05);
-    }}
-
+    .normal-sn:hover {{ background: #38bdf8 !important; color: #000000 !important; box-shadow: 0 0 15px #38bdf8; transform: scale(1.05); }}
     .error-sn-pill {{ background: rgba(245, 158, 11, 0.08); color: #f59e0b !important; border-color: rgba(245, 158, 11, 0.2); }}
-    .error-sn-pill:hover {{ 
-        background: #f59e0b !important; color: #000000 !important; 
-        box-shadow: 0 0 15px #f59e0b, 0 0 30px rgba(245, 158, 11, 0.6);
-        transform: scale(1.05);
-    }}
+    .error-sn-pill:hover {{ background: #f59e0b !important; color: #000000 !important; box-shadow: 0 0 15px #f59e0b; transform: scale(1.05); }}
 
-    /* 🚫 Tabs 样式 */
+    /* 🚫 Tabs 切换按钮特效：向外扩散光晕 */
     .stTabs [data-baseweb="tab-highlight"] {{ display: none !important; }}
     .stTabs [data-baseweb="tab-border"] {{ display: none !important; }}
     
     .stTabs [data-baseweb="tab-list"] {{ 
-        gap: 12px; background: transparent !important; padding-top: 15px !important; margin-bottom: 20px;
+        gap: 15px; background: transparent !important; padding: 15px 5px !important; margin-bottom: 25px;
     }}
     .stTabs [data-baseweb="tab"] {{ 
-        height: 32px !important; padding: 0 18px !important; font-size: 0.85rem !important; 
+        height: 36px !important; padding: 0 22px !important; font-size: 0.9rem !important; 
         border-radius: 40px !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; 
-        background: rgba(255, 255, 255, 0.02) !important; color: rgba(255, 255, 255, 0.4) !important; 
-        transition: all 0.3s ease !important; 
+        background: rgba(255, 255, 255, 0.02) !important; color: rgba(255, 255, 255, 0.5) !important; 
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important; 
     }}
-    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{ color: #38bdf8 !important; border-color: #38bdf8 !important; background: rgba(56, 189, 248, 0.1) !important; box-shadow: 0 0 15px rgba(56, 189, 248, 0.3); }}
-    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(2) {{ color: #f59e0b !important; border-color: #f59e0b !important; background: rgba(245, 158, 11, 0.1) !important; box-shadow: 0 0 15px rgba(245, 158, 11, 0.3); }}
+
+    /* 🔵 选定“汇总数据”按钮：向外散射蓝光 */
+    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{ 
+        color: #38bdf8 !important; 
+        border-color: #38bdf8 !important; 
+        background: rgba(56, 189, 248, 0.15) !important; 
+        box-shadow: 0 0 25px 5px rgba(56, 189, 248, 0.4), 0 0 10px rgba(56, 189, 248, 0.2) !important;
+    }}
+
+    /* 🟠 选定“异常拦截”按钮：向外散射橙光 */
+    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(2) {{ 
+        color: #f59e0b !important; 
+        border-color: #f59e0b !important; 
+        background: rgba(245, 158, 11, 0.15) !important; 
+        box-shadow: 0 0 25px 5px rgba(245, 158, 11, 0.4), 0 0 10px rgba(245, 158, 11, 0.2) !important;
+    }}
 
     .grand-title {{ display: inline-block; font-size: 3rem !important; font-weight: 900; letter-spacing: 8px; background: linear-gradient(to bottom, #ffffff 40%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
     div.stButton > button {{ background: rgba(56, 189, 248, 0.05) !important; color: #38bdf8 !important; border: 1.5px solid rgba(56, 189, 248, 0.4) !important; border-radius: 40px !important; padding: 6px 30px !important; transition: all 0.3s ease !important; margin: 30px auto !important; display: block !important; }}
@@ -136,7 +128,7 @@ st.markdown(f"""
     <div style="text-align:center; margin-bottom:40px;"><h1 class="grand-title">SKU 属性解析中枢</h1></div>
 """, unsafe_allow_html=True)
 
-# --- 3. 核心逻辑 ---
+# --- 3. 核心逻辑 (维持原样) ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
