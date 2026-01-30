@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import re
 
-# --- 1. 页面配置 (浏览器标签页标题与图标) ---
+# --- 1. 页面配置 ---
 st.set_page_config(page_title="爆单", page_icon="🚀", layout="wide")
 
 # 配置常量
@@ -10,10 +10,9 @@ GITHUB_USERNAME = "GianTakeshi"
 BASE_URL = "https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id="
 AVATAR_URL = f"https://avatars.githubusercontent.com/{GITHUB_USERNAME}"
 
-# --- 2. 注入极限 HDR 增强版 CSS ---
+# --- 2. 注入 CSS (仅针对颜色值做了 HDR 提亮处理) ---
 st.markdown(f"""
     <style>
-    /* 🎭 整体背景：深邃径向渐变 */
     .stApp {{ 
         background: radial-gradient(circle at 50% 50%, #0c1e3d 0%, #020617 60%, #000000 100%) !important; 
         color: #ffffff; 
@@ -21,31 +20,20 @@ st.markdown(f"""
     }}
     header {{visibility: hidden;}}
 
-    /* ✨ [极限 HDR] 上传框呼吸动画：模拟高压霓虹灯 */
+    /* ✨ 上传框呼吸：改用 color(display-p3 ...) 实现 HDR 高亮 */
     @keyframes uploader-glow {{
-        0% {{ 
-            border-color: rgba(56, 189, 248, 0.2); 
-            box-shadow: 0 0 10px color(display-p3 0.22 0.74 0.97 / 0.1); 
-        }}
-        50% {{ 
-            border-color: color(display-p3 0.4 0.85 1); 
-            /* 白色核心 + P3 强光 + 环境溢出光 */
-            box-shadow: 0 0 15px #fff, 0 0 30px color(display-p3 0.22 0.74 0.97), 0 0 70px color(display-p3 0.22 0.74 0.97 / 0.4); 
-        }}
-        100% {{ 
-            border-color: rgba(56, 189, 248, 0.2); 
-            box-shadow: 0 0 10px color(display-p3 0.22 0.74 0.97 / 0.1); 
-        }}
+        0% {{ border-color: rgba(56, 189, 248, 0.2); box-shadow: 0 0 10px rgba(56, 189, 248, 0.1); }}
+        50% {{ border-color: color(display-p3 0.22 0.74 0.97); box-shadow: 0 0 25px color(display-p3 0.22 0.74 0.97 / 0.5); }}
+        100% {{ border-color: rgba(56, 189, 248, 0.2); box-shadow: 0 0 10px rgba(56, 189, 248, 0.1); }}
     }}
 
-    /* ✨ [极限 HDR] 头像呼吸 */
+    /* ✨ 头像呼吸：HDR 提亮 */
     @keyframes avatar-breathing {{
         0% {{ box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); transform: scale(1); }}
-        50% {{ box-shadow: 0 0 25px 5px color(display-p3 0.22 0.74 0.97 / 0.9); transform: scale(1.05); }}
+        50% {{ box-shadow: 0 0 20px 4px color(display-p3 0.22 0.74 0.97 / 0.8); transform: scale(1.05); }}
         100% {{ box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); transform: scale(1); }}
     }}
 
-    /* 🛡️ 用户面板 */
     .user-profile {{
         position: fixed; top: 35px; left: 35px; display: flex; align-items: center; gap: 12px; z-index: 1000000; 
         background: rgba(255, 255, 255, 0.05); padding: 8px 20px 8px 8px; border-radius: 60px;
@@ -54,7 +42,6 @@ st.markdown(f"""
     .avatar {{ width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; animation: avatar-breathing 3s infinite ease-in-out; }}
     .user-name {{ font-size: 0.95rem; font-weight: 600; color: #fff; letter-spacing: 0.5px; }}
 
-    /* 🧊 数据卡片：HDR 内发光增强 */
     .wide-card {{
         background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 16px; padding: 25px 30px; margin-bottom: 25px;
@@ -62,57 +49,53 @@ st.markdown(f"""
         backdrop-filter: blur(15px); transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
     }}
     .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.4); }}
+    /* 🧊 卡片悬停：加入 HDR 内发光 */
     .normal-card:hover {{ 
         transform: translateY(-8px); 
-        border-color: color(display-p3 0.5 0.9 1); 
-        box-shadow: 0 20px 50px rgba(0,0,0,0.6), inset 0 0 40px color(display-p3 0.22 0.74 0.97 / 0.6), inset 0 0 100px color(display-p3 0.22 0.74 0.97 / 0.3); 
+        border-color: color(display-p3 0.22 0.74 0.97); 
+        box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 80px color(display-p3 0.22 0.74 0.97 / 0.25); 
     }}
     .error-card {{ border-left: 5px solid rgba(245, 158, 11, 0.4); }}
+    /* 🧊 异常卡片悬停：加入 HDR 橙色发光 */
     .error-card:hover {{ 
         transform: translateY(-8px); 
-        border-color: color(display-p3 1 0.7 0.2); 
-        box-shadow: 0 20px 50px rgba(0,0,0,0.6), inset 0 0 40px color(display-p3 0.96 0.62 0.04 / 0.6), inset 0 0 100px color(display-p3 0.96 0.62 0.04 / 0.3); 
+        border-color: color(display-p3 0.96 0.62 0.04); 
+        box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 80px color(display-p3 0.96 0.62 0.04 / 0.25); 
     }}
 
-    /* 🏷️ SN 标签与 Tab 切换：极限发光 */
     .sn-pill {{ padding: 6px 14px; border-radius: 40px; font-size: 0.8rem; font-weight: 800; text-decoration: none !important; transition: all 0.3s ease; border: 1px solid transparent; }}
     .normal-sn {{ background: rgba(56, 189, 248, 0.08); color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.3); }}
-    .normal-sn:hover {{ background: color(display-p3 0.22 0.74 0.97) !important; color: #000000 !important; box-shadow: 0 0 20px color(display-p3 0.22 0.74 0.97); transform: scale(1.05); }}
-    
+    /* 🏷️ SN 悬停：HDR 蓝 */
+    .normal-sn:hover {{ background: color(display-p3 0.22 0.74 0.97) !important; color: #000000 !important; box-shadow: 0 0 20px color(display-p3 0.22 0.74 0.97 / 0.6); transform: scale(1.05); }}
+    .error-sn-pill {{ background: rgba(245, 158, 11, 0.08); color: #f59e0b !important; border: 1px solid rgba(245, 158, 11, 0.3); }}
+    .error-sn-pill:hover {{ background: color(display-p3 0.96 0.62 0.04) !important; color: #000000 !important; box-shadow: 0 0 20px color(display-p3 0.96 0.62 0.04 / 0.6); transform: scale(1.05); }}
+
     .stTabs {{ overflow: visible !important; }}
     .stTabs [data-baseweb="tab-list"] {{ gap: 20px; background: transparent !important; padding: 30px 10px !important; margin-bottom: 10px; overflow: visible !important; }}
     .stTabs [data-baseweb="tab"] {{ height: 42px !important; padding: 0 30px !important; font-size: 1rem !important; border-radius: 40px !important; border: 1.5px solid rgba(255, 255, 255, 0.1) !important; background: rgba(255, 255, 255, 0.02) !important; color: rgba(255, 255, 255, 0.5) !important; transition: all 0.4s ease !important; position: relative; z-index: 10; }}
-    
-    /* 🚫 Tabs 选中：白核 P3 强光叠加 */
-    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{ 
-        color: #fff !important; border-color: color(display-p3 0.5 0.9 1) !important; 
-        background: rgba(56, 189, 248, 0.25) !important; 
-        box-shadow: 0 0 15px #fff, 0 0 45px color(display-p3 0.22 0.74 0.97), 0 0 90px color(display-p3 0.22 0.74 0.97 / 0.4) !important; 
-    }}
-    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(2) {{ 
-        color: #fff !important; border-color: color(display-p3 1 0.7 0.2) !important; 
-        background: rgba(245, 158, 11, 0.25) !important; 
-        box-shadow: 0 0 15px #fff, 0 0 45px color(display-p3 0.96 0.62 0.04), 0 0 90px color(display-p3 0.96 0.62 0.04 / 0.4) !important; 
-    }}
+    /* 🚫 Tabs 选中：HDR 霓虹效果 */
+    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{ color: color(display-p3 0.22 0.74 0.97) !important; border-color: color(display-p3 0.22 0.74 0.97) !important; background: rgba(56, 189, 248, 0.15) !important; box-shadow: 0 0 35px 8px color(display-p3 0.22 0.74 0.97 / 0.5) !important; }}
+    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(2) {{ color: color(display-p3 0.96 0.62 0.04) !important; border-color: color(display-p3 0.96 0.62 0.04) !important; background: rgba(245, 158, 11, 0.15) !important; box-shadow: 0 0 35px 8px color(display-p3 0.96 0.62 0.04 / 0.5) !important; }}
     .stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] {{ display: none !important; }}
 
-    /* 🔄 重制系统按钮 */
     div.stButton > button {{ 
         background: rgba(56, 189, 248, 0.08) !important; color: #38bdf8 !important; 
         border: 1.5px solid rgba(56, 189, 248, 0.4) !important; border-radius: 40px !important; 
         padding: 10px 45px !important; font-weight: 800 !important; font-size: 1rem !important; 
         transition: all 0.4s ease !important; margin: 50px auto !important; display: block !important; 
     }}
-    div.stButton > button:hover {{ background: color(display-p3 0.22 0.74 0.97) !important; color: #000000 !important; box-shadow: 0 0 30px 5px color(display-p3 0.22 0.74 0.97); transform: scale(1.05); }}
+    div.stButton > button:hover {{ background: color(display-p3 0.22 0.74 0.97) !important; color: #000000 !important; box-shadow: 0 0 30px 5px color(display-p3 0.22 0.74 0.97 / 0.5) !important; transform: scale(1.05); }}
 
-    /* 📥 上传框：底部悬浮控制台 */
     [data-testid="stFileUploader"] {{
         position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); 
         width: 520px; z-index: 9999;
-        background: rgba(12, 30, 61, 0.65) !important; border-radius: 24px !important; 
-        padding: 20px !important; backdrop-filter: blur(30px) !important;
+        background: rgba(12, 30, 61, 0.65) !important; 
+        border-radius: 24px !important; 
+        padding: 20px !important; 
+        backdrop-filter: blur(30px) !important;
         border: 1.5px solid rgba(56, 189, 248, 0.3) !important;
         animation: uploader-glow 4s infinite ease-in-out;
+        box-shadow: 0 15px 45px rgba(0,0,0,0.7);
     }}
     .grand-title {{ display: inline-block; font-size: 3.5rem !important; font-weight: 900; letter-spacing: 8px; background: linear-gradient(to bottom, #ffffff 40%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
     </style>
@@ -124,7 +107,7 @@ st.markdown(f"""
     <div style="text-align:center; margin-bottom:100px;"><h1 class="grand-title">祝王哥天天爆单</h1></div>
 """, unsafe_allow_html=True)
 
-# --- 3. 核心提取逻辑 (逻辑严禁修改，保持原样) ---
+# --- 3. 核心提取逻辑 (完全未动) ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -156,7 +139,7 @@ def process_sku_logic(uploaded_file):
             all_error_rows.append({'SN': sn, 'Line': index+2, 'Reason': f"数量异常({len(data_pairs)}/{i_qty})", 'Content': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 4. UI 渲染 (逻辑严禁修改，保持原样) ---
+# --- 4. UI 渲染 (完全未动) ---
 upload_zone = st.empty()
 uploaded_file = upload_zone.file_uploader("DROP FILE TO PARSE", type=["xlsx"])
 
