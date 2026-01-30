@@ -9,10 +9,10 @@ GITHUB_USERNAME = "GianTakeshi"
 BASE_URL = "https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id="
 AVATAR_URL = f"https://avatars.githubusercontent.com/{GITHUB_USERNAME}"
 
-# --- 2. 注入深度定制 CSS ---
+# --- 2. 注入回归版定制 CSS ---
 st.markdown(f"""
     <style>
-    /* 🎭 整体布局 */
+    /* 🎭 整体背景 */
     .stApp {{ 
         background: radial-gradient(circle at 50% 50%, #0c1e3d 0%, #020617 60%, #000000 100%) !important; 
         color: #ffffff; 
@@ -20,42 +20,35 @@ st.markdown(f"""
     }}
     header {{visibility: hidden;}}
 
-    /* 🛡️ 用户面板：白色高亮毛玻璃 */
+    /* 🛡️ 头像胶囊：白色毛玻璃回归 */
     .user-profile {{
         position: fixed; top: 35px; left: 35px; display: flex; align-items: center; gap: 12px; z-index: 10000; 
-        background: rgba(255, 255, 255, 0.15) !important; /* 提升亮度 */
+        background: rgba(255, 255, 255, 0.15) !important;
         padding: 10px 24px 10px 10px; border-radius: 60px;
         border: 1px solid rgba(255, 255, 255, 0.3); 
-        backdrop-filter: blur(20px) saturate(180%);
+        backdrop-filter: blur(20px);
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
         cursor: pointer;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     }}
-    .user-profile:hover {{ 
-        transform: scale(1.1); 
-        background: rgba(255, 255, 255, 0.25) !important;
-        border-color: #38bdf8; 
-        box-shadow: 0 0 30px rgba(56, 189, 248, 0.5); 
-    }}
+    .user-profile:hover {{ transform: scale(1.1); box-shadow: 0 0 30px rgba(56, 189, 248, 0.5); }}
     .avatar {{ width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; }}
-    .user-name {{ color: #fff !important; font-weight: 800; }}
 
-    /* 🚫 Tabs 按钮选定态 */
+    /* 🚫 Tabs 选定态光效 */
     .stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] {{ display: none !important; }}
-    .stTabs [data-baseweb="tab-list"] {{ gap: 20px; background: transparent !important; margin-bottom: 30px; }}
+    .stTabs [data-baseweb="tab-list"] {{ gap: 20px; }}
     .stTabs [data-baseweb="tab"] {{ 
-        height: 42px !important; padding: 0 35px !important; 
-        border-radius: 40px !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; 
+        height: 42px !important; padding: 0 35px !important; border-radius: 40px !important; 
+        border: 1px solid rgba(255, 255, 255, 0.1) !important; 
         background: rgba(255, 255, 255, 0.02) !important; color: rgba(255, 255, 255, 0.4) !important; 
         transition: all 0.3s ease !important; 
     }}
     .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{ 
         color: #38bdf8 !important; border-color: #38bdf8 !important; 
-        background: rgba(56, 189, 248, 0.15) !important; box-shadow: 0 0 25px rgba(56, 189, 248, 0.5);
+        background: rgba(56, 189, 248, 0.2) !important; box-shadow: 0 0 25px rgba(56, 189, 248, 0.6);
     }}
     .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(2) {{ 
         color: #f59e0b !important; border-color: #f59e0b !important; 
-        background: rgba(245, 158, 11, 0.15) !important; box-shadow: 0 0 25px rgba(245, 158, 11, 0.5);
+        background: rgba(245, 158, 11, 0.2) !important; box-shadow: 0 0 25px rgba(245, 158, 11, 0.6);
     }}
 
     /* 🏷️ SN 气泡：无下划线 + 常态光圈 */
@@ -63,47 +56,35 @@ st.markdown(f"""
         padding: 5px 15px; border-radius: 40px; font-size: 0.75rem; font-weight: 700; 
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
         border: 1.5px solid transparent; margin: 3px; display: inline-block;
-        text-decoration: none !important; /* 去除下划线 */
+        text-decoration: none !important;
     }}
-    .normal-sn {{ 
-        background: rgba(56, 189, 248, 0.1); color: #38bdf8 !important; 
-        border-color: rgba(56, 189, 248, 0.3); box-shadow: 0 0 10px rgba(56, 189, 248, 0.1); 
-    }}
-    .normal-sn:hover {{ transform: scale(1.25); background: #38bdf8 !important; color: #000 !important; box-shadow: 0 0 25px #38bdf8; }}
+    .normal-sn {{ background: rgba(56, 189, 248, 0.1); color: #38bdf8 !important; border-color: rgba(56, 189, 248, 0.4); box-shadow: 0 0 10px rgba(56, 189, 248, 0.1); }}
+    .normal-sn:hover {{ transform: scale(1.3); background: #38bdf8 !important; color: #000 !important; box-shadow: 0 0 30px #38bdf8; }}
     
-    /* 异常拦截 SN：橙色回归 */
-    .error-sn-pill {{ 
-        background: rgba(245, 158, 11, 0.15); color: #f59e0b !important; 
-        border-color: rgba(245, 158, 11, 0.4); box-shadow: 0 0 10px rgba(245, 158, 11, 0.1); 
-    }}
-    .error-sn-pill:hover {{ transform: scale(1.25); background: #f59e0b !important; color: #000 !important; box-shadow: 0 0 25px #f59e0b; }}
+    .error-sn-pill {{ background: rgba(245, 158, 11, 0.15); color: #f59e0b !important; border-color: rgba(245, 158, 11, 0.4); box-shadow: 0 0 10px rgba(245, 158, 11, 0.1); }}
+    .error-sn-pill:hover {{ transform: scale(1.3); background: #f59e0b !important; color: #000 !important; box-shadow: 0 0 30px #f59e0b; }}
 
-    /* 🧊 卡片：强制放大效果与层级 */
-    [data-testid="stVerticalBlock"] > div > div > .wide-card {{
-        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-        position: relative;
-        z-index: 1;
-    }}
-
+    /* 🧊 卡片：垂直屏幕向外放大 (Z轴) */
     .wide-card {{ 
         background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); 
         border-radius: 20px; padding: 30px; margin-bottom: 25px; 
         display: flex; flex-direction: row; align-items: center; justify-content: space-between; 
-        backdrop-filter: blur(20px);
+        backdrop-filter: blur(20px); transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        position: relative; z-index: 1;
     }}
-    
-    /* 核心悬浮效果 */
     .wide-card:hover {{ 
-        transform: scale(1.03) !important; 
-        z-index: 100 !important;
-        background: rgba(255, 255, 255, 0.06) !important;
+        transform: scale(1.03); /* 垂直放大，无位移 */
+        z-index: 999 !important; /* 强制置顶，防止遮挡 */
+        background: rgba(255, 255, 255, 0.07);
     }}
+    /* 点击下沉 */
+    .wide-card:active {{ transform: scale(0.97) !important; transition: all 0.1s ease !important; }}
 
-    .normal-card {{ box-shadow: 0 0 15px rgba(56, 189, 248, 0.1), inset 0 0 20px rgba(56, 189, 248, 0.05); }}
-    .normal-card:hover {{ border-color: #38bdf8; box-shadow: 0 0 40px rgba(56, 189, 248, 0.3), inset 0 0 60px rgba(56, 189, 248, 0.2); }}
+    .normal-card {{ box-shadow: 0 0 15px rgba(56, 189, 248, 0.1), inset 0 0 30px rgba(56, 189, 248, 0.1); }}
+    .normal-card:hover {{ border-color: #38bdf8; box-shadow: 0 0 50px rgba(56, 189, 248, 0.4), inset 0 0 80px rgba(56, 189, 248, 0.2); }}
 
-    .error-card {{ box-shadow: 0 0 15px rgba(245, 158, 11, 0.1), inset 0 0 20px rgba(245, 158, 11, 0.05); }}
-    .error-card:hover {{ border-color: #f59e0b; box-shadow: 0 0 40px rgba(245, 158, 11, 0.3), inset 0 0 60px rgba(245, 158, 11, 0.2); }}
+    .error-card {{ box-shadow: 0 0 15px rgba(245, 158, 11, 0.1), inset 0 0 30px rgba(245, 158, 11, 0.1); }}
+    .error-card:hover {{ border-color: #f59e0b; box-shadow: 0 0 50px rgba(245, 158, 11, 0.4), inset 0 0 80px rgba(245, 158, 11, 0.2); }}
 
     .grand-title {{ font-size: 3.5rem !important; font-weight: 900; letter-spacing: 10px; background: linear-gradient(to bottom, #ffffff 30%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
     </style>
@@ -115,7 +96,7 @@ st.markdown(f"""
     <div style="text-align:center; margin-bottom:50px;"><h1 class="grand-title">SKU 属性解析中枢</h1></div>
 """, unsafe_allow_html=True)
 
-# --- 3. 核心逻辑 (维持原样) ---
+# --- 3. 核心逻辑 (保持稳定) ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
