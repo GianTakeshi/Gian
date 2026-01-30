@@ -14,18 +14,43 @@ AVATAR_URL = f"https://avatars.githubusercontent.com/{GITHUB_USERNAME}"
 st.markdown(f"""
     <style>
         /* 🎨 [平滑优化版] 背景：增加中间色阶，确保向四周平滑消隐至全黑 */
-    .stApp {{ 
-        background: radial-gradient(
-            circle at 50% 45%, 
-            #0c1e3d 0%, 
-            #061126 25%, 
-            #030814 50%, 
-            #010308 75%, 
-            #000000 100%
-        ) !important; 
-        color: #ffffff; 
-        padding-top: 80px !important; 
+        @keyframes moving-glow {{
+        0% {{ transform: translate(-10%, -10%) scale(1); }}
+        50% {{ transform: translate(10%, 15%) scale(1.1); }}
+        100% {{ transform: translate(-10%, -10%) scale(1); }}
     }}
+
+    .stApp {{
+        background: #000000 !important;
+        overflow: hidden;
+    }}
+
+    /* 在背景中注入两个动态 HDR 光晕层 */
+    .stApp::before, .stApp::after {{
+        content: "";
+        position: fixed;
+        width: 80vw;
+        height: 80vw;
+        border-radius: 50%;
+        filter: blur(120px);
+        z-index: -1;
+        opacity: 0.4;
+    }}
+
+    .stApp::before {{
+        background: color(display-p3 0.05 0.12 0.24);
+        top: -10%;
+        left: -10%;
+        animation: moving-glow 20s infinite alternate ease-in-out;
+    }}
+
+    .stApp::after {{
+        background: color(display-p3 0.02 0.08 0.15);
+        bottom: -10%;
+        right: -10%;
+        animation: moving-glow 25s infinite alternate-reverse ease-in-out;
+    }}
+
 
     header {{visibility: hidden;}}
 
