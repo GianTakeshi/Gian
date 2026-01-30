@@ -12,7 +12,7 @@ AVATAR_URL = f"https://avatars.githubusercontent.com/{GITHUB_USERNAME}"
 # --- 2. 注入极致定制 CSS ---
 st.markdown(f"""
     <style>
-    /* 🎭 整体背景 */
+    /* 🎭 整体背景与基础布局 */
     .stApp {{ 
         background: radial-gradient(circle at 50% 50%, #0c1e3d 0%, #020617 60%, #000000 100%) !important; 
         color: #ffffff; 
@@ -38,62 +38,43 @@ st.markdown(f"""
         animation: avatar-pulse 3s infinite ease-in-out; 
     }}
 
-    /* 🚫 Tabs 选定态辉光 */
-    .stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] {{ display: none !important; }}
-    .stTabs [data-baseweb="tab"] {{ 
-        height: 42px !important; padding: 0 35px !important; border-radius: 40px !important; 
-        border: 1px solid rgba(255, 255, 255, 0.1) !important; 
-        background: rgba(255, 255, 255, 0.02) !important; color: rgba(255, 255, 255, 0.4) !important; 
-        transition: all 0.4s ease !important; 
-    }}
-    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{ 
-        color: #38bdf8 !important; border-color: #38bdf8 !important; 
-        background: rgba(56, 189, 248, 0.15) !important; box-shadow: 0 0 30px rgba(56, 189, 248, 0.6) !important;
-        transform: scale(1.05);
-    }}
-    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(2) {{ 
-        color: #f59e0b !important; border-color: #f59e0b !important; 
-        background: rgba(245, 158, 11, 0.15) !important; box-shadow: 0 0 30px rgba(245, 158, 11, 0.6) !important;
-        transform: scale(1.05);
-    }}
-
-    /* 🧊 核心：卡片向内扩散光效 */
+    /* 🧊 核心：加强版向内扩散光效 */
     .wide-card {{ 
         background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); 
-        border-radius: 20px; padding: 30px; margin-bottom: 25px; 
+        border-radius: 24px; padding: 32px; margin-bottom: 25px; 
         display: flex; flex-direction: row; align-items: center; justify-content: space-between; 
-        backdrop-filter: blur(25px); transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1); 
+        backdrop-filter: blur(25px); transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1); 
         position: relative; z-index: 10;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        overflow: hidden; /* 确保内扩散阴影不会溢出 */
     }}
     
-    /* 汇总卡片（蓝光内向扩散） */
+    /* 汇总卡片：重度蓝光内陷 */
     .normal-card:hover {{ 
-        transform: scale(1.02);
+        transform: translateY(-5px) scale(1.02);
         z-index: 9999 !important;
-        border-color: #38bdf8 !important;
+        border-color: rgba(56, 189, 248, 0.8) !important;
         box-shadow: 
-            0 20px 40px rgba(0,0,0,0.5), 
-            0 0 20px rgba(56, 189, 248, 0.4), 
-            inset 0 0 50px rgba(56, 189, 248, 0.25) !important; /* Inset 向内扩散 */
+            0 25px 50px rgba(0,0,0,0.6), 
+            0 0 30px rgba(56, 189, 248, 0.3), 
+            inset 0 0 80px 10px rgba(56, 189, 248, 0.4) !important; /* 关键：增加扩散距离 */
     }}
 
-    /* 异常卡片（橙光内向扩散） */
+    /* 异常卡片：重度橙光内陷 */
     .error-card:hover {{ 
-        transform: scale(1.02);
+        transform: translateY(-5px) scale(1.02);
         z-index: 9999 !important;
-        border-color: #f59e0b !important;
+        border-color: rgba(245, 158, 11, 0.8) !important;
         box-shadow: 
-            0 20px 40px rgba(0,0,0,0.5), 
-            0 0 20px rgba(245, 158, 11, 0.4), 
-            inset 0 0 50px rgba(245, 158, 11, 0.25) !important; /* Inset 向内扩散 */
+            0 25px 50px rgba(0,0,0,0.6), 
+            0 0 30px rgba(245, 158, 11, 0.3), 
+            inset 0 0 80px 10px rgba(245, 158, 11, 0.4) !important; /* 关键：增加扩散距离 */
     }}
 
-    /* 🏷️ SN 气泡：彻底去放大，保留霓虹光 */
+    /* 🏷️ SN 气泡：干练发光，不放大 */
     .sn-pill {{ 
         padding: 6px 16px; border-radius: 40px; font-size: 0.75rem; font-weight: 700; 
         border: 1px solid transparent; margin: 3px; display: inline-block;
-        text-decoration: none !important; transition: all 0.3s ease;
+        text-decoration: none !important; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }}
     .normal-sn {{ background: rgba(56, 189, 248, 0.1); color: #38bdf8 !important; border-color: rgba(56, 189, 248, 0.3); }}
     .normal-sn:hover {{ 
@@ -105,6 +86,22 @@ st.markdown(f"""
     .error-sn-pill:hover {{ 
         background: #f59e0b !important; color: #000 !important; 
         box-shadow: 0 0 20px #f59e0b !important; text-decoration: none !important; 
+    }}
+
+    /* 🚫 Tabs 样式回归 */
+    .stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] {{ display: none !important; }}
+    .stTabs [data-baseweb="tab"] {{ 
+        height: 42px !important; padding: 0 35px !important; border-radius: 40px !important; 
+        border: 1px solid rgba(255, 255, 255, 0.1) !important; 
+        background: rgba(255, 255, 255, 0.02) !important; color: rgba(255, 255, 255, 0.4) !important; 
+    }}
+    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{ 
+        color: #38bdf8 !important; border-color: #38bdf8 !important; 
+        background: rgba(56, 189, 248, 0.15) !important; box-shadow: 0 0 30px rgba(56, 189, 248, 0.6) !important;
+    }}
+    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(2) {{ 
+        color: #f59e0b !important; border-color: #f59e0b !important; 
+        background: rgba(245, 158, 11, 0.15) !important; box-shadow: 0 0 30px rgba(245, 158, 11, 0.6) !important;
     }}
 
     .grand-title {{ font-size: 3.5rem !important; font-weight: 900; letter-spacing: 10px; background: linear-gradient(to bottom, #ffffff 30%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
