@@ -7,16 +7,17 @@ st.set_page_config(page_title="SKU 属性解析中枢", page_icon="🚀", layout
 
 GITHUB_USERNAME = "GianTakeshi" 
 BASE_URL = "https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id="
-# ✅ 修复：使用更稳健的 GitHub 原始头像镜像 URL
 AVATAR_URL = f"https://avatars.githubusercontent.com/{GITHUB_USERNAME}"
 
 # --- 2. 注入深度定制 CSS ---
 st.markdown(f"""
     <style>
-    /* 🎭 背景基调 */
+    /* 🎭 整体布局调整 */
     .stApp {{ 
         background: radial-gradient(circle at 50% 50%, #0c1e3d 0%, #020617 60%, #000000 100%) !important; 
         color: #ffffff; 
+        /* ✅ 整个页面内容向下移动 */
+        padding-top: 80px !important; 
     }}
     header {{visibility: hidden;}}
 
@@ -25,31 +26,31 @@ st.markdown(f"""
         to {{ opacity: 1; transform: translateY(0); filter: blur(0); }}
     }}
 
-    /* 🛡️ 用户面板 & 头像修复 */
-    @keyframes avatarPulse {{
-        0%, 100% {{ box-shadow: 0 0 5px rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.3); }}
-        50% {{ box-shadow: 0 0 20px rgba(56, 189, 248, 0.6); border-color: rgba(56, 189, 248, 0.8); }}
-    }}
+    /* 🛡️ 用户面板 - 随页面微调位置 */
     .user-profile {{
-        position: fixed; top: 25px; left: 25px; display: flex; align-items: center; gap: 12px; z-index: 1000000; 
+        position: fixed; top: 35px; left: 35px; display: flex; align-items: center; gap: 12px; z-index: 1000000; 
         background: rgba(255, 255, 255, 0.05); padding: 8px 18px 8px 8px; border-radius: 50px;
         border: 1px solid rgba(56, 189, 248, 0.2); backdrop-filter: blur(15px);
     }}
     .avatar {{ 
-        width: 40px; height: 40px; border-radius: 50%; 
-        border: 2px solid #38bdf8; 
-        background: #0c1e3d; /* 背景兜底 */
-        animation: avatarPulse 2.5s infinite ease-in-out; 
-        object-fit: cover;
+        width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; 
+        background: #0c1e3d; object-fit: cover;
+    }}
+    
+    /* 标题容器下移 */
+    .hero-container {{
+        margin-top: 20px;
+        margin-bottom: 50px;
+        text-align: center;
     }}
     
     .grand-title {{
-        text-align: center; font-size: 3.5rem !important; font-weight: 900; letter-spacing: 10px;
+        display: inline-block; font-size: 3.5rem !important; font-weight: 900; letter-spacing: 10px;
         background: linear-gradient(to bottom, #ffffff 40%, #38bdf8 100%);
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 40px 0;
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }}
 
-    /* 🧊 卡片通用样式 (修复 animation 冲突) */
+    /* 🧊 卡片通用样式 */
     .wide-card {{
         background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 20px; padding: 25px 30px; margin-bottom: 35px;
@@ -59,14 +60,14 @@ st.markdown(f"""
         transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
     }}
 
-    /* 🔵 正常卡片与超重霓虹 */
+    /* 🔵 汇总卡片：科技蓝 */
     .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.5); }}
     .normal-card:hover {{
         background: rgba(56, 189, 248, 0.1); transform: translateY(-12px) scale(1.015); border-color: #38bdf8;
         box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 30px rgba(56, 189, 248, 0.5), 0 0 70px rgba(56, 189, 248, 0.2);
     }}
 
-    /* 🟠 异常卡片与超重橙光 */
+    /* 🟠 异常卡片：警告橙 */
     .error-card {{ border-left: 5px solid rgba(245, 158, 11, 0.5); }}
     .error-card:hover {{
         background: rgba(245, 158, 11, 0.1); transform: translateY(-12px) scale(1.015); border-color: #f59e0b;
@@ -81,23 +82,15 @@ st.markdown(f"""
         transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1) !important; margin: 50px auto !important; display: block !important;
     }}
     div.stButton > button:hover {{
-        background: rgba(56, 189, 248, 0.2) !important; border-color: #38bdf8 !important;
-        transform: translateY(-5px) scale(1.05) !important;
         box-shadow: 0 0 30px rgba(56, 189, 248, 0.6), 0 0 60px rgba(56, 189, 248, 0.3) !important;
-        color: #ffffff !important;
     }}
 
     /* 💊 SN 药丸 */
     .sn-pill {{ padding: 5px 15px; border-radius: 50px !important; font-size: 0.75rem; font-weight: 600; text-decoration: none !important; transition: all 0.3s ease; }}
     .normal-sn {{ background: rgba(56, 189, 248, 0.1); color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.2); }}
     .normal-sn:hover {{ background: #38bdf8 !important; color: #000 !important; box-shadow: 0 0 20px rgba(56, 189, 248, 0.8); }}
-    
     .error-sn-pill {{ background: rgba(245, 158, 11, 0.1); color: #f59e0b !important; border: 1px solid rgba(245, 158, 11, 0.3); }}
-    .error-sn-pill:hover {{ 
-        background: #f59e0b !important; color: #000 !important; 
-        box-shadow: 0 0 20px rgba(245, 158, 11, 0.8), 0 0 40px rgba(245, 158, 11, 0.4); 
-        transform: translateY(-2px);
-    }}
+    .error-sn-pill:hover {{ background: #f59e0b !important; color: #000 !important; box-shadow: 0 0 20px rgba(245, 158, 11, 0.8); transform: translateY(-2px); }}
 
     /* Tabs 修正 */
     .stTabs [data-baseweb="tab-highlight"] {{ display: none !important; }}
@@ -107,8 +100,6 @@ st.markdown(f"""
         border: 1px solid rgba(255, 255, 255, 0.1) !important; background: rgba(255, 255, 255, 0.02) !important;
         color: rgba(255, 255, 255, 0.4) !important; transition: 0.3s ease !important;
     }}
-    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{ color: #38bdf8 !important; border-color: #38bdf8 !important; }}
-    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(2) {{ color: #f59e0b !important; border-color: #f59e0b !important; }}
 
     [data-testid="stFileUploader"] {{
         position: fixed; bottom: 35px; left: 50%; transform: translateX(-50%); width: 450px; z-index: 9999;
@@ -124,10 +115,10 @@ st.markdown(f"""
             <div style="font-size: 0.6rem; color: #38bdf8; font-weight: bold;">● QUANTUM ANALYZER</div>
         </div>
     </div>
-    <div style="text-align:center;"><h1 class="grand-title">SKU 属性解析中枢</h1></div>
+    <div class="hero-container"><h1 class="grand-title">SKU 属性解析中枢</h1></div>
 """, unsafe_allow_html=True)
 
-# --- 3. 核心逻辑 (省略未更改部分以节省空间，功能完整) ---
+# --- 3. 核心逻辑 (保持功能完整) ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
