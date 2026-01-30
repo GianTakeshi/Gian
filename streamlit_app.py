@@ -8,32 +8,28 @@ st.set_page_config(page_title="SKU 属性解析中枢", page_icon="🚀", layout
 GITHUB_USERNAME = "GianTakeshi" 
 BASE_URL = "https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id="
 
-# --- 2. 注入 V11.0 核心 CSS + 流水动画 (无鼠标动效纯净版) ---
+# --- 2. 注入核心 CSS (包含浮动与霓虹扩散) ---
 st.markdown(f"""
     <style>
-    /* 🎭 舞台底色与全局重置 */
+    /* 🎭 舞台底色 */
     .stApp {{ 
         background: radial-gradient(circle at 50% 50%, #0c1e3d 0%, #020617 60%, #000000 100%) !important; 
         color: #ffffff; 
     }}
     header {{visibility: hidden;}}
 
-    /* 🛡️ 用户面板 - 头像呼吸灯 (V11) */
+    /* 🛡️ 用户面板 */
     @keyframes avatarPulse {{
-        0% {{ box-shadow: 0 0 5px rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.3); }}
+        0%, 100% {{ box-shadow: 0 0 5px rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.3); }}
         50% {{ box-shadow: 0 0 20px rgba(56, 189, 248, 0.6); border-color: rgba(56, 189, 248, 0.8); }}
-        100% {{ box-shadow: 0 0 5px rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.3); }}
     }}
     .user-profile {{
         position: fixed; top: 25px; left: 25px; display: flex; align-items: center; gap: 12px; z-index: 1000000; 
         background: rgba(255, 255, 255, 0.05); padding: 8px 18px 8px 8px; border-radius: 50px;
         border: 1px solid rgba(56, 189, 248, 0.2); backdrop-filter: blur(15px);
     }}
-    .avatar {{ 
-        width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; 
-        animation: avatarPulse 2.5s infinite ease-in-out; 
-    }}
-    
+    .avatar {{ width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; animation: avatarPulse 2.5s infinite ease-in-out; }}
+
     .hero-container {{ text-align: center; width: 100%; padding: 40px 0 20px 0; }}
     .grand-title {{
         display: block; font-family: 'Inter', sans-serif; font-size: 3.5rem !important; font-weight: 900; letter-spacing: 10px;
@@ -42,53 +38,53 @@ st.markdown(f"""
         filter: drop-shadow(0 0 15px rgba(56, 189, 248, 0.3));
     }}
 
-    /* 🌊 流水浮现关键帧 (淡入+平滑上移) */
+    /* 🌊 流水浮现 */
     @keyframes cardReveal {{
         from {{ opacity: 0; transform: translateY(20px); filter: blur(5px); }}
         to {{ opacity: 1; transform: translateY(0); filter: blur(0); }}
     }}
 
-    /* 🧊 卡片系统 (V11 + Animation) */
+    /* 🧊 霓虹浮动卡片系统 */
     .wide-card {{
-        background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
+        position: relative;
+        background: rgba(255, 255, 255, 0.03); 
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 20px; padding: 25px 30px; margin-bottom: 25px;
         display: flex; flex-direction: row; align-items: center; justify-content: space-between;
         backdrop-filter: blur(15px);
-        transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-        animation: cardReveal 0.6s ease-out both; 
-    }}
-    .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.5); }}
-    .normal-card:hover {{ 
-        background: rgba(56, 189, 248, 0.06); 
-        transform: translateY(-5px); 
-        border-color: #38bdf8; 
-        box-shadow: 0 15px 30px rgba(0,0,0,0.5); 
+        transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1);
+        animation: cardReveal 0.6s ease-out both;
+        z-index: 1;
     }}
 
-    /* 💊 药丸 Tabs (点击反馈版) */
-    .stTabs [data-baseweb="tab-highlight"] {{ display: none !important; }}
-    .stTabs [data-baseweb="tab-list"] {{ gap: 12px; background-color: transparent !important; border-bottom: none !important; }}
-    .stTabs [data-baseweb="tab"] {{
-        height: 34px !important; padding: 0 22px !important; border-radius: 50px !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important; background: rgba(255, 255, 255, 0.02) !important;
-        color: rgba(255, 255, 255, 0.4) !important; transition: all 0.2s ease !important;
+    .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.4); }}
+
+    /* ✨ 鼠标悬停：浮动 + 霓虹扩散 */
+    .wide-card:hover {{
+        transform: translateY(-8px) scale(1.005); /* 向上浮动并轻微放大 */
+        background: rgba(56, 189, 248, 0.05); /* 内部渗入微弱蓝光 */
+        border-color: rgba(56, 189, 248, 0.6); /* 边框点亮 */
+        
+        /* 霓虹扩散灯效 */
+        box-shadow: 
+            0 20px 40px rgba(0, 0, 0, 0.6),            /* 底部深层投影增强浮动感 */
+            0 0 20px rgba(56, 189, 248, 0.3),          /* 第一层浅蓝晕染 */
+            0 0 40px rgba(56, 189, 248, 0.1);          /* 第二层远端扩散 */
     }}
+
+    /* 💊 其他反馈逻辑保持不动 */
     .stTabs [data-baseweb="tab"]:active {{ transform: scale(0.92) !important; }}
-    .stTabs [aria-selected="true"] {{ color: #38bdf8 !important; border: 1.5px solid #38bdf8 !important; box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); }}
-
-    /* SN 药丸 & 按钮 */
-    .sn-pill {{ padding: 5px 15px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; transition: 0.2s; text-decoration: none !important; display: inline-block; }}
+    .sn-pill {{ padding: 5px 15px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; transition: 0.2s; text-decoration: none !important; }}
     .sn-pill:active {{ transform: scale(0.9) !important; }}
     .normal-sn {{ background: rgba(56, 189, 248, 0.1); color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.2); }}
-    .error-sn {{ background: rgba(245, 158, 11, 0.1); color: #f59e0b !important; border: 1px solid rgba(245, 158, 11, 0.2); }}
+    .normal-sn:hover {{ background: #38bdf8 !important; color: #000 !important; box-shadow: 0 0 15px #38bdf8; }}
 
     div.stButton > button {{
         background: rgba(255, 255, 255, 0.03) !important; color: #38bdf8 !important;
         border: 1px solid rgba(56, 189, 248, 0.3) !important; border-radius: 50px !important;
-        padding: 10px 50px !important; font-weight: 800 !important; backdrop-filter: blur(10px) !important;
-        transition: all 0.2s !important; margin: 30px auto !important; display: block !important;
+        padding: 10px 50px !important; transition: all 0.2s !important; margin: 30px auto !important; display: block !important;
     }}
-    div.stButton > button:active {{ transform: scale(0.95) !important; background: rgba(56, 189, 248, 0.2) !important; }}
+    div.stButton > button:active {{ transform: scale(0.95) !important; }}
 
     [data-testid="stFileUploader"] {{
         position: fixed; bottom: 35px; left: 50%; transform: translateX(-50%); width: 450px; z-index: 9999;
@@ -96,7 +92,6 @@ st.markdown(f"""
         border-radius: 50px !important; padding: 15px 35px !important; backdrop-filter: blur(25px) !important;
     }}
     </style>
-
     <div class="user-profile">
         <img src="https://avatars.githubusercontent.com/{GITHUB_USERNAME}" class="avatar">
         <div class="user-info">
@@ -107,7 +102,7 @@ st.markdown(f"""
     <div class="hero-container"><h1 class="grand-title">SKU 属性解析中枢</h1></div>
 """, unsafe_allow_html=True)
 
-# --- 3. 核心处理逻辑 ---
+# --- 3. 核心处理逻辑 (V11 定稿版) ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -139,7 +134,7 @@ def process_sku_logic(uploaded_file):
             all_error_rows.append({'SN': sn, 'Line': index+2, 'Reason': f"数量异常({len(data_pairs)}/{i_qty})", 'Content': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 4. 渲染界面 ---
+# --- 4. 渲染循环 ---
 upload_zone = st.empty()
 uploaded_file = upload_zone.file_uploader("Upload", type=["xlsx"])
 
@@ -153,7 +148,7 @@ if uploaded_file:
         if not v_df.empty:
             cats = sorted(v_df['Category'].unique())
             for i, cat in enumerate(cats):
-                delay = i * 0.08 # 卡片流水出现的间隔
+                delay = i * 0.08
                 cat_group = v_df[v_df['Category'] == cat]
                 attr_html = ""
                 for clr in sorted(cat_group['Color'].unique()):
