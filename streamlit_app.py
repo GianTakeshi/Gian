@@ -20,12 +20,6 @@ st.markdown(f"""
     }}
     header {{visibility: hidden;}}
 
-    /* ✨ 动画库 */
-    @keyframes fadeIn {{
-        from {{ opacity: 0; transform: translateY(15px); filter: blur(5px); }}
-        to {{ opacity: 1; transform: translateY(0); filter: blur(0); }}
-    }}
-
     /* 🟢 头像呼吸动画 */
     @keyframes avatar-breathing {{
         0% {{ box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); transform: scale(1); }}
@@ -33,92 +27,73 @@ st.markdown(f"""
         100% {{ box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); transform: scale(1); }}
     }}
 
-    /* 🛡️ 用户面板 */
     .user-profile {{
         position: fixed; top: 35px; left: 35px; display: flex; align-items: center; gap: 12px; z-index: 1000000; 
         background: rgba(255, 255, 255, 0.05); padding: 8px 20px 8px 8px; border-radius: 60px;
         border: 1.5px solid rgba(56, 189, 248, 0.2); backdrop-filter: blur(15px);
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer;
     }}
     .avatar {{ 
         width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; 
-        background: #0c1e3d; object-fit: cover; 
         animation: avatar-breathing 3s infinite ease-in-out; 
     }}
-    .user-name {{ font-size: 0.95rem; font-weight: 900; color: #fff; letter-spacing: 0.5px; }}
 
-    /* 🧊 卡片基础样式 */
+    /* 🧊 卡片样式 */
     .wide-card {{
         background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 16px; padding: 20px 25px; margin-bottom: 25px;
         display: flex; flex-direction: row; align-items: center; justify-content: space-between;
-        backdrop-filter: blur(15px); 
-        transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
-        animation: fadeIn 0.4s ease-out;
-        cursor: pointer;
-        position: relative;
+        backdrop-filter: blur(15px); transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
     }}
-    
     .normal-card {{ border-left: 4px solid rgba(56, 189, 248, 0.4); }}
-    .normal-card:hover {{
-        transform: translateY(-8px);
-        border-color: #38bdf8;
-        background: rgba(56, 189, 248, 0.03);
-        box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 80px rgba(56, 189, 248, 0.25);
-    }}
-
+    .normal-card:hover {{ transform: translateY(-8px); border-color: #38bdf8; box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 80px rgba(56, 189, 248, 0.25); }}
     .error-card {{ border-left: 4px solid rgba(245, 158, 11, 0.4); }}
-    .error-card:hover {{
-        transform: translateY(-8px);
-        border-color: #f59e0b;
-        background: rgba(245, 158, 11, 0.03);
-        box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 80px rgba(245, 158, 11, 0.25);
-    }}
+    .error-card:hover {{ transform: translateY(-8px); border-color: #f59e0b; box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 80px rgba(245, 158, 11, 0.25); }}
 
-    /* 🏷️ SN 标签霓虹效果 */
-    .sn-pill {{ 
-        padding: 4px 12px; border-radius: 40px; font-size: 0.7rem; font-weight: 600; 
-        text-decoration: none !important; transition: all 0.3s ease; 
-        border: 1px solid transparent;
-    }}
-    .normal-sn {{ background: rgba(56, 189, 248, 0.08); color: #38bdf8 !important; border-color: rgba(56, 189, 248, 0.2); }}
-    .normal-sn:hover {{ background: #38bdf8 !important; color: #000000 !important; box-shadow: 0 0 15px #38bdf8; transform: scale(1.05); }}
-    .error-sn-pill {{ background: rgba(245, 158, 11, 0.08); color: #f59e0b !important; border-color: rgba(245, 158, 11, 0.2); }}
-    .error-sn-pill:hover {{ background: #f59e0b !important; color: #000000 !important; box-shadow: 0 0 15px #f59e0b; transform: scale(1.05); }}
+    /* 🏷️ SN 标签 */
+    .sn-pill {{ padding: 4px 12px; border-radius: 40px; font-size: 0.7rem; font-weight: 600; text-decoration: none !important; }}
+    .normal-sn {{ background: rgba(56, 189, 248, 0.08); color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.2); }}
+    .error-sn-pill {{ background: rgba(245, 158, 11, 0.08); color: #f59e0b !important; border: 1px solid rgba(245, 158, 11, 0.2); }}
 
-    /* 🚫 Tabs 切换按钮特效：向外扩散光晕 */
-    .stTabs [data-baseweb="tab-highlight"] {{ display: none !important; }}
-    .stTabs [data-baseweb="tab-border"] {{ display: none !important; }}
+    /* 🚫 Tabs 切换按钮特效：解决遮挡问题 */
+    .stTabs {{
+        overflow: visible !important; /* 核心：允许光晕溢出 */
+    }}
+    .stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] {{ display: none !important; }}
     
     .stTabs [data-baseweb="tab-list"] {{ 
-        gap: 15px; background: transparent !important; padding: 15px 5px !important; margin-bottom: 25px;
+        gap: 20px; background: transparent !important; 
+        padding: 30px 10px !important; /* 增加内边距给光晕留空间 */
+        margin-bottom: 10px;
+        overflow: visible !important;
     }}
+    
     .stTabs [data-baseweb="tab"] {{ 
-        height: 36px !important; padding: 0 22px !important; font-size: 0.9rem !important; 
-        border-radius: 40px !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; 
+        height: 38px !important; padding: 0 25px !important; font-size: 0.95rem !important; 
+        border-radius: 40px !important; border: 1.5px solid rgba(255, 255, 255, 0.1) !important; 
         background: rgba(255, 255, 255, 0.02) !important; color: rgba(255, 255, 255, 0.5) !important; 
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important; 
+        transition: all 0.4s ease !important;
+        position: relative;
+        z-index: 10;
     }}
 
-    /* 🔵 选定“汇总数据”按钮：向外散射蓝光 */
+    /* 🔵 选定“汇总数据”：强化扩散光晕 */
     .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{ 
         color: #38bdf8 !important; 
         border-color: #38bdf8 !important; 
         background: rgba(56, 189, 248, 0.15) !important; 
-        box-shadow: 0 0 25px 5px rgba(56, 189, 248, 0.4), 0 0 10px rgba(56, 189, 248, 0.2) !important;
+        box-shadow: 0 0 35px 8px rgba(56, 189, 248, 0.5), 0 0 15px rgba(56, 189, 248, 0.3) !important;
     }}
 
-    /* 🟠 选定“异常拦截”按钮：向外散射橙光 */
+    /* 🟠 选定“异常拦截”：强化扩散光晕 */
     .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(2) {{ 
         color: #f59e0b !important; 
         border-color: #f59e0b !important; 
         background: rgba(245, 158, 11, 0.15) !important; 
-        box-shadow: 0 0 25px 5px rgba(245, 158, 11, 0.4), 0 0 10px rgba(245, 158, 11, 0.2) !important;
+        box-shadow: 0 0 35px 8px rgba(245, 158, 11, 0.5), 0 0 15px rgba(245, 158, 11, 0.3) !important;
     }}
 
-    .grand-title {{ display: inline-block; font-size: 3rem !important; font-weight: 900; letter-spacing: 8px; background: linear-gradient(to bottom, #ffffff 40%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
-    div.stButton > button {{ background: rgba(56, 189, 248, 0.05) !important; color: #38bdf8 !important; border: 1.5px solid rgba(56, 189, 248, 0.4) !important; border-radius: 40px !important; padding: 6px 30px !important; transition: all 0.3s ease !important; margin: 30px auto !important; display: block !important; }}
-    [data-testid="stFileUploader"] {{ position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 380px; z-index: 9999; background: rgba(255, 255, 255, 0.1) !important; border-radius: 40px !important; padding: 10px 25px !important; backdrop-filter: blur(20px) !important; }}
+    .grand-title {{ font-size: 3rem !important; font-weight: 900; letter-spacing: 8px; background: linear-gradient(to bottom, #ffffff 40%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
+    [data-testid="stFileUploader"] {{ position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 380px; z-index: 9999; background: rgba(255, 255, 255, 0.1) !important; border-radius: 40px !important; backdrop-filter: blur(20px) !important; }}
     </style>
 
     <div class="user-profile">
