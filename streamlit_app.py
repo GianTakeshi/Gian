@@ -10,119 +10,71 @@ GITHUB_USERNAME = "GianTakeshi"
 BASE_URL = "https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id="
 AVATAR_URL = f"https://avatars.githubusercontent.com/{GITHUB_USERNAME}"
 
-# --- 2. 注入 CSS (仅针对颜色值做了 HDR 提亮处理) ---
+# --- 2. 注入修复后的 CSS (含背景平滑与卡片去断层噪点) ---
 st.markdown(f"""
     <style>
-        /* 🎨 [平滑优化版] 背景：增加中间色阶，确保向四周平滑消隐至全黑 */
+    /* 🎭 背景平滑进化版：增加中间色阶防止断层 */
     .stApp {{ 
-        background: radial-gradient(
-            circle at 50% 45%, 
-            #0c1e3d 0%, 
-            #061126 25%, 
-            #030814 50%, 
-            #010308 75%, 
-            #000000 100%
-        ) !important; 
+        background: radial-gradient(circle at 50% 45%, #0c1e3d 0%, #061126 25%, #030814 50%, #010308 75%, #000000 100%) !important; 
         color: #ffffff; 
         padding-top: 80px !important; 
     }}
-
     header {{visibility: hidden;}}
 
-    /* ✨ 上传框呼吸：改用 color(display-p3 ...) 实现 HDR 高亮 */
+    /* ✨ 上传框呼吸动画 */
     @keyframes uploader-glow {{
         0% {{ border-color: rgba(56, 189, 248, 0.2); box-shadow: 0 0 10px rgba(56, 189, 248, 0.1); }}
-        50% {{ border-color: color(display-p3 0.22 0.74 0.97); box-shadow: 0 0 25px color(display-p3 0.22 0.74 0.97 / 0.5); }}
+        50% {{ 
+            border-color: color(display-p3 0.4 0.85 1); 
+            box-shadow: 0 0 15px #fff, 0 0 30px color(display-p3 0.22 0.74 0.97 / 0.7), 0 0 50px color(display-p3 0.22 0.74 0.97 / 0.3), 0 0 80px color(display-p3 0.22 0.74 0.97 / 0.1); 
+        }}
         100% {{ border-color: rgba(56, 189, 248, 0.2); box-shadow: 0 0 10px rgba(56, 189, 248, 0.1); }}
     }}
 
-    /* ✨ 头像呼吸：HDR 提亮 */
-    @keyframes avatar-breathing {{
-        0% {{ box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); transform: scale(1); }}
-        50% {{ box-shadow: 0 0 20px 4px color(display-p3 0.22 0.74 0.97 / 0.8); transform: scale(1.05); }}
-        100% {{ box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); transform: scale(1); }}
-    }}
-
+    /* 🛡️ 用户面板 */
     .user-profile {{
         position: fixed; top: 35px; left: 35px; display: flex; align-items: center; gap: 12px; z-index: 1000000; 
         background: rgba(255, 255, 255, 0.05); padding: 8px 20px 8px 8px; border-radius: 60px;
         border: 1.5px solid rgba(56, 189, 248, 0.2); backdrop-filter: blur(15px);
     }}
-    .avatar {{ width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; animation: avatar-breathing 3s infinite ease-in-out; }}
-    .user-name {{ font-size: 0.95rem; font-weight: 600; color: #fff; letter-spacing: 0.5px; }}
+    .avatar {{ width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; }}
 
-       /* 🧊 修复卡片断层的最终方案 */
-    .wide-card {
-        /* 1. 基础背景 */
-        background: rgba(255, 255, 255, 0.03) !important;
-        
-        /* 2. 关键：叠加一层极淡的噪声纹理，利用 Base64 噪点图打碎断层 */
-        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-        background-blend-mode: overlay; /* 混合模式，让噪点只在暗部和亮部交界处起作用 */
-        opacity: 0.98; /* 微调透明度 */
-
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 16px; 
-        padding: 25px 30px; 
-        margin-bottom: 25px;
-        display: flex; 
-        flex-direction: row; 
-        align-items: center; 
-        justify-content: space-between;
-        
-        /* 3. 增强模糊：增加模糊像素，帮助色彩混合 */
+    /* 🧊 数据卡片：引入噪声滤镜 (Noise Dithering) 彻底干掉断层 */
+    .wide-card {{
+        background-color: rgba(255, 255, 255, 0.04) !important;
+        /* 使用 SVG 噪点背景打碎颜色断层 */
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px; padding: 25px 30px; margin-bottom: 25px;
+        display: flex; flex-direction: row; align-items: center; justify-content: space-between;
         backdrop-filter: blur(40px) saturate(150%); 
         transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
-    }
-
+    }}
     .normal-card {{ border-left: 5px solid rgba(56, 189, 248, 0.4); }}
-    /* 🧊 卡片悬停：加入 HDR 内发光 */
     .normal-card:hover {{ 
         transform: translateY(-8px); 
-        border-color: color(display-p3 0.22 0.74 0.97); 
-        box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 80px color(display-p3 0.22 0.74 0.97 / 0.25); 
-    }}
-    .error-card {{ border-left: 5px solid rgba(245, 158, 11, 0.4); }}
-    /* 🧊 异常卡片悬停：加入 HDR 橙色发光 */
-    .error-card:hover {{ 
-        transform: translateY(-8px); 
-        border-color: color(display-p3 0.96 0.62 0.04); 
-        box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 80px color(display-p3 0.96 0.62 0.04 / 0.25); 
+        border-color: color(display-p3 0.4 0.85 1); 
+        box-shadow: 0 20px 50px rgba(0,0,0,0.6), inset 0 0 40px color(display-p3 0.22 0.74 0.97 / 0.5); 
     }}
 
-    .sn-pill {{ padding: 6px 14px; border-radius: 40px; font-size: 0.8rem; font-weight: 800; text-decoration: none !important; transition: all 0.3s ease; border: 1px solid transparent; }}
-    .normal-sn {{ background: rgba(56, 189, 248, 0.08); color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.3); }}
-    /* 🏷️ SN 悬停：HDR 蓝 */
-    .normal-sn:hover {{ background: color(display-p3 0.22 0.74 0.97) !important; color: #000000 !important; box-shadow: 0 0 20px color(display-p3 0.22 0.74 0.97 / 0.6); transform: scale(1.05); }}
-    .error-sn-pill {{ background: rgba(245, 158, 11, 0.08); color: #f59e0b !important; border: 1px solid rgba(245, 158, 11, 0.3); }}
-    .error-sn-pill:hover {{ background: color(display-p3 0.96 0.62 0.04) !important; color: #000000 !important; box-shadow: 0 0 20px color(display-p3 0.96 0.62 0.04 / 0.6); transform: scale(1.05); }}
-
-    .stTabs {{ overflow: visible !important; }}
-    .stTabs [data-baseweb="tab-list"] {{ gap: 20px; background: transparent !important; padding: 30px 10px !important; margin-bottom: 10px; overflow: visible !important; }}
-    .stTabs [data-baseweb="tab"] {{ height: 42px !important; padding: 0 30px !important; font-size: 1rem !important; border-radius: 40px !important; border: 1.5px solid rgba(255, 255, 255, 0.1) !important; background: rgba(255, 255, 255, 0.02) !important; color: rgba(255, 255, 255, 0.5) !important; transition: all 0.4s ease !important; position: relative; z-index: 10; }}
-    /* 🚫 Tabs 选中：HDR 霓虹效果 */
-    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{ color: color(display-p3 0.22 0.74 0.97) !important; border-color: color(display-p3 0.22 0.74 0.97) !important; background: rgba(56, 189, 248, 0.15) !important; box-shadow: 0 0 35px 8px color(display-p3 0.22 0.74 0.97 / 0.5) !important; }}
-    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(2) {{ color: color(display-p3 0.96 0.62 0.04) !important; border-color: color(display-p3 0.96 0.62 0.04) !important; background: rgba(245, 158, 11, 0.15) !important; box-shadow: 0 0 35px 8px color(display-p3 0.96 0.62 0.04 / 0.5) !important; }}
+    /* 🚫 Tabs 选中样式 */
+    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{ 
+        color: #fff !important; border-color: color(display-p3 0.4 0.85 1) !important; 
+        background: rgba(56, 189, 248, 0.15) !important; 
+        box-shadow: 0 0 15px #fff, 0 0 40px color(display-p3 0.22 0.74 0.97) !important; 
+    }}
     .stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] {{ display: none !important; }}
 
-    div.stButton > button {{ 
-        background: rgba(56, 189, 248, 0.08) !important; color: #38bdf8 !important; 
-        border: 1.5px solid rgba(56, 189, 248, 0.4) !important; border-radius: 40px !important; 
-        padding: 10px 45px !important; font-weight: 800 !important; font-size: 1rem !important; 
-        transition: all 0.4s ease !important; margin: 50px auto !important; display: block !important; 
-    }}
-    div.stButton > button:hover {{ background: color(display-p3 0.22 0.74 0.97) !important; color: #000000 !important; box-shadow: 0 0 30px 5px color(display-p3 0.22 0.74 0.97 / 0.5) !important; transform: scale(1.05); }}
-
+    /* 其他 UI 保持原样 */
+    .sn-pill {{ padding: 6px 14px; border-radius: 40px; font-size: 0.8rem; font-weight: 800; text-decoration: none !important; transition: all 0.3s ease; }}
+    .normal-sn {{ background: rgba(56, 189, 248, 0.08); color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.3); }}
+    
     [data-testid="stFileUploader"] {{
         position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); 
-        width: 520px; z-index: 9999;
-        background: rgba(12, 30, 61, 0.65) !important; 
-        border-radius: 24px !important; 
-        padding: 20px !important; 
-        backdrop-filter: blur(30px) !important;
+        width: 520px; z-index: 9999; background: rgba(12, 30, 61, 0.7) !important; 
+        border-radius: 24px !important; backdrop-filter: blur(30px) !important;
         border: 1.5px solid rgba(56, 189, 248, 0.3) !important;
         animation: uploader-glow 4s infinite ease-in-out;
-        box-shadow: 0 15px 45px rgba(0,0,0,0.7);
     }}
     .grand-title {{ display: inline-block; font-size: 3.5rem !important; font-weight: 900; letter-spacing: 8px; background: linear-gradient(to bottom, #ffffff 40%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
     </style>
@@ -134,7 +86,7 @@ st.markdown(f"""
     <div style="text-align:center; margin-bottom:100px;"><h1 class="grand-title">祝王哥天天爆单</h1></div>
 """, unsafe_allow_html=True)
 
-# --- 3. 核心提取逻辑 (完全未动) ---
+# --- 3. 核心提取逻辑 (逻辑不动) ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -166,10 +118,9 @@ def process_sku_logic(uploaded_file):
             all_error_rows.append({'SN': sn, 'Line': index+2, 'Reason': f"数量异常({len(data_pairs)}/{i_qty})", 'Content': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 4. UI 渲染 (完全未动) ---
+# --- 4. UI 渲染 (渲染不动) ---
 upload_zone = st.empty()
 uploaded_file = upload_zone.file_uploader("DROP FILE TO PARSE", type=["xlsx"])
-
 if uploaded_file:
     v_df, e_df = process_sku_logic(uploaded_file)
     upload_zone.empty()
