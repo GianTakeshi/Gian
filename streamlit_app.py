@@ -20,29 +20,38 @@ st.markdown(f"""
     }}
     header {{visibility: hidden;}}
 
+    /* ✨ 呼吸动画定义 */
+    @keyframes profile-breath {{
+        0% {{ box-shadow: 0 0 5px rgba(255, 255, 255, 0.2); border-color: rgba(255, 255, 255, 0.3); }}
+        50% {{ box-shadow: 0 0 25px rgba(56, 189, 248, 0.6); border-color: rgba(56, 189, 248, 0.8); }}
+        100% {{ box-shadow: 0 0 5px rgba(255, 255, 255, 0.2); border-color: rgba(255, 255, 255, 0.3); }}
+    }}
+
     /* 🛡️ 解决被遮挡的核心补丁 */
     [data-testid="stTabPanel"] {{
         overflow: visible !important;
         z-index: 1 !important;
     }}
     
-    /* 🛡️ 用户面板：进化为白色高亮毛玻璃 */
+    /* 🛡️ 用户面板：白色高亮毛玻璃 + 呼吸效果 */
     .user-profile {{
         position: fixed; top: 35px; left: 35px; display: flex; align-items: center; gap: 12px; z-index: 10000; 
-        background: rgba(255, 255, 255, 0.15) !important; /* 增加背景亮度 */
+        background: rgba(255, 255, 255, 0.15) !important;
         padding: 8px 20px 8px 8px; border-radius: 60px;
-        border: 1px solid rgba(255, 255, 255, 0.3); /* 强化边线感 */
-        backdrop-filter: blur(15px) saturate(160%); /* 强化毛玻璃效果 */
-        transition: all 0.4s ease; cursor: pointer; opacity: 0.8;
+        border: 1px solid rgba(255, 255, 255, 0.3); 
+        backdrop-filter: blur(15px) saturate(160%);
+        transition: all 0.4s ease; cursor: pointer;
+        animation: profile-breath 3s infinite ease-in-out; /* 呼吸效果 */
     }}
     .user-profile:hover {{ 
-        opacity: 1; transform: scale(1.1); z-index: 10001; 
-        border-color: #38bdf8; box-shadow: 0 0 30px rgba(56, 189, 248, 0.5); 
+        transform: scale(1.1); 
+        background: rgba(255, 255, 255, 0.25) !important;
+        box-shadow: 0 0 30px rgba(56, 189, 248, 0.8) !important;
     }}
     .avatar {{ width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; }}
     .user-name {{ color: #ffffff !important; font-weight: 700; }}
 
-    /* 🚫 Tabs 按钮：选定态光效强化 */
+    /* 🚫 Tabs 按钮：选定态光效 */
     .stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] {{ display: none !important; }}
     .stTabs [data-baseweb="tab-list"] {{ gap: 20px; background: transparent !important; margin-bottom: 30px; overflow: visible !important; }}
     .stTabs [data-baseweb="tab"] {{ 
@@ -51,7 +60,6 @@ st.markdown(f"""
         background: rgba(255, 255, 255, 0.02) !important; color: rgba(255, 255, 255, 0.4) !important; 
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; 
     }}
-    
     .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{ 
         color: #38bdf8 !important; border-color: #38bdf8 !important; 
         background: rgba(56, 189, 248, 0.2) !important; 
@@ -73,7 +81,6 @@ st.markdown(f"""
         backdrop-filter: blur(25px); transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); 
         position: relative; z-index: 10;
     }}
-    
     .wide-card:hover {{ 
         transform: scale(1.05); 
         z-index: 9999 !important; 
@@ -81,25 +88,24 @@ st.markdown(f"""
         border-color: rgba(255,255,255,0.4);
     }}
 
-    .normal-card {{ box-shadow: 0 0 20px rgba(56, 189, 248, 0.05), inset 0 0 40px rgba(56, 189, 248, 0.1); }}
-    .normal-card:hover {{ border-color: #38bdf8; box-shadow: 0 0 50px rgba(56, 189, 248, 0.4), inset 0 0 80px rgba(56, 189, 248, 0.2); }}
-
-    .error-card {{ box-shadow: 0 0 20px rgba(245, 158, 11, 0.05), inset 0 0 40px rgba(245, 158, 11, 0.1); }}
-    .error-card:hover {{ border-color: #f59e0b; box-shadow: 0 0 50px rgba(245, 158, 11, 0.4), inset 0 0 80px rgba(245, 158, 11, 0.2); }}
-
-    /* 🏷️ SN 气泡：彻底去除下划线 */
+    /* 🏷️ SN 气泡：取消放大，仅保留光效和去下划线 */
     .sn-pill {{ 
         padding: 5px 15px; border-radius: 40px; font-size: 0.75rem; font-weight: 700; 
-        transition: all 0.3s ease; border: 1.5px solid transparent; margin: 3px; position: relative;
-        text-decoration: none !important; /* 强制去除下划线 */
-        display: inline-block;
+        transition: all 0.2s ease; border: 1.5px solid transparent; margin: 3px; 
+        text-decoration: none !important; display: inline-block;
     }}
     .normal-sn {{ background: rgba(56, 189, 248, 0.15); color: #38bdf8 !important; border-color: rgba(56, 189, 248, 0.3); }}
-    .normal-sn:hover {{ transform: scale(1.4) !important; z-index: 10000; background: #38bdf8 !important; color: #000 !important; box-shadow: 0 0 30px #38bdf8; text-decoration: none !important; }}
+    .normal-sn:hover {{ 
+        background: #38bdf8 !important; color: #000 !important; 
+        box-shadow: 0 0 15px #38bdf8; text-decoration: none !important; 
+        /* transform: scale(1); 显式取消放大 */
+    }}
     
-    /* 异常拦截 SN：橙色回归 */
     .error-sn-pill {{ background: rgba(245, 158, 11, 0.15); color: #f59e0b !important; border-color: rgba(245, 158, 11, 0.3); }}
-    .error-sn-pill:hover {{ transform: scale(1.4) !important; z-index: 10000; background: #f59e0b !important; color: #000 !important; box-shadow: 0 0 30px #f59e0b; text-decoration: none !important; }}
+    .error-sn-pill:hover {{ 
+        background: #f59e0b !important; color: #000 !important; 
+        box-shadow: 0 0 15px #f59e0b; text-decoration: none !important; 
+    }}
 
     .grand-title {{ font-size: 3.5rem !important; font-weight: 900; letter-spacing: 10px; background: linear-gradient(to bottom, #ffffff 30%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
     </style>
@@ -111,7 +117,7 @@ st.markdown(f"""
     <div style="text-align:center; margin-bottom:50px;"><h1 class="grand-title">SKU 属性解析中枢</h1></div>
 """, unsafe_allow_html=True)
 
-# --- 3. 核心逻辑 ---
+# --- 3. 核心逻辑 (维持原样) ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -139,12 +145,10 @@ def process_sku_logic(uploaded_file):
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
 # --- 4. 渲染 ---
-upload_zone = st.empty()
-uploaded_file = upload_zone.file_uploader("Upload", type=["xlsx"])
+uploaded_file = st.file_uploader("Upload", type=["xlsx"])
 
 if uploaded_file:
     v_df, e_df = process_sku_logic(uploaded_file)
-    upload_zone.empty() 
     t1, t2 = st.tabs(["汇总数据", "异常拦截"])
     
     with t1:
@@ -158,7 +162,6 @@ if uploaded_file:
                     attr_html_list.append(f'<div style="display:flex; align-items:center; gap:15px; padding:6px 0;"><div style="color:#38bdf8; font-weight:700; min-width:80px; font-size:0.9rem;">{clr}</div><div>{"".join(size_badges)}</div></div>')
                 sn_html = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill normal-sn">{sn}</a>' for sn in sorted(list(set(cat_group['SN'].tolist())))])
                 st.markdown(f'<div class="wide-card normal-card"><div style="flex:1;"><div style="color:#38bdf8; font-weight:900; font-size:1.4rem; margin-bottom:10px;">{cat}</div>{"".join(attr_html_list)}</div><div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end; max-width:350px;">{sn_html}</div></div>', unsafe_allow_html=True)
-            if st.button("↺ 重制系统"): st.rerun()
 
     with t2:
         if not e_df.empty:
