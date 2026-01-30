@@ -12,59 +12,71 @@ AVATAR_URL = f"https://avatars.githubusercontent.com/{GITHUB_USERNAME}"
 # --- 2. 注入深度定制 CSS ---
 st.markdown(f"""
     <style>
-    /* 🎭 整体背景 */
+    /* 🎭 整体布局 - 保持原样 */
     .stApp {{ 
         background: radial-gradient(circle at 50% 50%, #0c1e3d 0%, #020617 60%, #000000 100%) !important; 
-        color: #ffffff; padding-top: 80px !important; 
+        color: #ffffff; 
+        padding-top: 80px !important; 
     }}
     header {{visibility: hidden;}}
 
-    /* 💓 动画库 */
-    @keyframes avatarPulse {{
-        0%, 100% {{ box-shadow: 0 0 10px rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.4); }}
-        50% {{ box-shadow: 0 0 25px rgba(56, 189, 248, 0.6); border-color: rgba(56, 189, 248, 0.8); }}
+    /* ✨ 动画库 */
+    @keyframes fadeIn {{
+        from {{ opacity: 0; transform: translateY(15px); filter: blur(5px); }}
+        to {{ opacity: 1; transform: translateY(0); filter: blur(0); }}
     }}
 
-    /* 🛡️ 用户面板：放大、浮动、霓虹、点击反馈 */
+    @keyframes avatarPulse {{
+        0%, 100% {{ 
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.2); 
+            border-color: rgba(56, 189, 248, 0.4); 
+        }}
+        50% {{ 
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.6); 
+            border-color: rgba(56, 189, 248, 1); 
+        }}
+    }}
+
+    /* 🛡️ 用户面板：放大、去除下侧文字、增加悬停与点击动效 */
     .user-profile {{
-        position: fixed; top: 35px; left: 35px; display: flex; align-items: center; gap: 15px; z-index: 1000000; 
+        position: fixed; top: 35px; left: 35px; display: flex; align-items: center; gap: 12px; z-index: 1000000; 
         background: rgba(255, 255, 255, 0.05); 
-        padding: 8px 22px 8px 8px; /* 稍微放大内边距 */
+        padding: 8px 20px 8px 8px; /* 稍微放大的胶囊内边距 */
         border-radius: 60px;
         border: 1.5px solid rgba(56, 189, 248, 0.2); 
-        backdrop-filter: blur(20px);
+        backdrop-filter: blur(15px);
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         cursor: pointer;
-        user-select: none;
     }}
 
-    /* 悬停：浮动并增强霓虹 */
+    /* 悬停效果：向上浮动+霓虹增强 */
     .user-profile:hover {{
-        transform: translateY(-4px) scale(1.02);
+        transform: translateY(-4px);
         background: rgba(56, 189, 248, 0.1);
         border-color: #38bdf8;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(56, 189, 248, 0.4);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(56, 189, 248, 0.3);
     }}
 
-    /* ✅ 点击：向内凹陷震动反馈 */
+    /* 点击效果：向内凹陷震动反馈 */
     .user-profile:active {{
-        transform: translateY(-1px) scale(0.96);
-        box-shadow: 0 0 40px rgba(56, 189, 248, 0.8);
-        background: rgba(56, 189, 248, 0.2);
+        transform: translateY(-1px) scale(0.97);
+        box-shadow: 0 0 35px rgba(56, 189, 248, 0.6);
     }}
 
     .avatar {{ 
-        width: 38px; height: 38px; /* 头像稍微放大 */
-        border-radius: 50%; border: 2px solid #38bdf8; 
-        background: #0c1e3d; object-fit: cover;
+        width: 38px; height: 38px; /* 头像放大一丢丢 */
+        border-radius: 50%; 
+        border: 2px solid #38bdf8; 
+        background: #0c1e3d; 
+        object-fit: cover;
         animation: avatarPulse 3s infinite ease-in-out; 
     }}
     
     .user-name {{
-        font-size: 1rem; font-weight: 900; color: #fff; letter-spacing: 1px;
+        font-size: 0.95rem; font-weight: 900; color: #fff; letter-spacing: 0.5px;
     }}
 
-    /* 标题与卡片样式 (保持精简版) */
+    /* 标题、卡片、Tabs 逻辑 - 维持原样不改动 */
     .hero-container {{ margin-top: 10px; margin-bottom: 40px; text-align: center; }}
     .grand-title {{
         display: inline-block; font-size: 3rem !important; font-weight: 900; letter-spacing: 8px;
@@ -76,14 +88,25 @@ st.markdown(f"""
         background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 16px; padding: 20px 25px; margin-bottom: 25px;
         display: flex; flex-direction: row; align-items: center; justify-content: space-between;
-        backdrop-filter: blur(15px); transition: all 0.4s ease;
+        backdrop-filter: blur(15px); transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        animation: fadeIn 0.8s ease-out;
     }}
-    .normal-card:hover, .error-card:hover {{ transform: translateY(-6px); }}
+    .normal-card {{ border-left: 4px solid rgba(56, 189, 248, 0.4); }}
+    .normal-card:hover {{
+        transform: translateY(-6px); border-color: #38bdf8;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 30px rgba(56, 189, 248, 0.2);
+    }}
+    .error-card {{ border-left: 4px solid rgba(245, 158, 11, 0.4); }}
+    .error-card:hover {{
+        transform: translateY(-6px); border-color: #f59e0b;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 30px rgba(245, 158, 11, 0.2);
+    }}
 
-    /* Tabs 溢出修复 */
     .stTabs {{ overflow: visible !important; }}
     .stTabs [data-baseweb="tab-list"] {{
-        gap: 12px; background: transparent !important; padding-top: 15px !important; margin-bottom: 20px; overflow: visible !important;
+        gap: 12px; background: transparent !important; 
+        padding-top: 15px !important; margin-bottom: 20px;
+        overflow: visible !important;
     }}
     .stTabs [data-baseweb="tab-highlight"] {{ display: none !important; }}
     .stTabs [data-baseweb="tab"] {{
@@ -92,7 +115,31 @@ st.markdown(f"""
         background: rgba(255, 255, 255, 0.02) !important; color: rgba(255, 255, 255, 0.4) !important; 
         transition: all 0.3s ease !important;
     }}
-    .stTabs [data-baseweb="tab"]:hover {{ transform: translateY(-4px) !important; background: rgba(255, 255, 255, 0.08) !important; }}
+    .stTabs [data-baseweb="tab"]:hover {{
+        transform: translateY(-4px) !important; background: rgba(255, 255, 255, 0.08) !important;
+    }}
+    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(1) {{
+        color: #38bdf8 !important; border-color: #38bdf8 !important; 
+        background: rgba(56, 189, 248, 0.1) !important; box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+    }}
+    .stTabs [data-baseweb="tab"][aria-selected="true"]:nth-child(2) {{
+        color: #f59e0b !important; border-color: #f59e0b !important; 
+        background: rgba(245, 158, 11, 0.1) !important; box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+    }}
+
+    div.stButton > button {{
+        background: rgba(56, 189, 248, 0.05) !important; color: #38bdf8 !important;
+        border: 1.5px solid rgba(56, 189, 248, 0.4) !important; border-radius: 40px !important;
+        padding: 6px 30px !important; font-size: 0.8rem !important;
+        transition: all 0.3s ease !important; margin: 30px auto !important; display: block !important;
+    }}
+    div.stButton > button:hover {{ transform: translateY(-3px) !important; box-shadow: 0 0 20px rgba(56, 189, 248, 0.4) !important; }}
+
+    .sn-pill {{ padding: 4px 12px; border-radius: 40px; font-size: 0.7rem; font-weight: 600; text-decoration: none !important; transition: all 0.2s ease; }}
+    .normal-sn {{ background: rgba(56, 189, 248, 0.08); color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.15); }}
+    .normal-sn:hover {{ background: #38bdf8 !important; color: #000 !important; box-shadow: 0 0 12px rgba(56, 189, 248, 0.6); }}
+    .error-sn-pill {{ background: rgba(245, 158, 11, 0.08); color: #f59e0b !important; border: 1px solid rgba(245, 158, 11, 0.2); }}
+    .error-sn-pill:hover {{ background: #f59e0b !important; color: #000 !important; box-shadow: 0 0 12px rgba(245, 158, 11, 0.6); }}
 
     [data-testid="stFileUploader"] {{
         position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: 380px; z-index: 9999;
@@ -108,7 +155,7 @@ st.markdown(f"""
     <div class="hero-container"><h1 class="grand-title">SKU 属性解析中枢</h1></div>
 """, unsafe_allow_html=True)
 
-# --- 3. 核心逻辑 (保持不变) ---
+# --- 3. 核心逻辑 (完全维持) ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
