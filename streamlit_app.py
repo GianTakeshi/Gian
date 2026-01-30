@@ -26,7 +26,7 @@ st.markdown(f"""
         to {{ opacity: 1; transform: translateY(0); filter: blur(0); }}
     }}
 
-    /* 🟢 新增：头像呼吸动画 */
+    /* 🟢 头像呼吸动画 */
     @keyframes avatar-breathing {{
         0% {{ box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); transform: scale(1); }}
         50% {{ box-shadow: 0 0 20px 4px rgba(56, 189, 248, 0.7); transform: scale(1.05); }}
@@ -43,11 +43,11 @@ st.markdown(f"""
     .avatar {{ 
         width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; 
         background: #0c1e3d; object-fit: cover; 
-        animation: avatar-breathing 3s infinite ease-in-out; /* 应用呼吸效果 */
+        animation: avatar-breathing 3s infinite ease-in-out; 
     }}
     .user-name {{ font-size: 0.95rem; font-weight: 900; color: #fff; letter-spacing: 0.5px; }}
 
-    /* 🧊 卡片逻辑：巨量内散射效果 */
+    /* 🧊 卡片逻辑：向外扩散的光晕效果 (Outer Glow) */
     .wide-card {{
         background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 16px; padding: 20px 25px; margin-bottom: 25px;
@@ -64,7 +64,12 @@ st.markdown(f"""
         transform: translateY(-8px);
         border-color: #38bdf8;
         background: rgba(56, 189, 248, 0.03);
-        box-shadow: 0 15px 35px rgba(0,0,0,0.5), 0 0 25px rgba(56, 189, 248, 0.2), inset 0 0 80px rgba(56, 189, 248, 0.25), inset 0 0 15px rgba(56, 189, 248, 0.4);
+        /* 🔹 增强：核心内陷 + 巨量外向扩散光晕 */
+        box-shadow: 
+            0 15px 35px rgba(0,0,0,0.5), 
+            0 0 30px 5px rgba(56, 189, 248, 0.3),  /* 向外扩散层 1 */
+            0 0 50px 10px rgba(56, 189, 248, 0.15), /* 向外扩散层 2 */
+            inset 0 0 80px rgba(56, 189, 248, 0.25);
     }}
 
     .error-card {{ border-left: 4px solid rgba(245, 158, 11, 0.4); }}
@@ -72,7 +77,12 @@ st.markdown(f"""
         transform: translateY(-8px);
         border-color: #f59e0b;
         background: rgba(245, 158, 11, 0.03);
-        box-shadow: 0 15px 35px rgba(0,0,0,0.5), 0 0 25px rgba(245, 158, 11, 0.2), inset 0 0 80px rgba(245, 158, 11, 0.25), inset 0 0 15px rgba(245, 158, 11, 0.4);
+        /* 🔸 增强：核心内陷 + 巨量外向扩散光晕 */
+        box-shadow: 
+            0 15px 35px rgba(0,0,0,0.5), 
+            0 0 30px 5px rgba(245, 158, 11, 0.3),  /* 向外扩散层 1 */
+            0 0 50px 10px rgba(245, 158, 11, 0.15), /* 向外扩散层 2 */
+            inset 0 0 80px rgba(245, 158, 11, 0.25);
     }}
 
     .wide-card:active {{ transform: translateY(-2px) scale(0.98) !important; filter: brightness(1.2); transition: all 0.1s !important; }}
@@ -98,6 +108,7 @@ st.markdown(f"""
         transform: scale(1.05);
     }}
 
+    /* 🚫 Tabs 样式 */
     .stTabs [data-baseweb="tab-highlight"] {{ display: none !important; }}
     .stTabs [data-baseweb="tab-border"] {{ display: none !important; }}
     
@@ -125,7 +136,7 @@ st.markdown(f"""
     <div style="text-align:center; margin-bottom:40px;"><h1 class="grand-title">SKU 属性解析中枢</h1></div>
 """, unsafe_allow_html=True)
 
-# --- 3. 核心逻辑 (维持原样) ---
+# --- 3. 核心逻辑 ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -168,7 +179,6 @@ if uploaded_file:
                 attr_html_list = []
                 for clr in sorted(cat_group['Color'].unique()):
                     clr_group = cat_group[cat_group['Color'] == clr]
-                    # 🔹 修改点：统一 Size 和 Quantity 的字体加粗程度与大小
                     size_badges = [f'<div style="display:inline-flex; align-items:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:2px 10px; margin-right:6px;"><span style="color:#fff; font-size:0.75rem; font-weight:800;">{(s if s!="FREE" else "")}</span><span style="color:#38bdf8; font-weight:800; margin-left:4px;">{("×" if s!="FREE" else "")}{q}</span></div>' for s, q in clr_group['Size'].value_counts().sort_index().items()]
                     attr_html_list.append(f'<div style="display:flex; align-items:center; gap:15px; padding:6px 0;"><div style="color:#38bdf8; font-weight:700; min-width:80px; font-size:0.9rem;">{clr}</div><div>{"".join(size_badges)}</div></div>')
                 sn_html = "".join([f'<a href="{BASE_URL}{sn}" target="_blank" class="sn-pill normal-sn">{sn}</a>' for sn in sorted(list(set(cat_group['SN'].tolist())))])
