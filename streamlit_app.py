@@ -95,17 +95,51 @@ st.markdown(f"""
     }}
     div.stButton > button:hover {{ background: color(display-p3 0.22 0.74 0.97) !important; color: #000000 !important; box-shadow: 0 0 30px 5px color(display-p3 0.22 0.74 0.97 / 0.5) !important; transform: scale(1.05); }}
 
+        /* 🚀 重新定义上传框样式：毛玻璃悬浮效果 */
     [data-testid="stFileUploader"] {{
-        position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); 
-        width: 520px; z-index: 9999;
-        background: rgba(12, 30, 61, 0.65) !important; 
-        border-radius: 24px !important; 
-        padding: 20px !important; 
-        backdrop-filter: blur(30px) !important;
-        border: 1.5px solid rgba(56, 189, 248, 0.3) !important;
+        position: fixed; 
+        bottom: 60px; /* 稍微上移，避免贴边 */
+        left: 50%; 
+        transform: translateX(-50%); 
+        width: 580px; 
+        z-index: 9999;
+        background: rgba(255, 255, 255, 0.05) !important; 
+        border-radius: 20px !important; 
+        padding: 12px 20px !important; 
+        backdrop-filter: blur(25px) saturate(160%) !important; /* 核心毛玻璃 */
+        border: 1.5px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 25px 50px rgba(0,0,0,0.6) !important;
         animation: uploader-glow 4s infinite ease-in-out;
-        box-shadow: 0 15px 45px rgba(0,0,0,0.7);
     }}
+
+    /* 🧼 隐藏上传框内原本的限制字样和图标，保持极简 */
+    [data-testid="stFileUploader"] section small {{
+        display: none !important;
+    }}
+    
+    /* 🎨 修改上传框内部文字颜色 */
+    [data-testid="stFileUploader"] section {{
+        color: rgba(255, 255, 255, 0.7) !important;
+    }}
+
+    /* 🖱️ 深度美化“Browse files”按钮 */
+    [data-testid="stFileUploader"] button {{
+        background: color(display-p3 0.22 0.74 0.97 / 0.15) !important;
+        border: 1px solid color(display-p3 0.22 0.74 0.97 / 0.4) !important;
+        color: #38bdf8 !important;
+        border-radius: 12px !important;
+        font-weight: 700 !important;
+        padding: 6px 18px !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }}
+
+    [data-testid="stFileUploader"] button:hover {{
+        background: color(display-p3 0.22 0.74 0.97) !important;
+        color: #000 !important;
+        box-shadow: 0 0 20px color(display-p3 0.22 0.74 0.97 / 0.6) !important;
+        transform: scale(1.02);
+    }}
+
     .grand-title {{ display: inline-block; font-size: 3.5rem !important; font-weight: 900; letter-spacing: 8px; background: linear-gradient(to bottom, #ffffff 40%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
     </style>
 
