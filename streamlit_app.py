@@ -95,17 +95,48 @@ st.markdown(f"""
     }}
     div.stButton > button:hover {{ background: color(display-p3 0.22 0.74 0.97) !important; color: #000000 !important; box-shadow: 0 0 30px 5px color(display-p3 0.22 0.74 0.97 / 0.5) !important; transform: scale(1.05); }}
 
+        /* 🚀 深度定制上传框容器 */
     [data-testid="stFileUploader"] {{
-        position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); 
-        width: 520px; z-index: 9999;
-        background: rgba(12, 30, 61, 0.65) !important; 
-        border-radius: 24px !important; 
-        padding: 20px !important; 
-        backdrop-filter: blur(30px) !important;
-        border: 1.5px solid rgba(56, 189, 248, 0.3) !important;
+        position: fixed; 
+        bottom: 60px; /* 距离底部稍微近一点，更像悬浮窗 */
+        left: 50%; 
+        transform: translateX(-50%); 
+        width: 600px; 
+        z-index: 9999;
+        background: rgba(255, 255, 255, 0.05) !important; 
+        border-radius: 20px !important; 
+        padding: 15px !important; 
+        backdrop-filter: blur(25px) saturate(150%) !important; /* 强力毛玻璃 */
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5) !important;
         animation: uploader-glow 4s infinite ease-in-out;
-        box-shadow: 0 15px 45px rgba(0,0,0,0.7);
     }}
+
+    /* 🧼 隐藏上传框里的冗余文字（比如 Limit 200MB） */
+    [data-testid="stFileUploader"] section small {{
+        display: none !important;
+    }}
+
+    /* 🎨 定制上传框内部的文字颜色和图标 */
+    [data-testid="stFileUploader"] section {{
+        color: rgba(255, 255, 255, 0.8) !important;
+    }}
+
+    /* 🖱️ 定制“Browse files”按钮样式 */
+    [data-testid="stFileUploader"] button {{
+        background: color(display-p3 0.22 0.74 0.97 / 0.2) !important;
+        border: 1px solid color(display-p3 0.22 0.74 0.97 / 0.4) !important;
+        color: #38bdf8 !important;
+        border-radius: 12px !important;
+        transition: all 0.3s ease !important;
+    }}
+
+    [data-testid="stFileUploader"] button:hover {{
+        background: color(display-p3 0.22 0.74 0.97) !important;
+        color: #000 !important;
+        box-shadow: 0 0 15px color(display-p3 0.22 0.74 0.97 / 0.5) !important;
+    }}
+
     .grand-title {{ display: inline-block; font-size: 3.5rem !important; font-weight: 900; letter-spacing: 8px; background: linear-gradient(to bottom, #ffffff 40%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
     </style>
 
