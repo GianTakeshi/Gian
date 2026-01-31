@@ -150,7 +150,7 @@ def process_sku_logic(uploaded_file):
 
 # --- 4. UI 渲染 (完全未动) ---
 upload_zone = st.empty()
-uploaded_file = upload_zone.file_uploader("将文件拖入框中", type=["xlsx"])
+uploaded_file = upload_zone.file_uploader("", type=["xlsx"])
 
 if uploaded_file:
     v_df, e_df = process_sku_logic(uploaded_file)
