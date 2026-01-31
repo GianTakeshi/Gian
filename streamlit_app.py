@@ -95,7 +95,7 @@ st.markdown(f"""
     }}
     div.stButton > button:hover {{ background: color(display-p3 0.22 0.74 0.97) !important; color: #000000 !important; box-shadow: 0 0 30px 5px color(display-p3 0.22 0.74 0.97 / 0.5) !important; transform: scale(1.05); }}
 
-        /* 🚀 修复版：强力 HDR 蓝色呼吸上传框 */
+        /* 🚀 终极修复：HDR 蓝色呼吸 + 毛玻璃 + 汉化 */
     [data-testid="stFileUploader"] {{
         position: fixed; 
         bottom: 80px; 
@@ -105,42 +105,51 @@ st.markdown(f"""
         z-index: 9999;
         background: rgba(255, 255, 255, 0.05) !important; 
         border-radius: 24px !important; 
-        padding: 15px 25px !important; 
+        padding: 20px !important; 
         backdrop-filter: blur(30px) saturate(150%) !important;
         
-        /* 这里的初始边框和投影要和动画衔接 */
+        /* 关键：初始边框设定 */
         border: 1.5px solid rgba(56, 189, 248, 0.3) !important;
-        /* 动画：关键是让 uploader-glow 重新控制外发光 */
+        /* 关键：确保动画不被其他样式覆盖 */
         animation: uploader-glow 4s infinite ease-in-out !important;
-        transition: all 0.3s ease;
     }}
 
-    /* ✨ 重新校准呼吸灯：使用更高的亮度值 */
+    /* ✨ 重新校准 HDR 呼吸动画：让蓝色发光更通透 */
     @keyframes uploader-glow {{
         0% {{ 
             border-color: rgba(56, 189, 248, 0.3); 
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 10px rgba(56, 189, 248, 0.1); 
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.7), 0 0 10px rgba(56, 189, 248, 0.1); 
         }}
         50% {{ 
-            /* HDR 巅峰亮度：Display-P3 纯蓝 */
+            /* 爆发 HDR 蓝色光芒 */
             border-color: color(display-p3 0.22 0.74 0.97); 
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 35px color(display-p3 0.22 0.74 0.97 / 0.7); 
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 35px color(display-p3 0.22 0.74 0.97 / 0.6); 
         }}
         100% {{ 
             border-color: rgba(56, 189, 248, 0.3); 
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 10px rgba(56, 189, 248, 0.1); 
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.7), 0 0 10px rgba(56, 189, 248, 0.1); 
         }}
     }}
 
-    /* 🧼 其他汉化逻辑保持不变... */
+    /* 🧼 汉化与去杂逻辑 */
     [data-testid="stFileUploader"] section small {{ display: none !important; }}
     [data-testid="stFileUploader"] section > label > div {{ color: transparent !important; position: relative; }}
     [data-testid="stFileUploader"] section > label > div::before {{
-        content: "请将 Excel 文件拖拽至此处上传"; 
+        content: "请将 Excel 文件拖拽至此处"; 
         color: rgba(255, 255, 255, 0.8) !important;
         position: absolute; left: 0; right: 0; top: 0;
-        text-align: center; font-size: 1rem; letter-spacing: 1px;
+        text-align: center; font-size: 1.1rem; font-weight: 600;
     }}
+
+    /* 🖱️ 按钮微调：保持与整体色调一致 */
+    [data-testid="stFileUploader"] button {{
+        background: color(display-p3 0.22 0.74 0.97 / 0.1) !important;
+        border: 1px solid color(display-p3 0.22 0.74 0.97 / 0.3) !important;
+        color: #38bdf8 !important;
+        border-radius: 12px !important;
+        transition: all 0.3s ease !important;
+    }}
+
 
 
     .grand-title {{ display: inline-block; font-size: 3.5rem !important; font-weight: 900; letter-spacing: 8px; background: linear-gradient(to bottom, #ffffff 40%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
