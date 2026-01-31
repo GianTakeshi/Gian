@@ -95,47 +95,53 @@ st.markdown(f"""
     }}
     div.stButton > button:hover {{ background: color(display-p3 0.22 0.74 0.97) !important; color: #000000 !important; box-shadow: 0 0 30px 5px color(display-p3 0.22 0.74 0.97 / 0.5) !important; transform: scale(1.05); }}
 
-        /* 🚀 深度定制上传框容器 */
+        /* 🚀 修复版：强力 HDR 蓝色呼吸上传框 */
     [data-testid="stFileUploader"] {{
         position: fixed; 
-        bottom: 60px; /* 距离底部稍微近一点，更像悬浮窗 */
+        bottom: 80px; 
         left: 50%; 
         transform: translateX(-50%); 
-        width: 600px; 
+        width: 560px; 
         z-index: 9999;
         background: rgba(255, 255, 255, 0.05) !important; 
-        border-radius: 20px !important; 
-        padding: 15px !important; 
-        backdrop-filter: blur(25px) saturate(150%) !important; /* 强力毛玻璃 */
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5) !important;
-        animation: uploader-glow 4s infinite ease-in-out;
+        border-radius: 24px !important; 
+        padding: 15px 25px !important; 
+        backdrop-filter: blur(30px) saturate(150%) !important;
+        
+        /* 这里的初始边框和投影要和动画衔接 */
+        border: 1.5px solid rgba(56, 189, 248, 0.3) !important;
+        /* 动画：关键是让 uploader-glow 重新控制外发光 */
+        animation: uploader-glow 4s infinite ease-in-out !important;
+        transition: all 0.3s ease;
     }}
 
-    /* 🧼 隐藏上传框里的冗余文字（比如 Limit 200MB） */
-    [data-testid="stFileUploader"] section small {{
-        display: none !important;
+    /* ✨ 重新校准呼吸灯：使用更高的亮度值 */
+    @keyframes uploader-glow {{
+        0% {{ 
+            border-color: rgba(56, 189, 248, 0.3); 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 10px rgba(56, 189, 248, 0.1); 
+        }}
+        50% {{ 
+            /* HDR 巅峰亮度：Display-P3 纯蓝 */
+            border-color: color(display-p3 0.22 0.74 0.97); 
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 35px color(display-p3 0.22 0.74 0.97 / 0.7); 
+        }}
+        100% {{ 
+            border-color: rgba(56, 189, 248, 0.3); 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 10px rgba(56, 189, 248, 0.1); 
+        }}
     }}
 
-    /* 🎨 定制上传框内部的文字颜色和图标 */
-    [data-testid="stFileUploader"] section {{
+    /* 🧼 其他汉化逻辑保持不变... */
+    [data-testid="stFileUploader"] section small {{ display: none !important; }}
+    [data-testid="stFileUploader"] section > label > div {{ color: transparent !important; position: relative; }}
+    [data-testid="stFileUploader"] section > label > div::before {{
+        content: "请将 Excel 文件拖拽至此处上传"; 
         color: rgba(255, 255, 255, 0.8) !important;
+        position: absolute; left: 0; right: 0; top: 0;
+        text-align: center; font-size: 1rem; letter-spacing: 1px;
     }}
 
-    /* 🖱️ 定制“Browse files”按钮样式 */
-    [data-testid="stFileUploader"] button {{
-        background: color(display-p3 0.22 0.74 0.97 / 0.2) !important;
-        border: 1px solid color(display-p3 0.22 0.74 0.97 / 0.4) !important;
-        color: #38bdf8 !important;
-        border-radius: 12px !important;
-        transition: all 0.3s ease !important;
-    }}
-
-    [data-testid="stFileUploader"] button:hover {{
-        background: color(display-p3 0.22 0.74 0.97) !important;
-        color: #000 !important;
-        box-shadow: 0 0 15px color(display-p3 0.22 0.74 0.97 / 0.5) !important;
-    }}
 
     .grand-title {{ display: inline-block; font-size: 3.5rem !important; font-weight: 900; letter-spacing: 8px; background: linear-gradient(to bottom, #ffffff 40%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
     </style>
