@@ -10,38 +10,24 @@ GITHUB_USERNAME = "GianTakeshi"
 BASE_URL = "https://inflyway.com/kamelnet/#/kn/fly-link/orders/detail?id="
 AVATAR_URL = f"https://avatars.githubusercontent.com/{GITHUB_USERNAME}"
 
-# --- 2. 注入 CSS (云流动背景 + 汉化上传框) ---
+# --- 2. 注入 CSS (静态渐变背景 + 汉化上传框) ---
 st.markdown(f"""
     <style>
-    /* 🎨 根容器：纯黑底色 */
+    /* 🎨 [平滑优化版] 背景：增加中间色阶，确保向四周平滑消隐至全黑 */
     .stApp {{ 
-        background-color: #000000 !important;
+        background: radial-gradient(
+            circle at 50% 45%, 
+            #0c1e3d 0%, 
+            #061126 25%, 
+            #030814 50%, 
+            #010308 75%, 
+            #000000 100%
+        ) !important; 
         color: #ffffff; 
         padding-top: 80px !important; 
     }}
+
     header {{visibility: hidden;}}
-
-    /* ☁️ 云流动背景：利用伪元素置底 */
-    .stApp::before {{
-        content: "";
-        position: fixed;
-        top: -50%; left: -50%; width: 200%; height: 200%;
-        z-index: -1;
-        background: 
-            radial-gradient(circle at 40% 40%, color(display-p3 0.05 0.15 0.35 / 0.65) 0%, transparent 45%),
-            radial-gradient(circle at 70% 60%, color(display-p3 0.02 0.08 0.2 / 0.6) 0%, transparent 40%),
-            radial-gradient(circle at 20% 80%, color(display-p3 0.03 0.12 0.3 / 0.5) 0%, #000000 100%);
-        background-size: 50% 50%;
-        animation: cloud-drift 25s ease-in-out infinite alternate;
-        pointer-events: none;
-        filter: blur(100px);
-    }}
-
-    @keyframes cloud-drift {{
-        0% {{ transform: translate3d(0, 0, 0) scale(1); }}
-        50% {{ transform: translate3d(8%, 4%, 0) scale(1.1); }}
-        100% {{ transform: translate3d(-4%, 12%, 0) scale(0.95); }}
-    }}
 
     /* ✨ 上传框呼吸动画 */
     @keyframes uploader-glow {{
@@ -50,7 +36,7 @@ st.markdown(f"""
         100% {{ border-color: rgba(56, 189, 248, 0.2); box-shadow: 0 0 10px rgba(56, 189, 248, 0.1); }}
     }}
 
-    /* 📤 上传框汉化与美化 */
+    /* 📤 上传框汉化与美化 (保持毛玻璃悬浮感) */
     [data-testid="stFileUploader"] {{
         position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); 
         width: 560px; z-index: 9999;
@@ -59,13 +45,14 @@ st.markdown(f"""
         backdrop-filter: blur(30px) saturate(150%) !important;
         border: 1.5px solid rgba(56, 189, 248, 0.3) !important;
         animation: uploader-glow 4s infinite ease-in-out;
+        box-shadow: 0 15px 45px rgba(0,0,0,0.7);
     }}
 
-    /* 隐藏原有英文和说明 */
+    /* 隐藏原本的英文文字和说明 */
     [data-testid="stFileUploader"] section small {{ display: none !important; }}
     [data-testid="stFileUploader"] section > label > div {{ color: transparent !important; position: relative; }}
 
-    /* 插入中文 */
+    /* 插入中文文字 */
     [data-testid="stFileUploader"] section > label > div::before {{
         content: "请将 Excel 文件拖拽至此处上传"; 
         color: rgba(255, 255, 255, 0.8) !important;
@@ -78,6 +65,7 @@ st.markdown(f"""
         background: color(display-p3 0.22 0.74 0.97 / 0.15) !important;
         border: 1px solid color(display-p3 0.22 0.74 0.97 / 0.4) !important;
         color: #38bdf8 !important; border-radius: 12px !important;
+        transition: all 0.3s ease !important;
     }}
 
     /* ✨ 头像呼吸 */
@@ -127,7 +115,7 @@ st.markdown(f"""
     <div style="text-align:center; margin-bottom:100px;"><h1 class="grand-title">祝王哥天天爆单</h1></div>
 """, unsafe_allow_html=True)
 
-# --- 3. 核心提取逻辑 (保持不变) ---
+# --- 3. 核心提取逻辑 ---
 def process_sku_logic(uploaded_file):
     COLOR_REG, SIZE_REG = r'(?i)Color[:：\s]*([a-zA-Z0-9\-_/]+)', r'(?i)Size[:：\s]*([a-zA-Z0-9\-\s/]+?)(?=\s*(?:Color|Size|$|[,;，；]))'
     SIZE_MAP = {'HIGH ANKLE SOCKS': 'L', 'KNEE-HIGH SOCKS': 'M'}
@@ -159,7 +147,7 @@ def process_sku_logic(uploaded_file):
             all_error_rows.append({'SN': sn, 'Line': index+2, 'Reason': f"数量异常({len(data_pairs)}/{i_qty})", 'Content': g_text})
     return pd.DataFrame(all_normal_data), pd.DataFrame(all_error_rows)
 
-# --- 4. UI 渲染 (注意这里的上传框文字参数设为空) ---
+# --- 4. UI 渲染 ---
 upload_zone = st.empty()
 uploaded_file = upload_zone.file_uploader("", type=["xlsx"])
 
