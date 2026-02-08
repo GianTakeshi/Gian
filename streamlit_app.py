@@ -159,7 +159,8 @@ st.markdown(f"""
         <img src="{AVATAR_URL}" class="avatar">
         <div class="user-name">{GITHUB_USERNAME}</div>
     </div>
-    <div style="text-align:center; margin-bottom:100px;"><h1 class="grand-title">🙂你就是全天下最坚的刃</h1></div>
+    <div style="text-align:center; margin-bottom:100px;"><h1 class="grand-title">不去攀 不去比
+    不拿傻逼气自己</h1></div>
 """, unsafe_allow_html=True)
 
 # --- 3. 核心提取逻辑 (完全未动) ---
